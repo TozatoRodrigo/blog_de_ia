@@ -29,6 +29,19 @@ export const SITE = {
   ],
 } as const;
 
+export const SITE_LOCALE = {
+  'pt-BR': {
+    tagline: 'Inteligência Artificial para Product Managers',
+    description:
+      'Análises diárias de inteligência artificial, gestão de produtos e tecnologia para Product Managers, Product Owners e líderes de produto.',
+  },
+  en: {
+    tagline: 'Artificial Intelligence for Product Managers',
+    description:
+      'Daily analysis of artificial intelligence, product management and technology for Product Managers, Product Owners and product leaders.',
+  },
+} as const;
+
 export const NAV_LINKS = [
   { label: 'Início', href: '/' },
   { label: 'Newsletter', href: '/newsletter' },

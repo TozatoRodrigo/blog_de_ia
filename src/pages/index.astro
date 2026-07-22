@@ -5,7 +5,7 @@ import NewsletterCard from '../components/NewsletterCard.astro';
 import { topics } from '../data/topics';
 import { concepts } from '../data/concepts';
 import { formatDate, formatDateISO } from '../utils/format';
-import { SITE } from '../config';
+import { SITE, SITE_LOCALE } from '../config';
 import { t, ta } from '../i18n/lang';
 import { ui } from '../i18n/ui';
 
@@ -19,12 +19,12 @@ const featuredTopics = topics.slice(0, 6);
 const featuredConcepts = concepts.slice(0, 4);
 
 const jsonLd = [
-  { '@context': 'https://schema.org', '@type': 'Organization', name: SITE.name, url: SITE.url, description: SITE.description, founder: { '@type': 'Person', name: SITE.author, jobTitle: SITE.authorRole }, sameAs: [SITE.linkedin] },
-  { '@context': 'https://schema.org', '@type': 'Blog', name: SITE.name, url: SITE.url, description: SITE.description, inLanguage: 'pt-BR', author: { '@type': 'Person', name: SITE.author } },
+  { '@context': 'https://schema.org', '@type': 'Organization', name: SITE.name, url: SITE.url, description: SITE_LOCALE['pt-BR'].description, founder: { '@type': 'Person', name: SITE.author, jobTitle: SITE.authorRole }, sameAs: [SITE.linkedin] },
+  { '@context': 'https://schema.org', '@type': 'Blog', name: SITE.name, url: SITE.url, description: SITE_LOCALE['pt-BR'].description, inLanguage: 'pt-BR', author: { '@type': 'Person', name: SITE.author } },
 ];
 ---
 
-<BaseLayout description={SITE.description} jsonLd={jsonLd} lang={lang} alternateUrl="/en/">
+<BaseLayout description={SITE_LOCALE['pt-BR'].description} jsonLd={jsonLd} lang={lang} alternateUrl="/en/">
   <section class="hero">
     <div class="container hero__content">
       <span class="crosshair crosshair--tl"></span>
