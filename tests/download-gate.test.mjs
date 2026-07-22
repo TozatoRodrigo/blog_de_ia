@@ -55,3 +55,40 @@ test('download analytics declare the approved PII-free event vocabulary', async 
   assert.doesNotMatch(analyticsSection, /name\s*:/);
   assert.doesNotMatch(analyticsSection, /turnstileToken\s*:/);
 });
+
+test('privacy pages disclose the complete lead lifecycle in both languages', async () => {
+  const cases = [
+    ['privacidade/index.html', '/privacidade/', '/en/privacy/', 'Política de privacidade'],
+    ['en/privacy/index.html', '/en/privacy/', '/privacidade/', 'Privacy policy'],
+  ];
+
+  for (const [pathname, canonicalPath, alternatePath, heading] of cases) {
+    const $ = await loadPage(pathname);
+    const text = $('main').text();
+    assert.equal($('main h1').length, 1);
+    assert.match($('main h1').text(), new RegExp(heading));
+    assert.equal($('link[rel="canonical"]').attr('href'), `https://produtocomia.com.br${canonicalPath}`);
+    assert.ok($('link[rel="alternate"][hreflang]').filter((_, element) => $(element).attr('href') === `https://produtocomia.com.br${alternatePath}`).length > 0);
+    assert.match(text, /rodrigo\.tozato@icloud\.com/);
+    assert.match(text, /Resend/);
+    assert.match(text, /Cloudflare Turnstile/);
+    assert.match(text, /730/);
+    assert.match(text, /2026-07-22/);
+    assert.match(text, /(acesso|access)/i);
+    assert.match(text, /(correção|correction)/i);
+    assert.match(text, /(exclusão|deletion)/i);
+  }
+});
+
+test('footer and styles expose privacy, accessible dialog and reduced motion support', async () => {
+  const pt = await loadPage('index.html');
+  const en = await loadPage('en/index.html');
+  assert.equal(pt('footer a[href="/privacidade/"]').length, 1);
+  assert.equal(en('footer a[href="/en/privacy/"]').length, 1);
+
+  const css = await readFile(new URL('../src/styles/global.css', import.meta.url), 'utf8');
+  assert.match(css, /\.download-gate::backdrop/);
+  assert.match(css, /:focus-visible/);
+  assert.match(css, /@media\s*\(prefers-reduced-motion:\s*reduce\)/);
+  assert.match(css, /@media\s*\(max-width:\s*640px\)[\s\S]*?\.download-gate/);
+});
