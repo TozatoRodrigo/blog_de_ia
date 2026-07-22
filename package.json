@@ -9,6 +9,7 @@
     "astro": "astro",
     "check": "astro check",
     "test": "node --disable-warning=ExperimentalWarning --experimental-strip-types --test tests/*.test.mjs",
+    "test:leads": "npm --prefix services/download-leads test",
     "generate:og": "node scripts/generate-og-images.mjs",
     "audit:dist": "node scripts/audit-dist.mjs",
     "validate": "npm run check && npm run generate:og && npm run build && npm test && npm run audit:dist"

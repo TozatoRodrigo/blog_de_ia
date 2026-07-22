@@ -1,0 +1,14 @@
+[
+  {"id":"checklist-governanca-ia","filename":"checklist-governanca-de-ia.md","contentType":"text/markdown; charset=utf-8","labels":{"pt-BR":"Checklist de governança de IA","en":"AI governance checklist (Portuguese)"}},
+  {"id":"ai-governance-checklist","filename":"ai-governance-checklist.md","contentType":"text/markdown; charset=utf-8","labels":{"pt-BR":"Checklist de governança de IA (inglês)","en":"AI governance checklist"}},
+  {"id":"matriz-risco-ia","filename":"matriz-risco-ia.csv","contentType":"text/csv; charset=utf-8","labels":{"pt-BR":"Matriz de risco de IA","en":"AI risk matrix (Portuguese)"}},
+  {"id":"ai-risk-matrix","filename":"ai-risk-matrix.csv","contentType":"text/csv; charset=utf-8","labels":{"pt-BR":"Matriz de risco de IA (inglês)","en":"AI risk matrix"}},
+  {"id":"inventario-sistemas-ia","filename":"inventario-sistemas-de-ia.csv","contentType":"text/csv; charset=utf-8","labels":{"pt-BR":"Inventário de sistemas de IA","en":"AI system inventory (Portuguese)"}},
+  {"id":"ai-system-inventory","filename":"ai-system-inventory.csv","contentType":"text/csv; charset=utf-8","labels":{"pt-BR":"Inventário de sistemas de IA (inglês)","en":"AI system inventory"}},
+  {"id":"template-avaliacao-agente-ia","filename":"template-avaliacao-agente-de-ia.csv","contentType":"text/csv; charset=utf-8","labels":{"pt-BR":"Template de avaliação de agente de IA","en":"AI agent evaluation template (Portuguese)"}},
+  {"id":"ai-agent-evaluation-template","filename":"ai-agent-evaluation-template.csv","contentType":"text/csv; charset=utf-8","labels":{"pt-BR":"Template de avaliação de agente de IA (inglês)","en":"AI agent evaluation template"}},
+  {"id":"questionario-ia-produto","filename":"questionario-ia-gestao-de-produto.md","contentType":"text/markdown; charset=utf-8","labels":{"pt-BR":"Questionário de IA em gestão de produto","en":"AI product management survey (Portuguese)"}},
+  {"id":"ai-product-management-survey","filename":"ai-product-management-survey.md","contentType":"text/markdown; charset=utf-8","labels":{"pt-BR":"Questionário de IA em gestão de produto (inglês)","en":"AI product management survey"}},
+  {"id":"estado-ia-produto-2026","filename":"estado-ia-gestao-de-produto-2026.pdf","contentType":"application/pdf","labels":{"pt-BR":"Estado da IA em gestão de produto 2026","en":"State of AI in product management 2026 (Portuguese)"}},
+  {"id":"state-ai-product-2026","filename":"state-of-ai-in-product-management-2026.pdf","contentType":"application/pdf","labels":{"pt-BR":"Estado da IA em gestão de produto 2026 (inglês)","en":"State of AI in product management 2026"}}
+]
