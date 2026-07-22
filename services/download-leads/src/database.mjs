@@ -1,3 +1,4 @@
+import { randomUUID as nodeRandomUUID } from 'node:crypto';
 import { DatabaseSync } from 'node:sqlite';
 
 const SCHEMA = `
@@ -70,7 +71,7 @@ function eventFromRow(row) {
   };
 }
 
-export function createLeadDatabase({ path, clock = () => new Date(), randomUUID = crypto.randomUUID }) {
+export function createLeadDatabase({ path, clock = () => new Date(), randomUUID = nodeRandomUUID }) {
   const database = new DatabaseSync(path, { timeout: 5_000 });
   database.exec('PRAGMA foreign_keys=ON; PRAGMA busy_timeout=5000; PRAGMA journal_mode=WAL;');
   database.exec(SCHEMA);
