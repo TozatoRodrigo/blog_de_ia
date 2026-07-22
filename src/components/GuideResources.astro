@@ -1,4 +1,6 @@
 ---
+import downloadCatalog from '../../config/downloads.json';
+
 interface Resource {
   label: string;
   href: string;
@@ -11,6 +13,12 @@ interface Props {
 }
 
 const { resources, lang = 'pt-BR' } = Astro.props;
+
+function downloadItem(href: string) {
+  if (!href.startsWith('/downloads/')) return undefined;
+  const filename = href.split('/').pop()?.split('?')[0];
+  return downloadCatalog.find((item) => item.filename === filename);
+}
 ---
 
 {resources.length > 0 && (
@@ -18,12 +26,22 @@ const { resources, lang = 'pt-BR' } = Astro.props;
     <span class="mono-sm">{lang === 'pt-BR' ? '[ MATERIAIS PRÁTICOS ]' : '[ PRACTICAL RESOURCES ]'}</span>
     <h2 id="guide-resources-title">{lang === 'pt-BR' ? 'Use estes materiais' : 'Use these resources'}</h2>
     <div class="grid grid-2">
-      {resources.map((resource) => (
-        <a class="topic-card" href={resource.href} download={resource.href.startsWith('/downloads/') ? '' : undefined}>
+      {resources.map((resource) => {
+        const item = downloadItem(resource.href);
+        const href = item && lang === 'en' ? `${resource.href}?lang=en` : resource.href;
+        return (
+        <a
+          class="topic-card"
+          href={href}
+          data-download-id={item?.id}
+          data-download-label={item ? item.labels[lang] : undefined}
+          data-download-format={item ? resource.format : undefined}
+        >
           <span class="topic-card__num">{resource.format}</span>
           <span class="topic-card__title">{resource.label}</span>
         </a>
-      ))}
+        );
+      })}
     </div>
   </section>
 )}

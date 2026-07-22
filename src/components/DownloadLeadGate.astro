@@ -1,0 +1,291 @@
+---
+import type { Lang } from '../i18n/lang';
+
+interface Props {
+  lang?: Lang;
+}
+
+const { lang = 'pt-BR' } = Astro.props;
+const english = lang === 'en';
+---
+
+<div data-download-gate data-lang={lang}>
+  <dialog
+    id="download-lead-dialog"
+    class="download-gate"
+    aria-labelledby="download-lead-title"
+    aria-describedby="download-lead-description"
+  >
+    <form id="download-lead-form" class="download-gate__form">
+      <button
+        id="download-lead-close"
+        class="download-gate__close"
+        type="button"
+        aria-label={english ? 'Close' : 'Fechar'}
+      >×</button>
+
+      <span class="mono-sm">{english ? '[ FREE RESOURCE ]' : '[ MATERIAL GRATUITO ]'}</span>
+      <h2 id="download-lead-title">
+        {english ? 'Get the free resource' : 'Receba o material gratuito'}
+      </h2>
+      <p id="download-lead-description">
+        {english
+          ? 'Enter your email once. This and future downloads will start immediately.'
+          : 'Informe seu e-mail uma única vez. Este e os próximos downloads começarão imediatamente.'}
+      </p>
+
+      <p id="download-lead-material" class="download-gate__material" aria-live="polite"></p>
+
+      <label for="download-lead-email">E-mail</label>
+      <input
+        id="download-lead-email"
+        name="email"
+        type="email"
+        inputmode="email"
+        autocomplete="email"
+        required
+        placeholder={english ? 'you@example.com' : 'voce@exemplo.com'}
+      />
+
+      <label class="download-gate__choice">
+        <input name="marketingOptIn" type="checkbox" value="true" />
+        <span>
+          {english
+            ? 'I also want practical Produto com IA updates.'
+            : 'Também quero receber novidades práticas do Produto com IA.'}
+        </span>
+      </label>
+
+      <div class="download-gate__honeypot" aria-hidden="true">
+        <label for="download-lead-company">Company</label>
+        <input id="download-lead-company" name="company" tabindex="-1" autocomplete="off" />
+      </div>
+
+      <div id="download-lead-turnstile" class="download-gate__turnstile"></div>
+      <p id="download-lead-status" class="download-gate__status" role="status" aria-live="polite"></p>
+
+      <button id="download-lead-submit" class="btn" type="submit">
+        {english ? 'Download now' : 'Baixar agora'}
+      </button>
+
+      <p class="download-gate__privacy">
+        {english
+          ? 'Your email is used to deliver the resource. Updates are optional.'
+          : 'Seu e-mail é usado para entregar o material. Novidades são opcionais.'}
+        <a href={english ? '/en/privacy/' : '/privacidade/'}>
+          {english ? 'Privacy policy' : 'Política de privacidade'}
+        </a>.
+      </p>
+    </form>
+  </dialog>
+</div>
+
+<script>
+  type DownloadEventName =
+    | 'download_gate_opened'
+    | 'download_lead_submitted'
+    | 'download_authorized_returning_lead'
+    | 'download_started'
+    | 'download_failed'
+    | 'download_marketing_opt_in';
+
+  type TurnstileApi = {
+    render: (container: HTMLElement, options: Record<string, unknown>) => string;
+    reset: (widgetId: string) => void;
+  };
+
+  const DOWNLOAD_EVENTS: Record<string, DownloadEventName> = {
+    opened: 'download_gate_opened',
+    submitted: 'download_lead_submitted',
+    returning: 'download_authorized_returning_lead',
+    started: 'download_started',
+    failed: 'download_failed',
+    optIn: 'download_marketing_opt_in',
+  };
+  const browser = window as Window & {
+    turnstile?: TurnstileApi;
+    umami?: { track: (name: string, data: Record<string, string | boolean>) => void };
+  };
+  const root = document.querySelector<HTMLElement>('[data-download-gate]');
+  const dialog = document.querySelector<HTMLDialogElement>('#download-lead-dialog');
+  const form = document.querySelector<HTMLFormElement>('#download-lead-form');
+  const closeButton = document.querySelector<HTMLButtonElement>('#download-lead-close');
+  const submitButton = document.querySelector<HTMLButtonElement>('#download-lead-submit');
+  const materialLabel = document.querySelector<HTMLElement>('#download-lead-material');
+  const status = document.querySelector<HTMLElement>('#download-lead-status');
+  const turnstileContainer = document.querySelector<HTMLElement>('#download-lead-turnstile');
+  const lang = root?.dataset.lang === 'en' ? 'en' : 'pt-BR';
+  let activeLink: HTMLAnchorElement | null = null;
+  let previousFocus: HTMLElement | null = null;
+  let privacyVersion = '';
+  let turnstileSiteKey = '';
+  let turnstileToken = '';
+  let turnstileWidgetId = '';
+  let turnstilePromise: Promise<TurnstileApi> | null = null;
+
+  function copy(pt: string, en: string) {
+    return lang === 'en' ? en : pt;
+  }
+
+  function analyticsContext(link: HTMLAnchorElement) {
+    return {
+      material_id: link.dataset.downloadId ?? 'unknown',
+      lang,
+      source_path: window.location.pathname,
+      returning_visitor: link.dataset.returningVisitor === 'true',
+    };
+  }
+
+  function loadTurnstile() {
+    if (browser.turnstile) return Promise.resolve(browser.turnstile);
+    if (turnstilePromise) return turnstilePromise;
+    turnstilePromise = new Promise((resolve, reject) => {
+      const script = document.createElement('script');
+      script.src = 'https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit';
+      script.async = true;
+      script.defer = true;
+      script.addEventListener('load', () => browser.turnstile ? resolve(browser.turnstile) : reject(new Error('Turnstile unavailable')));
+      script.addEventListener('error', () => reject(new Error('Turnstile unavailable')));
+      document.head.append(script);
+    });
+    return turnstilePromise;
+  }
+
+  async function prepareTurnstile() {
+    const [configResponse, turnstile] = await Promise.all([
+      fetch('/api/download-leads/config', { headers: { accept: 'application/json' } }),
+      loadTurnstile(),
+    ]);
+    if (!configResponse.ok) throw new Error('Configuration unavailable');
+    const config = await configResponse.json();
+    privacyVersion = config.privacyVersion;
+    turnstileSiteKey = config.turnstileSiteKey;
+    if (!turnstileWidgetId && turnstileContainer) {
+      turnstileWidgetId = turnstile.render(turnstileContainer, {
+        sitekey: turnstileSiteKey,
+        action: 'download_lead',
+        appearance: 'interaction-only',
+        callback: (token: string) => { turnstileToken = token; },
+        'expired-callback': () => { turnstileToken = ''; },
+        'error-callback': () => { turnstileToken = ''; },
+      });
+    }
+  }
+
+  function downloadBody(link: HTMLAnchorElement) {
+    return {
+      materialId: link.dataset.downloadId,
+      sourcePath: window.location.pathname,
+      lang,
+      campaign: new URLSearchParams(window.location.search).get('utm_campaign'),
+    };
+  }
+
+  async function postJson(path: string, body: Record<string, unknown>) {
+    const response = await fetch(path, {
+      method: 'POST',
+      credentials: 'same-origin',
+      headers: { 'content-type': 'application/json', accept: 'application/json' },
+      body: JSON.stringify(body),
+    });
+    const payload = await response.json().catch(() => ({}));
+    return { response, payload };
+  }
+
+  function startDownload(downloadUrl: string, link: HTMLAnchorElement) {
+    link.dataset.returningVisitor ||= 'false';
+    trackDownload(DOWNLOAD_EVENTS.started, link);
+    const download = document.createElement('a');
+    download.href = downloadUrl;
+    download.hidden = true;
+    document.body.append(download);
+    download.click();
+    download.remove();
+  }
+
+  async function authorize(link: HTMLAnchorElement) {
+    const { response, payload } = await postJson('/api/download-leads/authorize', downloadBody(link));
+    if (response.ok && payload.downloadUrl) {
+      link.dataset.returningVisitor = 'true';
+      trackDownload(DOWNLOAD_EVENTS.returning, link);
+      startDownload(payload.downloadUrl, link);
+      return;
+    }
+    if (response.status !== 401) throw new Error(payload.message || 'Authorization failed');
+    openGate(link);
+  }
+
+  function openGate(link: HTMLAnchorElement) {
+    if (!dialog) return;
+    activeLink = link;
+    previousFocus = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+    if (materialLabel) materialLabel.textContent = link.dataset.downloadLabel ?? '';
+    if (status) status.textContent = '';
+    trackDownload(DOWNLOAD_EVENTS.opened, link);
+    dialog.showModal();
+    dialog.querySelector<HTMLInputElement>('input[name="email"]')?.focus();
+    prepareTurnstile().catch(() => {
+      if (status) status.textContent = copy('Não foi possível carregar a verificação. Tente novamente.', 'Could not load verification. Please try again.');
+    });
+  }
+
+  function closeGate() {
+    dialog?.close();
+    previousFocus?.focus();
+  }
+
+  document.addEventListener('click', (event) => {
+    const link = (event.target as Element).closest<HTMLAnchorElement>('a[href^="/downloads/"][data-download-id]');
+    if (!link || event.defaultPrevented || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+    event.preventDefault();
+    authorize(link).catch(() => {
+      trackDownload(DOWNLOAD_EVENTS.failed, link);
+      window.location.assign(link.href);
+    });
+  });
+
+  closeButton?.addEventListener('click', closeGate);
+  dialog?.addEventListener('click', (event) => {
+    if (event.target === dialog) closeGate();
+  });
+  dialog?.addEventListener('close', () => previousFocus?.focus());
+
+  form?.addEventListener('submit', async (event) => {
+    event.preventDefault();
+    if (!activeLink || !form || !submitButton) return;
+    const fields = new FormData(form);
+    submitButton.disabled = true;
+    if (status) status.textContent = copy('Preparando seu download…', 'Preparing your download…');
+    try {
+      if (!privacyVersion || !turnstileSiteKey) await prepareTurnstile();
+      if (!turnstileToken) throw new Error(copy('Conclua a verificação e tente novamente.', 'Complete the verification and try again.'));
+      const marketingOptIn = fields.get('marketingOptIn') === 'true';
+      const { response, payload } = await postJson('/api/download-leads/register', {
+        ...downloadBody(activeLink),
+        email: fields.get('email'),
+        marketingOptIn,
+        company: fields.get('company'),
+        privacyVersion,
+        turnstileToken,
+      });
+      if (!response.ok || !payload.downloadUrl) throw new Error(payload.message || copy('Tente novamente.', 'Please try again.'));
+      trackDownload(DOWNLOAD_EVENTS.submitted, activeLink);
+      if (marketingOptIn) trackDownload(DOWNLOAD_EVENTS.optIn, activeLink);
+      const completedLink = activeLink;
+      closeGate();
+      form.reset();
+      startDownload(payload.downloadUrl, completedLink);
+    } catch (error) {
+      trackDownload(DOWNLOAD_EVENTS.failed, activeLink);
+      if (status) status.textContent = error instanceof Error ? error.message : copy('Tente novamente.', 'Please try again.');
+      turnstileToken = '';
+      if (turnstileWidgetId) browser.turnstile?.reset(turnstileWidgetId);
+    } finally {
+      submitButton.disabled = false;
+    }
+  });
+
+  function trackDownload(eventName: DownloadEventName, link: HTMLAnchorElement) {
+    browser.umami?.track(eventName, analyticsContext(link));
+  }
+</script>
