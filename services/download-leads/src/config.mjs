@@ -22,6 +22,19 @@ function email(env, name) {
   return value;
 }
 
+const TURNSTILE_TEST_SITE_KEYS = new Set([
+  '1x00000000000000000000AA',
+  '2x00000000000000000000AB',
+  '1x00000000000000000000BB',
+  '2x00000000000000000000BB',
+  '3x00000000000000000000FF',
+]);
+const TURNSTILE_TEST_SECRET_KEYS = new Set([
+  '1x0000000000000000000000000000000AA',
+  '2x0000000000000000000000000000000AA',
+  '3x0000000000000000000000000000000AA',
+]);
+
 export function loadConfig(env = process.env) {
   const nodeEnv = env.NODE_ENV?.trim() || 'production';
   const allowedOrigin = required(env, 'ALLOWED_ORIGIN').replace(/\/$/, '');
@@ -48,6 +61,18 @@ export function loadConfig(env = process.env) {
     throw new Error('PRIVACY_VERSION must use YYYY-MM-DD');
   }
 
+  const turnstileSiteKey = required(env, 'TURNSTILE_SITE_KEY');
+  const turnstileSecretKey = required(env, 'TURNSTILE_SECRET_KEY');
+  if (nodeEnv === 'production' && (
+    TURNSTILE_TEST_SITE_KEYS.has(turnstileSiteKey)
+    || TURNSTILE_TEST_SECRET_KEYS.has(turnstileSecretKey)
+  )) {
+    throw new Error('Turnstile test keys are forbidden in production');
+  }
+  const turnstileTesting = nodeEnv !== 'production'
+    && turnstileSiteKey === '1x00000000000000000000AA'
+    && turnstileSecretKey === '1x0000000000000000000000000000000AA';
+
   const config = {
     nodeEnv,
     port: positiveInteger(env, 'PORT', 8787),
@@ -56,8 +81,9 @@ export function loadConfig(env = process.env) {
     downloadCatalogPath: required(env, 'DOWNLOAD_CATALOG_PATH'),
     allowedOrigin,
     cookieSecret,
-    turnstileSiteKey: required(env, 'TURNSTILE_SITE_KEY'),
-    turnstileSecretKey: required(env, 'TURNSTILE_SECRET_KEY'),
+    turnstileSiteKey,
+    turnstileSecretKey,
+    turnstileTesting,
     resendApiKey: notificationMode === 'resend' ? required(env, 'RESEND_API_KEY') : env.RESEND_API_KEY?.trim() || '',
     resendFrom: required(env, 'RESEND_FROM'),
     notificationTo: email(env, 'LEAD_NOTIFICATION_TO'),

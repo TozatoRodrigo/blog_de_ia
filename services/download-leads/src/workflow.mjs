@@ -95,6 +95,7 @@ export function createLeadWorkflow({
         remoteIp,
         secret: config.turnstileSecretKey,
         expectedHostname,
+        testing: config.turnstileTesting,
       });
       if (!turnstileValid) {
         throw new LeadFlowError('turnstile_failed', 400, 'Verification failed; try again');

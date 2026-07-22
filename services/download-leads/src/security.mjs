@@ -103,6 +103,7 @@ export async function verifyTurnstile({
   remoteIp,
   secret,
   expectedHostname,
+  testing = false,
   fetchImpl = fetch,
 }) {
   if (typeof token !== 'string' || token.length === 0 || token.length > 2_048) return false;
@@ -123,6 +124,9 @@ export async function verifyTurnstile({
     });
     if (!response.ok) return false;
     const result = await response.json();
+    if (testing) {
+      return result.success === true && result.metadata?.result_with_testing_key === true;
+    }
     return result.success === true
       && result.hostname === expectedHostname
       && result.action === 'download_lead';

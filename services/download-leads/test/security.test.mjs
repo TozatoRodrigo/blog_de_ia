@@ -123,3 +123,22 @@ test('rejects malformed, failed, mismatched and unavailable Turnstile checks', a
   assert.equal(await verifyTurnstile({ ...base, fetchImpl: response({}, 503) }), false);
   assert.equal(await verifyTurnstile({ ...base, fetchImpl: async () => { throw new Error('network'); } }), false);
 });
+
+test('accepts Cloudflare dummy responses only in explicit test mode', async () => {
+  const fetchImpl = async () => new Response(JSON.stringify({
+    success: true,
+    hostname: 'example.com',
+    'error-codes': [],
+    metadata: { result_with_testing_key: true },
+  }), { status: 200, headers: { 'content-type': 'application/json' } });
+  const base = {
+    token: 'XXXX.DUMMY.TOKEN.XXXX',
+    remoteIp: '127.0.0.1',
+    secret: 'test-secret',
+    expectedHostname: '127.0.0.1',
+    fetchImpl,
+  };
+
+  assert.equal(await verifyTurnstile({ ...base, testing: true }), true);
+  assert.equal(await verifyTurnstile({ ...base, testing: false }), false);
+});

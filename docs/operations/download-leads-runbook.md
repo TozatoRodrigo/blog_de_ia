@@ -120,4 +120,3 @@ Após cada alteração, mantenha o arquivo com modo 600, use `docker compose up 
 4. Determine quais dados e pessoas podem ter sido afetados, a duração e as medidas já tomadas.
 5. Avalie, com orientação adequada, as obrigações de comunicação a titulares e à ANPD. Não presuma automaticamente que todo evento exige ou dispensa notificação.
 6. Corrija a causa, restaure uma versão limpa, execute os testes e só então reabra os cadastros.
-

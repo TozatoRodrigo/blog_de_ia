@@ -30,6 +30,7 @@ test('loadConfig returns normalized immutable values', () => {
   assert.equal(config.notificationMode, 'resend');
   assert.equal(config.retentionDays, 730);
   assert.equal(config.privacyVersion, '2026-07-22');
+  assert.equal(config.turnstileTesting, true);
   assert.equal(Object.isFrozen(config), true);
 });
 
@@ -39,6 +40,10 @@ test('loadConfig rejects insecure production origins and invalid modes', () => {
     /ALLOWED_ORIGIN/,
   );
   assert.throws(() => loadConfig({ ...valid, NOTIFICATION_MODE: 'disabled' }), /NOTIFICATION_MODE/);
+  assert.throws(
+    () => loadConfig({ ...valid, NODE_ENV: 'production' }),
+    /Turnstile test keys.*production/i,
+  );
 });
 
 test('loadCatalog resolves only declared ids and filenames', async () => {
