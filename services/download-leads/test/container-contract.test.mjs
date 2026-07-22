@@ -21,6 +21,7 @@ test('compose isolates data, files, secrets and container privileges', async () 
   const compose = await text('deploy/docker-compose.yml');
   assert.match(compose, /download-leads:/);
   assert.match(compose, /env_file:\s*\n\s*- \.env\.download-leads/);
+  assert.match(compose, /user: "\$\{DOWNLOAD_LEADS_UID:-1000}:\$\{DOWNLOAD_LEADS_GID:-1000}"/);
   assert.match(compose, /\.\/lead-data:\/data/);
   assert.match(compose, /\.\/private-downloads:\/app\/downloads:ro/);
   assert.match(compose, /read_only: true/);

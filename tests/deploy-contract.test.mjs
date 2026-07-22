@@ -21,6 +21,9 @@ test('remote activation protects secrets, persistent data and private downloads'
   assert.match(deploy, /test -f "\$BASE\/\.env\.download-leads"/);
   assert.match(deploy, /stat -c %a "\$BASE\/\.env\.download-leads"/);
   assert.match(deploy, /chmod 700 "\$BASE\/lead-data"/);
+  assert.match(deploy, /DOWNLOAD_LEADS_UID="\$\(id -u\)"/);
+  assert.match(deploy, /DOWNLOAD_LEADS_GID="\$\(id -g\)"/);
+  assert.match(deploy, /export DOWNLOAD_LEADS_UID DOWNLOAD_LEADS_GID/);
   assert.match(deploy, /mv "\$NEW_SITE\/downloads" "\$NEW_PRIVATE"/);
   assert.match(deploy, /BACKUP_HTML/);
   assert.match(deploy, /BACKUP_PRIVATE/);

@@ -38,6 +38,7 @@ services:
       dockerfile: services/download-leads/Dockerfile
     container_name: produtocomia-download-leads
     restart: unless-stopped
+    user: "${DOWNLOAD_LEADS_UID:-1000}:${DOWNLOAD_LEADS_GID:-1000}"
     env_file:
       - .env.download-leads
     volumes:

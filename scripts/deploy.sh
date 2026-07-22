@@ -28,6 +28,9 @@ SERVICE_ARCHIVE="$3"
 EXPECTED_SITE_SHA="$4"
 EXPECTED_SERVICE_SHA="$5"
 BASE="/home/rodrigo/apps/radar-ia"
+DOWNLOAD_LEADS_UID="$(id -u)"
+DOWNLOAD_LEADS_GID="$(id -g)"
+export DOWNLOAD_LEADS_UID DOWNLOAD_LEADS_GID
 STAGE="$BASE/releases/$STAMP-stage"
 NEW_SITE="$STAGE/html"
 NEW_SERVICE_ROOT="$STAGE/service-root"
@@ -123,6 +126,9 @@ else
 set -eu
 STAMP="$1"
 BASE="/home/rodrigo/apps/radar-ia"
+DOWNLOAD_LEADS_UID="$(id -u)"
+DOWNLOAD_LEADS_GID="$(id -g)"
+export DOWNLOAD_LEADS_UID DOWNLOAD_LEADS_GID
 BACKUP="$BASE/backups/$STAMP"
 FAILED="$BASE/releases/$STAMP-failed"
 
