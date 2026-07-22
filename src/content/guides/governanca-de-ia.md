@@ -6,6 +6,8 @@ datePublished: "2026-07-22"
 dateModified: "2026-07-22"
 tags: ["governança de IA", "risco", "NIST AI RMF"]
 alternateSlug: "ai-governance"
+cluster: governance
+isHub: true
 sources:
   - name: "NIST AI Risk Management Framework"
     url: "https://www.nist.gov/itl/ai-risk-management-framework"
@@ -76,3 +78,5 @@ Não. O nível depende do impacto e da confiança demonstrada. Sistemas de baixo
 Comece pelo inventário. Depois escolha um caso real e crie sua ficha de risco e evidências. A política deve nascer do fluxo operacional, não de um texto genérico.
 
 Governança eficaz torna a inovação repetível: o time sabe quais provas precisa produzir, quem decide e como agir quando a realidade diverge do plano.
+
+Para transformar o guia em operação, use o [checklist de governança](/guias/checklist-governanca-de-ia/), a [matriz de risco](/guias/matriz-risco-ia/) e o [inventário de sistemas de IA](/guias/inventario-sistemas-de-ia/). A ISO/IEC 42001 oferece uma referência de sistema de gestão; ela não substitui a análise das obrigações legais aplicáveis ao caso.

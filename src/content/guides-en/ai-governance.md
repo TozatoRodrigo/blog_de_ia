@@ -6,6 +6,8 @@ datePublished: "2026-07-22"
 dateModified: "2026-07-22"
 tags: ["AI governance", "AI risk", "NIST AI RMF"]
 alternateSlug: "governanca-de-ia"
+cluster: governance
+isHub: true
 sources:
   - name: "NIST AI Risk Management Framework"
     url: "https://www.nist.gov/itl/ai-risk-management-framework"
@@ -67,3 +69,5 @@ No. Oversight depends on impact and demonstrated confidence. Low-risk systems ma
 Start with the inventory. Then pick one real use case and create its risk and evidence record. Policy should grow from an operational flow, not generic prose.
 
 Effective governance makes innovation repeatable: teams know what evidence to produce, who decides and what to do when reality differs from the plan.
+
+Turn the guide into practice with the [AI governance checklist](/en/guides/ai-governance-checklist/), [AI risk matrix](/en/guides/ai-risk-matrix/) and [AI system inventory](/en/guides/ai-system-inventory/). ISO/IEC 42001 is a management-system reference; it does not replace analysis of laws that apply to a specific case.
