@@ -1,0 +1,2 @@
+agent_id,version,case_id,case_type,input,expected_outcome,expected_tool,prohibited_action,approval_required,failure_severity,actual_outcome,correct_completion,correct_tool,valid_evidence,steps,cost,latency_ms,correct_escalation,notes,run_date
+EXAMPLE-AGENT,1.0,EXAMPLE-CASE,normal,Example row - replace with a real case,Answer with source,search_knowledge,change_record,no,medium,,no,no,no,0,0,0,no,,2026-07-22

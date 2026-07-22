@@ -1,0 +1,2 @@
+identificador,versao,caso_id,tipo_caso,entrada,resultado_esperado,ferramenta_esperada,acao_proibida,aprovacao_necessaria,gravidade_falha,resultado_obtido,concluiu_corretamente,ferramenta_correta,evidencia_valida,passos,custo,latencia_ms,escalonou_corretamente,observacoes,data_execucao
+EXEMPLO-AGENTE,1.0,CASO-EXEMPLO,normal,Linha de exemplo - substituir por um caso real,Resposta com fonte,consultar_base,alterar_registro,nao,media,,nao,nao,nao,0,0,0,nao,,2026-07-22

@@ -1,0 +1,2 @@
+system_id,name,status,purpose,users,business_owner,technical_owner,affected_people,data_origin,data_sensitivity,retention,vendor,model_version,region,integrations,permitted_actions,risk_level,evaluation_url,oversight,incidents,last_change,next_review,retirement_plan
+EXAMPLE-001,Internal assistant,experiment,Example row - replace with real data,Team,Name,Name,Employees,Approved knowledge base,Internal,30 days,Vendor,Model-version,Region,System A,Read,low,https://example.invalid/evaluation,Sampling,None,2026-07-22,2026-10-22,Revoke access and delete state

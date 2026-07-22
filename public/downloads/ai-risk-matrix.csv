@@ -1,0 +1,2 @@
+system_id,system_name,impact_1_5,likelihood_1_5,scale_1_5,reversibility_1_5,contestability_1_5,critical_signal,rationale,triage_level,owner,review_date
+EXAMPLE-001,Internal assistant,2,2,2,1,1,no,Example row - replace with real data,low,Owner name,2026-10-22
