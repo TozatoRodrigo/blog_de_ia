@@ -9,6 +9,7 @@ import { auditHtml, normalizePageUrl } from './lib/audit-dist.mjs';
 
 const ORIGIN = 'https://produtocomia.com.br';
 const DIST = path.resolve('dist');
+const downloadCatalog = JSON.parse(await readFile(path.resolve('config/downloads.json'), 'utf8'));
 
 async function walk(directory) {
   const entries = await readdir(directory, { withFileTypes: true });
@@ -30,10 +31,7 @@ function fileUrl(file) {
 
 const requiredFiles = [
   'robots.txt', 'rss.xml', 'sitemap-index.xml', 'sitemap-0.xml', 'llms.txt', 'llms-full.txt',
-  'downloads/estado-ia-gestao-de-produto-2026.pdf',
-  'downloads/state-of-ai-in-product-management-2026.pdf',
-  'downloads/template-avaliacao-agente-de-ia.csv',
-  'downloads/ai-agent-evaluation-template.csv',
+  ...downloadCatalog.map((item) => `downloads/${item.filename}`),
 ];
 const missingFiles = requiredFiles.filter((file) => !existsSync(path.join(DIST, file)));
 const allFiles = await walk(DIST);

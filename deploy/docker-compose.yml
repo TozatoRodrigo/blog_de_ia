@@ -34,7 +34,7 @@ services:
 
   download-leads:
     build:
-      context: ..
+      context: .
       dockerfile: services/download-leads/Dockerfile
     container_name: produtocomia-download-leads
     restart: unless-stopped
