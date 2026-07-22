@@ -29,6 +29,7 @@ test('loadConfig returns normalized immutable values', () => {
   assert.equal(config.allowedOrigin, 'https://produtocomia.com.br');
   assert.equal(config.notificationMode, 'resend');
   assert.equal(config.retentionDays, 730);
+  assert.equal(config.privacyVersion, '2026-07-22');
   assert.equal(Object.isFrozen(config), true);
 });
 

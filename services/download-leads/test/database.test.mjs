@@ -111,6 +111,25 @@ test('tracks notification retries without losing the download event', () => {
   db.close();
 });
 
+test('updates lead activity when a returning visitor downloads again', () => {
+  const { db, advance } = setup();
+  const lead = db.upsertLead({
+    email: 'pessoa@example.com',
+    marketingOptIn: false,
+    privacyVersion: '2026-07-22',
+  });
+  advance(60_000);
+  db.createDownloadEvent({
+    leadId: lead.id,
+    materialId: 'ai-risk-matrix',
+    sourcePath: '/',
+    lang: 'pt-BR',
+  });
+
+  assert.equal(db.findLeadById(lead.id).updatedAt, '2026-07-22T12:01:00.000Z');
+  db.close();
+});
+
 test('deletes a lead and cascades sessions and events', () => {
   const { db } = setup();
   const { lead } = seed(db);
@@ -129,7 +148,7 @@ test('creates a consistent online backup', async () => {
   const directory = await mkdtemp(join(tmpdir(), 'lead-db-'));
   const backupPath = join(directory, 'backup.sqlite');
 
-  await db.backupTo(backupPath);
+  db.backupTo(backupPath);
   assert.ok((await readFile(backupPath)).length > 100);
   db.close();
 });

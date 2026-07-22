@@ -43,6 +43,11 @@ export function loadConfig(env = process.env) {
     throw new Error('NOTIFICATION_MODE must be resend or log');
   }
 
+  const privacyVersion = env.PRIVACY_VERSION?.trim() || '2026-07-22';
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(privacyVersion)) {
+    throw new Error('PRIVACY_VERSION must use YYYY-MM-DD');
+  }
+
   const config = {
     nodeEnv,
     port: positiveInteger(env, 'PORT', 8787),
@@ -57,6 +62,7 @@ export function loadConfig(env = process.env) {
     resendFrom: required(env, 'RESEND_FROM'),
     notificationTo: email(env, 'LEAD_NOTIFICATION_TO'),
     notificationMode,
+    privacyVersion,
     retentionDays: positiveInteger(env, 'RETENTION_DAYS', 730),
     sessionDays: positiveInteger(env, 'SESSION_DAYS', 180),
     authorizationSeconds: positiveInteger(env, 'AUTHORIZATION_SECONDS', 300),

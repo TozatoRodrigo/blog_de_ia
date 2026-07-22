@@ -103,6 +103,7 @@ export function createLeadDatabase({ path, clock = () => new Date(), randomUUID 
       VALUES (?, ?, ?, ?, ?, ?, ?)
       RETURNING *
     `),
+    touchLead: database.prepare('UPDATE leads SET updated_at = ? WHERE id = ?'),
     createAuthorization: database.prepare(`
       INSERT INTO download_authorizations
         (token_hash, event_id, expires_at, max_uses, created_at)
@@ -186,17 +187,22 @@ export function createLeadDatabase({ path, clock = () => new Date(), randomUUID 
     },
 
     createDownloadEvent({ leadId, materialId, sourcePath, lang, campaign = null }) {
-      return eventFromRow(
-        statements.createEvent.get(
-          randomUUID(),
-          leadId,
-          materialId,
-          sourcePath,
-          lang,
-          campaign,
-          nowIso(),
-        ),
-      );
+      return transaction(() => {
+        const now = nowIso();
+        const event = eventFromRow(
+          statements.createEvent.get(
+            randomUUID(),
+            leadId,
+            materialId,
+            sourcePath,
+            lang,
+            campaign,
+            now,
+          ),
+        );
+        statements.touchLead.run(now, leadId);
+        return event;
+      });
     },
 
     createDownloadAuthorization({ eventId, tokenHash, expiresAt, maxUses = 3 }) {
