@@ -6,11 +6,22 @@
     "dev": "astro dev",
     "build": "astro build",
     "preview": "astro preview",
-    "astro": "astro"
+    "astro": "astro",
+    "check": "astro check",
+    "test": "node --test tests/*.test.mjs",
+    "generate:og": "node scripts/generate-og-images.mjs",
+    "audit:dist": "node scripts/audit-dist.mjs",
+    "validate": "npm run check && npm run generate:og && npm run build && npm test && npm run audit:dist"
   },
   "dependencies": {
     "@astrojs/rss": "^4.0.19",
     "@astrojs/sitemap": "^3.3.0",
     "astro": "^5.6.1"
+  },
+  "devDependencies": {
+    "@astrojs/check": "^0.9.9",
+    "cheerio": "^1.2.0",
+    "sharp": "^0.35.3",
+    "typescript": "^5.9.3"
   }
 }
