@@ -1,11 +1,15 @@
 ---
 import { getCollection, render } from 'astro:content';
 import BaseLayout from '../../../layouts/BaseLayout.astro';
-import { articleSchema, breadcrumbSchema } from '../../../utils/schema';
+import GuideConnections from '../../../components/GuideConnections.astro';
+import GuideResources from '../../../components/GuideResources.astro';
+import { articleSchema, breadcrumbSchema, faqPageSchema, howToSchema } from '../../../utils/schema';
 export async function getStaticPaths(){const entries=await getCollection('guides-en',({data})=>!data.draft);return entries.map(entry=>({params:{slug:entry.id},props:{entry}}));}
 const {entry}=Astro.props; const {Content}=await render(entry); const lang='en' as const; const url=`/en/guides/${entry.id}/`; const image=`/og/guides/${entry.id}.png`;
-const jsonLd=[articleSchema({url,title:entry.data.title,description:entry.data.description,datePublished:entry.data.datePublished,dateModified:entry.data.dateModified,image,lang,tags:entry.data.tags}),breadcrumbSchema([['Home','/en/'],['Guides','/en/guides/'],[entry.data.title,url]])];
+const jsonLd: object[]=[articleSchema({url,title:entry.data.title,description:entry.data.description,datePublished:entry.data.datePublished,dateModified:entry.data.dateModified,image,lang,tags:entry.data.tags}),breadcrumbSchema([['Home','/en/'],['Guides','/en/guides/'],[entry.data.title,url]])];
+if(entry.data.howToSteps.length) jsonLd.push(howToSchema({name:entry.data.title,description:entry.data.description,steps:entry.data.howToSteps}));
+if(entry.data.faq.length) jsonLd.push(faqPageSchema(entry.data.faq));
 ---
 <BaseLayout title={entry.data.seoTitle} description={entry.data.description} image={image} type="article" publishedTime={entry.data.datePublished} modifiedTime={entry.data.dateModified} tags={entry.data.tags} jsonLd={jsonLd} lang={lang} alternateUrl={`/guias/${entry.data.alternateSlug}/`}>
-<article class="container" style="padding-top:2rem;padding-bottom:4rem"><nav class="mono-sm"><a href="/en/">HOME</a> / <a href="/en/guides/">GUIDES</a></nav><header class="article-header"><div class="article-header__eyebrow"><span class="accent">●</span><span>GUIDE UPDATED {entry.data.dateModified}</span></div><h1>{entry.data.title}</h1><p style="font-size:var(--step-1);color:var(--fg-soft);max-width:70ch">{entry.data.description}</p></header><div class="article-body"><Content /><section><h2>Primary sources</h2><ul>{entry.data.sources.map(source=><li><a href={source.url} target="_blank" rel="noopener noreferrer">{source.name}</a></li>)}</ul></section></div></article>
+<article class="container" style="padding-top:2rem;padding-bottom:4rem"><nav class="mono-sm"><a href="/en/">HOME</a> / <a href="/en/guides/">GUIDES</a></nav><header class="article-header"><div class="article-header__eyebrow"><span class="accent">●</span><span>GUIDE UPDATED {entry.data.dateModified}</span></div><h1>{entry.data.title}</h1><p style="font-size:var(--step-1);color:var(--fg-soft);max-width:70ch">{entry.data.description}</p></header><div class="article-body"><Content />{entry.data.howToSteps.length > 0 && <section><h2>How to do it</h2><ol>{entry.data.howToSteps.map(step=><li><h3>{step.name}</h3><p>{step.text}</p></li>)}</ol></section>}{entry.data.faq.length > 0 && <section><h2>Frequently asked questions</h2>{entry.data.faq.map(item=><div><h3>{item.question}</h3><p>{item.answer}</p></div>)}</section>}<GuideResources resources={entry.data.downloads} lang={lang}/><GuideConnections slug={entry.id} lang={lang}/><section><h2>Primary sources</h2><ul>{entry.data.sources.map(source=><li><a href={source.url} target="_blank" rel="noopener noreferrer">{source.name}</a></li>)}</ul></section></div></article>
 </BaseLayout>

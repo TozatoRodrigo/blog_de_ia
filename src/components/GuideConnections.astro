@@ -1,0 +1,40 @@
+---
+import { getCollection } from 'astro:content';
+import { clusterForGuide } from '../data/guideClusters';
+import type { Lang } from '../i18n/lang';
+
+interface Props {
+  slug: string;
+  lang?: Lang;
+}
+
+const { slug, lang = 'pt-BR' } = Astro.props;
+const cluster = clusterForGuide(slug, lang);
+const collection = lang === 'pt-BR' ? 'guides' : 'guides-en';
+const entries = cluster ? await getCollection(collection, ({ data }) => !data.draft) : [];
+const key = lang === 'pt-BR' ? 'pt' : 'en';
+const related = cluster
+  ? cluster.items
+      .filter((item) => item[key] !== slug)
+      .map((item) => entries.find((entry) => entry.id === item[key]))
+      .filter((entry) => entry !== undefined)
+  : [];
+const base = lang === 'pt-BR' ? '/guias/' : '/en/guides/';
+---
+
+{cluster && related.length > 0 && (
+  <section class="guide-connections" aria-labelledby="guide-connections-title">
+    <span class="mono-sm">{lang === 'pt-BR' ? '[ CONTINUE NO TEMA ]' : '[ CONTINUE EXPLORING ]'}</span>
+    <h2 id="guide-connections-title">{cluster.name[lang]}</h2>
+    <p>{cluster.description[lang]}</p>
+    <div class="grid grid-2">
+      {related.map((entry) => entry && (
+        <a class="topic-card" href={`${base}${entry.id}/`}>
+          <span class="topic-card__num">{entry.data.isHub ? (lang === 'pt-BR' ? 'GUIA PRINCIPAL' : 'PILLAR GUIDE') : (lang === 'pt-BR' ? 'GUIA RELACIONADO' : 'RELATED GUIDE')}</span>
+          <span class="topic-card__title">{entry.data.title}</span>
+          <span class="topic-card__desc">{entry.data.description}</span>
+        </a>
+      ))}
+    </div>
+  </section>
+)}

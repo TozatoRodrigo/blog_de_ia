@@ -60,6 +60,29 @@ export function breadcrumbSchema(items: Array<[string, string]>) {
   };
 }
 
+export function faqPageSchema(items: Array<{ question: string; answer: string }>) {
+  return {
+    '@context': 'https://schema.org', '@type': 'FAQPage',
+    mainEntity: items.map((item) => ({
+      '@type': 'Question', name: item.question,
+      acceptedAnswer: { '@type': 'Answer', text: item.answer },
+    })),
+  };
+}
+
+export function howToSchema(input: {
+  name: string; description: string;
+  steps: Array<{ name: string; text: string }>;
+}) {
+  return {
+    '@context': 'https://schema.org', '@type': 'HowTo',
+    name: input.name, description: input.description,
+    step: input.steps.map((step, index) => ({
+      '@type': 'HowToStep', position: index + 1, name: step.name, text: step.text,
+    })),
+  };
+}
+
 export function definedTermSchema(input: { name: string; description: string; url: string; lang: Lang }) {
   return {
     '@context': 'https://schema.org', '@type': 'DefinedTerm', '@id': `${absoluteUrl(input.url)}#term`,

@@ -1,0 +1,29 @@
+---
+interface Resource {
+  label: string;
+  href: string;
+  format: string;
+}
+
+interface Props {
+  resources: Resource[];
+  lang?: 'pt-BR' | 'en';
+}
+
+const { resources, lang = 'pt-BR' } = Astro.props;
+---
+
+{resources.length > 0 && (
+  <section class="guide-resources" aria-labelledby="guide-resources-title">
+    <span class="mono-sm">{lang === 'pt-BR' ? '[ MATERIAIS PRÁTICOS ]' : '[ PRACTICAL RESOURCES ]'}</span>
+    <h2 id="guide-resources-title">{lang === 'pt-BR' ? 'Use estes materiais' : 'Use these resources'}</h2>
+    <div class="grid grid-2">
+      {resources.map((resource) => (
+        <a class="topic-card" href={resource.href} download={resource.href.startsWith('/downloads/') ? '' : undefined}>
+          <span class="topic-card__num">{resource.format}</span>
+          <span class="topic-card__title">{resource.label}</span>
+        </a>
+      ))}
+    </div>
+  </section>
+)}
