@@ -37,7 +37,7 @@ if (configResponse.status !== 200
   console.error('FAIL /api/download-leads/config exposed an invalid contract'); failures += 1;
 } else console.log('PASS /api/download-leads/config');
 
-const fallback = await fetch(`${origin}/downloads/ai-risk-matrix.csv`);
+const fallback = await fetch(`${origin}/downloads/ai-risk-matrix.csv?smoke=${Date.now()}`);
 const fallbackText = await fallback.text();
 if (fallback.status !== 200
   || !fallback.headers.get('content-type')?.includes('text/html')
