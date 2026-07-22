@@ -7,6 +7,7 @@ import {
   canonicalPath,
   metadataWarnings,
 } from '../src/utils/seo.ts';
+import { SITE_LOCALE } from '../src/config.ts';
 
 test('canonicalPath adds a trailing slash to page routes', () => {
   assert.equal(canonicalPath('/newsletter'), '/newsletter/');
@@ -45,4 +46,10 @@ test('metadataWarnings reports editorial length issues without rejecting metadat
     'title-over-60',
     'description-over-160',
   ]);
+});
+
+test('site metadata is localized for English pages', () => {
+  assert.equal(SITE_LOCALE.en.tagline, 'Artificial Intelligence for Product Managers');
+  assert.match(SITE_LOCALE.en.description, /^Daily analysis of artificial intelligence/);
+  assert.doesNotMatch(SITE_LOCALE.en.description, /Curadoria|inteligência/);
 });

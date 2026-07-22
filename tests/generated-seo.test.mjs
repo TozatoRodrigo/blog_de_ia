@@ -44,3 +44,15 @@ test('Portuguese topic emits self, English and x-default alternates', async () =
   });
   assert.equal($('meta[property="og:locale:alternate"]').attr('content'), 'en_US');
 });
+
+test('English newsletter links every tag to its translated topic route', async () => {
+  const $ = await loadPage('en/newsletter/2026-07-15-bonsai-27b-ia-que-cabe-no-bolso-sem-depender-da-nuvem/index.html');
+  const topicLinks = $('a[href^="/en/topics/"]')
+    .toArray()
+    .map((element) => $(element).attr('href'));
+
+  assert.ok(topicLinks.includes('/en/topics/artificial-intelligence/'));
+  assert.ok(topicLinks.includes('/en/topics/product/'));
+  assert.ok(!topicLinks.includes('/en/topics/inteligencia-artificial'));
+  assert.ok(!topicLinks.includes('/en/topics/produto'));
+});
