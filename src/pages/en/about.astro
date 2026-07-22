@@ -1,0 +1,97 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { SITE } from '../../config';
+import { ui } from '../../i18n/ui';
+
+const lang = 'en' as const;
+
+const jsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'AboutPage',
+  name: `About — ${SITE.name}`,
+  description: `Meet ${SITE.name} and its editor, ${SITE.author}.`,
+  url: `${SITE.url}/en/about`,
+  inLanguage: 'en',
+  mainEntity: {
+    '@type': 'Person',
+    name: SITE.author,
+    jobTitle: SITE.authorRole,
+    url: SITE.linkedin,
+    knowsAbout: SITE.keywords,
+  },
+};
+---
+
+<BaseLayout
+  title="About"
+  description="Meet Produto com IA: a daily AI newsletter for product managers, edited by Rodrigo Tozato."
+  jsonLd={jsonLd}
+  lang={lang}
+  alternateUrl="/sobre"
+>
+  <section class="container" style="padding-top: 3rem; max-width: 840px;">
+    <div class="section-header">
+      <div>
+        <span class="mono" style="color: var(--accent);">[ ABOUT ]</span>
+        <h1>{ui('about.whoBehind', lang)}</h1>
+      </div>
+    </div>
+
+    <div class="article-body" style="max-width: none;">
+      <p style="font-size: var(--step-2); color: var(--fg); font-weight: 600; line-height: 1.4;">
+        Produto com IA is a daily newsletter that curates artificial intelligence, product, and
+        technology for decision-makers in technology companies.
+      </p>
+
+      <hr />
+
+      <h2>The proposition</h2>
+      <p>
+        Every week brings dozens of new AI news stories. New model, new tool, new benchmark.
+        Most of them change nothing about your product decisions. What matters is the real data,
+        the operational case study, the safety alert that nobody commented on.
+      </p>
+      <p>
+        Produto com IA exists to separate that signal from the noise. Each edition brings an
+        in-depth analysis of a topic that matters to product managers — AI pricing, agent costs,
+        governance, adoption — and a radar with the most relevant news of the day, no hype, with
+        links to the source.
+      </p>
+
+      <h2>Who is it for</h2>
+      <p>
+        For <strong>Product Managers</strong> and <strong>Product Owners</strong> who work with
+        technology and need to keep up with what is happening in AI without wasting time filtering
+        noise. For product leaders building the AI business case in-house. For those working in
+        fintech who want to understand the intersection of AI and financial products.
+      </p>
+
+      <h2>Who writes it</h2>
+      <p>
+        <strong>{SITE.author}</strong> — {SITE.authorRole}. Works with product in credit and receivables
+        and writes daily about AI with a focus on real data, not opinion. The perspective comes from
+        someone inside the operation, not from someone observing from the outside.
+      </p>
+
+      <h2>What you will find here</h2>
+      <ul>
+        <li><strong>Daily newsletter</strong> — deep analysis of one topic + the day's news radar</li>
+        <li><strong>Topics</strong> — coverage maps by theme, with FAQ for quick reference</li>
+        <li><strong>Concepts</strong> — glossary of AI terms with contextual explanations and real cases</li>
+      </ul>
+
+      <h2>How to follow</h2>
+      <p>
+        The edition goes out every day on LinkedIn. Here on the blog you will find the complete
+        archive, organized by topic and concept, to search for reference whenever you need it.
+      </p>
+
+      <div style="margin-top: 2rem; display: flex; gap: 1rem; flex-wrap: wrap;">
+        <a href={SITE.linkedin} target="_blank" rel="noopener noreferrer" class="btn btn--accent btn--lg">
+          {ui('cta.linkedin', lang)} →
+        </a>
+        <a href="/en/newsletter" class="btn btn--lg">{ui('newsletter.title', lang).toUpperCase()}</a>
+      </div>
+    </div>
+  </section>
+</BaseLayout>

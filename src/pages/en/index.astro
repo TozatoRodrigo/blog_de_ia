@@ -1,0 +1,111 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import NewsletterCard from '../../components/NewsletterCard.astro';
+import { topics } from '../../data/topics';
+import { concepts } from '../../data/concepts';
+import { formatDate, formatDateISO } from '../../utils/format';
+import { SITE } from '../../config';
+import { t, ta } from '../../i18n/lang';
+import { ui } from '../../i18n/ui';
+
+const lang = 'en' as const;
+const newsletters = await getCollection('newsletters-en', ({ data }) => !data.draft);
+newsletters.sort((a, b) => b.data.date.localeCompare(a.data.date));
+
+const latest = newsletters[0];
+const recent = newsletters.slice(1, 4);
+const featuredTopics = topics.slice(0, 6);
+const featuredConcepts = concepts.slice(0, 4);
+
+const jsonLd = [
+  { '@context': 'https://schema.org', '@type': 'Organization', name: SITE.name, url: SITE.url, description: SITE.description, founder: { '@type': 'Person', name: SITE.author, jobTitle: SITE.authorRole }, sameAs: [SITE.linkedin] },
+  { '@context': 'https://schema.org', '@type': 'Blog', name: SITE.name, url: SITE.url, description: SITE.description, inLanguage: 'en', author: { '@type': 'Person', name: SITE.author } },
+];
+---
+
+<BaseLayout description={SITE.description} jsonLd={jsonLd} lang={lang} alternateUrl="/">
+  <section class="hero">
+    <div class="container hero__content">
+      <span class="crosshair crosshair--tl"></span>
+      <span class="crosshair crosshair--tr"></span>
+      <span class="crosshair crosshair--bl"></span>
+      <span class="crosshair crosshair--br"></span>
+
+      <div class="hero__eyebrow"><span>●</span> {ui('hero.eyebrow', lang)} — {formatDate(latest.data.date, lang).toUpperCase()}</div>
+      <h1 class="hero__title">{ui('hero.title1', lang)}<br />{ui('hero.title2', lang)}<br /><span>{ui('hero.title3', lang)}</span></h1>
+      <p class="hero__sub">{ui('hero.sub', lang)}</p>
+      <div class="hero-buttons" style="display: flex; gap: 1rem; flex-wrap: wrap; margin-bottom: 2.5rem;">
+        <a href="/en/newsletter" class="btn btn--accent btn--lg">{ui('hero.cta1', lang)} →</a>
+        <a href="/en/topics" class="btn btn--lg">{ui('hero.cta2', lang)}</a>
+      </div>
+      <div class="hero__meta">
+        <div><strong>{newsletters.length}</strong><span>{ui('hero.editions', lang)}</span></div>
+        <div><strong>{topics.length}</strong><span>{ui('hero.topics', lang)}</span></div>
+        <div><strong>{concepts.length}</strong><span>{ui('hero.concepts', lang)}</span></div>
+        <div><strong>{ui('hero.daily', lang)}</strong><span>{ui('hero.frequency', lang)}</span></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="container" style="padding-top: 4rem; padding-bottom: 4rem;">
+    <div class="section-header">
+      <div><span class="mono" style="color: var(--accent);">[ {ui('section.latest', lang)} ]</span><h2>{ui('section.latestTitle', lang)}</h2></div>
+      <a href="/en/newsletter" class="mono" style="color: var(--fg-muted);">{ui('section.archive', lang)} →</a>
+    </div>
+    <article class="latest-article">
+      <div class="latest-grid">
+        <div class="latest-meta">
+          <div><span class="mono-sm" style="color: var(--accent);">● {ui('section.newEdition', lang)}</span><p class="mono latest-meta__date">{formatDate(latest.data.date, lang)}</p></div>
+          <div><p class="mono-sm" style="color: var(--fg-muted);">{ui('section.edition', lang)}</p><p class="mono latest-meta__num">{formatDateISO(latest.data.date).replace(/[-:]/g, '').slice(0, 8)}</p><div class="latest-meta__tags">{latest.data.tags.slice(0, 3).map((tag) => <span class="tag" style="border-color: var(--fg-muted); color: var(--fg-invert);">#{tag}</span>)}</div></div>
+        </div>
+        <div class="latest-body">
+          <h3 class="latest-body__title"><a href={`/en/newsletter/${latest.id}`} style="border: none;">{latest.data.title}</a></h3>
+          <p class="latest-body__excerpt">{latest.data.excerpt}</p>
+          <a href={`/en/newsletter/${latest.id}`} class="btn btn--accent">{ui('article.readComplete', lang)} →</a>
+        </div>
+      </div>
+    </article>
+  </section>
+
+  <section class="container" style="padding-bottom: 4rem;">
+    <div class="section-header"><div><span class="mono" style="color: var(--accent);">[ {ui('section.recent', lang)} ]</span><h2>{ui('section.recentTitle', lang)}</h2></div></div>
+    <div class="grid grid-3">{recent.map((entry) => <NewsletterCard entry={entry} collection="newsletters-en" lang={lang} />)}</div>
+  </section>
+
+  <div class="warning-stripe"></div>
+
+  <section class="container" style="padding-top: 4rem; padding-bottom: 4rem;">
+    <div class="section-header"><div><span class="mono" style="color: var(--accent);">[ {ui('section.coverage', lang)} ]</span><h2>{ui('section.topicsTitle', lang)}</h2></div><a href="/en/topics" class="mono" style="color: var(--fg-muted);">{ui('section.viewAll', lang)} →</a></div>
+    <div class="grid grid-3">{featuredTopics.map((topic, i) => <a href={`/en/topics/${t(topic.slug, lang)}`} class="topic-card"><span class="topic-card__num">T.{String(i + 1).padStart(2, '0')}</span><h3 class="topic-card__title">{t(topic.name, lang)}</h3><p class="topic-card__desc">{t(topic.shortDescription, lang)}</p><span class="topic-card__count">{topic.faqs.length} {ui('section.questions', lang)} →</span></a>)}</div>
+  </section>
+
+  <section class="container" style="padding-bottom: 4rem;">
+    <div class="section-header"><div><span class="mono" style="color: var(--accent);">[ {ui('section.glossary', lang)} ]</span><h2>{ui('section.conceptsTitle', lang)}</h2></div><a href="/en/concepts" class="mono" style="color: var(--fg-muted);">{ui('section.viewAll', lang)} →</a></div>
+    <div class="grid grid-4">{featuredConcepts.map((concept) => <a href={`/en/concepts/${t(concept.slug, lang)}`} class="topic-card"><span class="topic-card__num">{t(concept.category, lang)}</span><h3 class="topic-card__title" style="font-size: 1rem;">{t(concept.term, lang)}</h3><p class="topic-card__desc" style="font-size: 0.8125rem;">{t(concept.definition, lang).slice(0, 100)}...</p></a>)}</div>
+  </section>
+
+  <section class="cta-section" style="background: var(--fg); color: var(--fg-invert); padding: 4rem 0;">
+    <div class="container" style="text-align: center;">
+      <span class="mono" style="color: var(--accent);">[ {ui('section.connect', lang)} ]</span>
+      <h2 style="color: var(--fg-invert); font-size: var(--step-4); margin: 1rem 0; max-width: none;">{ui('cta.title1', lang)}<br />{ui('cta.title2', lang)}</h2>
+      <p style="color: var(--fg-muted); font-size: var(--step-1); margin: 0 auto 2rem; max-width: 52ch;">{ui('cta.sub', lang)}</p>
+      <a href={SITE.linkedin} target="_blank" rel="noopener noreferrer" class="btn btn--accent btn--lg">{ui('cta.linkedin', lang)} →</a>
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .latest-article { border: 3px solid var(--line); padding: 0; background: var(--bg); }
+  .latest-grid { display: grid; grid-template-columns: 1fr 2fr; gap: 0; }
+  .latest-meta { background: var(--fg); color: var(--fg-invert); padding: 2rem; display: flex; flex-direction: column; justify-content: space-between; min-height: 300px; }
+  .latest-meta__date { margin-top: 1rem; color: var(--fg-muted); }
+  .latest-meta__num { font-size: 2rem; color: var(--fg-invert); margin: 0.5rem 0; }
+  .latest-meta__tags { display: flex; gap: 0.5rem; flex-wrap: wrap; margin-top: 1rem; }
+  .latest-body { padding: 2rem; }
+  .latest-body__title { font-size: var(--step-3); line-height: 1; margin-bottom: 1.5rem; max-width: 22ch; overflow-wrap: break-word; word-break: break-word; }
+  .latest-body__excerpt { font-size: var(--step-1); color: var(--fg-soft); line-height: 1.6; margin-bottom: 1.5rem; }
+  @media (max-width: 1024px) { .latest-grid { grid-template-columns: 1fr 1.5fr; } .latest-meta, .latest-body { padding: 1.5rem; } .latest-meta__num { font-size: 1.5rem; } }
+  @media (max-width: 768px) { .latest-grid { grid-template-columns: 1fr; } .latest-meta { min-height: auto; padding: 1.25rem; gap: 1rem; } .latest-body { padding: 1.25rem; } .latest-body__title { font-size: var(--step-2); max-width: none; } .latest-body__excerpt { font-size: var(--step-0); } }
+  @media (max-width: 480px) { .latest-meta__num { font-size: 1.25rem; } .latest-body__title { font-size: 1.25rem; } .latest-body__excerpt { font-size: 0.875rem; } }
+</style>

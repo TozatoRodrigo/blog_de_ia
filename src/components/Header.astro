@@ -1,0 +1,106 @@
+---
+import { SITE } from '../config';
+import { ui } from '../i18n/ui';
+import type { Lang } from '../i18n/lang';
+
+interface Props {
+  lang?: Lang;
+  alternateUrl?: string;
+}
+
+const { lang = 'pt-BR', alternateUrl = '' } = Astro.props;
+
+const navItems = [
+  { key: 'nav.home', href: lang === 'pt-BR' ? '/' : '/en/' },
+  { key: 'nav.newsletter', href: lang === 'pt-BR' ? '/newsletter' : '/en/newsletter' },
+  { key: 'nav.topics', href: lang === 'pt-BR' ? '/topicos' : '/en/topics' },
+  { key: 'nav.concepts', href: lang === 'pt-BR' ? '/conceitos' : '/en/concepts' },
+  { key: 'nav.about', href: lang === 'pt-BR' ? '/sobre' : '/en/about' },
+];
+
+const pathname = Astro.url.pathname;
+const isActive = (href: string) => {
+  if (href === '/' || href === '/en/') {
+    return pathname === '/' || pathname === '/en' || pathname === '/en/';
+  }
+  return pathname.startsWith(href);
+};
+
+const switchFlag = lang === 'pt-BR' ? '🇺🇸' : '🇧🇷';
+const switchLabel = lang === 'pt-BR' ? 'Switch to English' : 'Mudar para Português';
+---
+
+<header class="site-header">
+  <div class="container">
+    <div class="site-header__inner">
+      <a href={lang === 'pt-BR' ? '/' : '/en/'} class="site-header__logo" aria-label={SITE.name}>
+        PRODUTO COM <span>IA</span>
+      </a>
+
+      <div class="site-header__right">
+        {alternateUrl && (
+          <a href={alternateUrl} class="lang-switch" aria-label={switchLabel} title={switchLabel}>
+            <span class="lang-switch__flag">{switchFlag}</span>
+          </a>
+        )}
+        <button class="nav-toggle" id="nav-toggle" aria-expanded="false" aria-controls="site-nav">
+          {ui('nav.menu', lang)}
+        </button>
+      </div>
+
+      <nav class="site-nav" id="site-nav" aria-label={lang === 'pt-BR' ? 'Navegação principal' : 'Main navigation'}>
+        {navItems.map((item) => (
+          <a href={item.href} aria-current={isActive(item.href) ? 'page' : undefined}>
+            {ui(item.key, lang)}
+          </a>
+        ))}
+      </nav>
+    </div>
+  </div>
+</header>
+
+<style>
+  .site-header__right {
+    display: flex;
+    align-items: center;
+    gap: 0.625rem;
+    flex-shrink: 0;
+  }
+
+  .lang-switch {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border: 2px solid var(--line);
+    background: var(--bg);
+    text-decoration: none;
+    transition: all var(--dur) var(--ease);
+    flex-shrink: 0;
+    border-bottom: 2px solid var(--line);
+  }
+
+  .lang-switch:hover {
+    background: var(--fg);
+    border-color: var(--fg);
+  }
+
+  .lang-switch__flag {
+    font-size: 1rem;
+    line-height: 1;
+  }
+
+  @media (max-width: 480px) {
+    .lang-switch {
+      width: 28px;
+      height: 28px;
+    }
+    .lang-switch__flag {
+      font-size: 0.875rem;
+    }
+    .site-header__right {
+      gap: 0.5rem;
+    }
+  }
+</style>

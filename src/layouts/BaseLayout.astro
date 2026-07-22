@@ -1,0 +1,122 @@
+---
+import SEO from '../components/SEO.astro';
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
+import '../styles/global.css';
+import type { Lang } from '../i18n/lang';
+import { ui } from '../i18n/ui';
+
+interface Props {
+  title?: string;
+  description?: string;
+  image?: string;
+  type?: 'website' | 'article';
+  publishedTime?: string;
+  modifiedTime?: string;
+  tags?: string[];
+  canonical?: string;
+  noindex?: boolean;
+  jsonLd?: object | object[];
+  lang?: Lang;
+  alternateUrl?: string;
+}
+
+const { lang = 'pt-BR', alternateUrl = '', ...rest } = Astro.props;
+const htmlLang = lang === 'pt-BR' ? 'pt-BR' : 'en';
+---
+
+<!DOCTYPE html>
+<html lang={htmlLang}>
+  <head>
+    <SEO {...rest} lang={lang} alternateUrl={alternateUrl} />
+    <script async defer src="https://analytics.servidortozato.cloud/script.js" data-website-id="3b6d559f-9bec-4f01-9d11-d166999d4b11"></script>
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5583302148964069" crossorigin="anonymous"></script>
+  </head>
+  <body>
+    <div class="reading-progress" id="reading-progress"></div>
+
+    <a href="#main" class="sr-only" style="position:absolute;left:-9999px;top:auto;width:1px;height:1px;overflow:hidden;">
+      {ui('lang.skipToContent', lang)}
+    </a>
+
+    <button class="nav-close" id="nav-close" aria-label={ui('nav.close', lang)}>✕</button>
+
+    <Header lang={lang} alternateUrl={alternateUrl} />
+    <main id="main">
+      <slot />
+    </main>
+    <Footer lang={lang} />
+
+    <button class="back-to-top" id="back-to-top" aria-label={ui('lang.backToTop', lang)}>↑</button>
+
+    <script>
+      const progress = document.getElementById('reading-progress');
+      const backToTop = document.getElementById('back-to-top');
+      const navClose = document.getElementById('nav-close');
+      const navToggle = document.getElementById('nav-toggle');
+      const siteNav = document.getElementById('site-nav');
+
+      function updateProgress() {
+        const scrollTop = window.scrollY;
+        const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+        if (docHeight > 0 && progress) {
+          progress.style.width = (scrollTop / docHeight * 100) + '%';
+        }
+        if (backToTop) {
+          if (scrollTop > 400) {
+            backToTop.classList.add('show');
+          } else {
+            backToTop.classList.remove('show');
+          }
+        }
+      }
+
+      window.addEventListener('scroll', updateProgress, { passive: true });
+      updateProgress();
+
+      if (backToTop) {
+        backToTop.addEventListener('click', () => {
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+        });
+      }
+
+      function closeNav() {
+        if (siteNav) siteNav.classList.remove('open');
+        if (navToggle) navToggle.setAttribute('aria-expanded', 'false');
+        if (navClose) navClose.classList.remove('show');
+        document.body.style.overflow = '';
+      }
+
+      function openNav() {
+        if (siteNav) siteNav.classList.add('open');
+        if (navToggle) navToggle.setAttribute('aria-expanded', 'true');
+        if (navClose) navClose.classList.add('show');
+        document.body.style.overflow = 'hidden';
+      }
+
+      if (navToggle) {
+        navToggle.addEventListener('click', () => {
+          if (siteNav && siteNav.classList.contains('open')) {
+            closeNav();
+          } else {
+            openNav();
+          }
+        });
+      }
+
+      if (navClose) {
+        navClose.addEventListener('click', closeNav);
+      }
+
+      if (siteNav) {
+        siteNav.querySelectorAll('a').forEach(link => {
+          link.addEventListener('click', closeNav);
+        });
+      }
+
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') closeNav();
+      });
+    </script>
+  </body>
+</html>

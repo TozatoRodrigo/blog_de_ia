@@ -1,0 +1,114 @@
+---
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+import { concepts } from '../../../data/concepts';
+import { topics } from '../../../data/topics';
+import { SITE } from '../../../config';
+import { t } from '../../../i18n/lang';
+import { ui } from '../../../i18n/ui';
+
+const lang = 'en' as const;
+
+export async function getStaticPaths() {
+  return concepts.map((concept) => ({
+    params: { concept: t(concept.slug, 'en') },
+    props: { concept },
+  }));
+}
+
+const { concept } = Astro.props;
+
+const relatedTopics = topics.filter((topic) => concept.relatedTerms.includes(topic.id));
+const relatedConcepts = concepts.filter(
+  (c) => c.id !== concept.id && c.relatedTerms.some((rt) => concept.relatedTerms.includes(rt))
+);
+
+const jsonLd = [
+  {
+    '@context': 'https://schema.org',
+    '@type': 'DefinedTerm',
+    name: t(concept.term, 'en'),
+    description: t(concept.definition, 'en'),
+    url: `${SITE.url}/en/concepts/${t(concept.slug, 'en')}`,
+    inLanguage: 'en',
+    partOf: {
+      '@type': 'DefinedTermSet',
+      name: `${SITE.name} Glossary`,
+      url: `${SITE.url}/en/concepts`,
+    },
+  },
+  {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      { '@type': 'ListItem', position: 1, name: 'Home', item: `${SITE.url}/en/` },
+      { '@type': 'ListItem', position: 2, name: 'Concepts', item: `${SITE.url}/en/concepts` },
+      { '@type': 'ListItem', position: 3, name: t(concept.term, 'en'), item: `${SITE.url}/en/concepts/${t(concept.slug, 'en')}` },
+    ],
+  },
+];
+---
+
+<BaseLayout
+  title={`${ui('concept.whatIs', lang)} ${t(concept.term, lang)}?`}
+  description={t(concept.definition, lang)}
+  tags={concept.relatedTerms}
+  jsonLd={jsonLd}
+  lang={lang}
+  alternateUrl={`/conceitos/${t(concept.slug, 'pt-BR')}`}
+>
+  <article class="container" style="padding-top: 2rem; max-width: 840px;">
+    <!-- Breadcrumb -->
+    <nav class="mono-sm" style="display: flex; gap: 0.5rem; margin-bottom: 2rem; color: var(--fg-muted); flex-wrap: wrap;">
+      <a href="/en/" style="border: none; color: inherit;">HOME</a>
+      <span>/</span>
+      <a href="/en/concepts" style="border: none; color: inherit;">CONCEPTS</a>
+      <span>/</span>
+      <span style="color: var(--fg);">{t(concept.term, lang).toUpperCase()}</span>
+    </nav>
+
+    <!-- Header -->
+    <header class="article-header">
+      <div class="article-header__eyebrow">
+        <span class="accent">●</span>
+        <span>{ui('concept.category', lang)} — {t(concept.category, lang).toUpperCase()}</span>
+      </div>
+      <h1>{ui('concept.whatIs', lang)} {t(concept.term, lang)}?</h1>
+    </header>
+
+    <!-- Definition -->
+    <div class="article-body">
+      <p style="font-size: var(--step-2); color: var(--fg); font-weight: 600; line-height: 1.4;">
+        {t(concept.definition, lang)}
+      </p>
+
+      <hr />
+
+      <h2>{ui('concept.detailed', lang)}</h2>
+      <p>{t(concept.longDescription, lang)}</p>
+    </div>
+
+    <!-- Related topics -->
+    {relatedTopics.length > 0 && (
+      <div style="margin-top: 3rem;">
+        <div class="divider-label"><span>RELATED TOPICS</span></div>
+        <div style="display: flex; gap: 0.75rem; flex-wrap: wrap;">
+          {relatedTopics.map((topic) => (
+            <a href={`/en/topics/${t(topic.slug, lang)}`} class="btn">{t(topic.name, lang)} →</a>
+          ))}
+        </div>
+      </div>
+    )}
+
+    <!-- Related concepts -->
+    {relatedConcepts.length > 0 && (
+      <div style="margin-top: 2rem;">
+        <div class="divider-label"><span>{ui('concept.relatedTerms', lang)}</span></div>
+        <div style="display: flex; gap: 0.75rem; flex-wrap: wrap;">
+          {relatedConcepts.map((c) => (
+            <a href={`/en/concepts/${t(c.slug, lang)}`} class="btn">{t(c.term, lang)} →</a>
+          ))}
+        </div>
+      </div>
+    )}
+  </article>
+</BaseLayout>

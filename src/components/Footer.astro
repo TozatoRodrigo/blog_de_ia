@@ -1,0 +1,62 @@
+---
+import { SITE } from '../config';
+import { topics } from '../data/topics';
+import { t } from '../i18n/lang';
+import { ui } from '../i18n/ui';
+import type { Lang } from '../i18n/lang';
+
+interface Props {
+  lang?: Lang;
+}
+
+const { lang = 'pt-BR' } = Astro.props;
+const year = new Date().getFullYear();
+const topTopics = topics.slice(0, 6);
+const prefix = lang === 'pt-BR' ? '' : '/en';
+const topicsPath = lang === 'pt-BR' ? '/topicos' : '/en/topics';
+---
+
+<footer class="site-footer">
+  <div class="warning-stripe"></div>
+  <div class="container">
+    <div class="site-footer__inner">
+      <div>
+        <h4>PRODUTO COM <span style="color: var(--accent)">IA</span></h4>
+        <p style="color: var(--fg-muted); font-size: 0.875rem; line-height: 1.6; margin-top: 0.5rem;">
+          {SITE.description}
+        </p>
+        <p class="mono-sm" style="margin-top: 1rem; color: var(--fg-muted);">
+          EDITOR — {SITE.author.toUpperCase()}<br />
+          {SITE.authorRole.toUpperCase()}
+        </p>
+      </div>
+
+      <div>
+        <h4>{ui('footer.nav', lang)}</h4>
+        <a href={lang === 'pt-BR' ? '/' : '/en/'}>{ui('nav.home', lang)}</a>
+        <a href={`${prefix}/newsletter`}>{ui('nav.newsletter', lang)}</a>
+        <a href={topicsPath}>{ui('nav.topics', lang)}</a>
+        <a href={`${prefix}/${lang === 'pt-BR' ? 'conceitos' : 'concepts'}`}>{ui('nav.concepts', lang)}</a>
+        <a href={`${prefix}/${lang === 'pt-BR' ? 'sobre' : 'about'}`}>{ui('nav.about', lang)}</a>
+      </div>
+
+      <div>
+        <h4>{ui('footer.topics', lang)}</h4>
+        {topTopics.map((topic) => (
+          <a href={`${topicsPath}/${t(topic.slug, lang)}`}>{t(topic.name, lang)}</a>
+        ))}
+      </div>
+
+      <div>
+        <h4>{ui('footer.contact', lang)}</h4>
+        <a href={SITE.linkedin} target="_blank" rel="noopener noreferrer">LinkedIn</a>
+        <a href={`mailto:${SITE.email}`}>{SITE.email}</a>
+      </div>
+    </div>
+
+    <div class="site-footer__bottom">
+      <p>© {year} {SITE.name.toUpperCase()} — {ui('footer.rights', lang)}</p>
+      <p>REV. {year}.07 — BUILD: {new Date().toISOString().split('T')[0]}</p>
+    </div>
+  </div>
+</footer>

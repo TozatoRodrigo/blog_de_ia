@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://produtocomia.com.br/sitemap-index.xml

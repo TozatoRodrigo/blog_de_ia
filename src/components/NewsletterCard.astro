@@ -1,0 +1,63 @@
+---
+import type { CollectionEntry } from 'astro:content';
+import { formatDateShort, formatDateISO } from '../utils/format';
+import { ui } from '../i18n/ui';
+import type { Lang } from '../i18n/lang';
+
+interface Props {
+  entry: CollectionEntry<'newsletters'> | CollectionEntry<'newsletters-en'>;
+  collection: 'newsletters' | 'newsletters-en';
+  lang?: Lang;
+  featured?: boolean;
+}
+
+const { entry, collection, lang = 'pt-BR', featured = false } = Astro.props;
+const { data, body } = entry;
+
+const firstParagraph = body
+  .split('\n\n')
+  .filter((p) => !p.startsWith('#') && !p.startsWith('---') && p.trim().length > 50)[0] || data.excerpt;
+
+const wordCount = body.split(/\s+/).length;
+const readTime = Math.max(1, Math.ceil(wordCount / 200));
+
+const prefix = lang === 'pt-BR' ? '/newsletter' : '/en/newsletter';
+---
+
+<article class={`newsletter-card ${featured ? 'newsletter-card--featured' : ''}`}>
+  <div class="newsletter-card__header">
+    <span class="mono-sm">{formatDateShort(data.date)}</span>
+    <span class="mono-sm">ED.{formatDateISO(data.date).replace(/[-:]/g, '').slice(0, 8)}</span>
+  </div>
+  <div class="newsletter-card__body">
+    <h3 class="newsletter-card__title">
+      <a href={`${prefix}/${entry.id}`} style="border: none;">
+        {data.title}
+      </a>
+    </h3>
+    <p class="newsletter-card__excerpt">{firstParagraph}</p>
+    <div class="newsletter-card__meta">
+      {data.tags.slice(0, 3).map((tag) => (
+        <span class="tag">#{tag}</span>
+      ))}
+      <span class="mono-sm" style="margin-left: auto;">{readTime} {ui('article.min', lang)}</span>
+    </div>
+  </div>
+</article>
+
+<style>
+  .newsletter-card--featured {
+    border-width: 3px;
+  }
+  .newsletter-card--featured .newsletter-card__header {
+    background: var(--fg);
+  }
+  .newsletter-card--featured .newsletter-card__header .mono-sm {
+    color: var(--fg-invert);
+  }
+  .newsletter-card a {
+    color: inherit;
+    text-decoration: none;
+    border: none;
+  }
+</style>

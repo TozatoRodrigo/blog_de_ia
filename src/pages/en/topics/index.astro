@@ -1,0 +1,52 @@
+---
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+import { topics } from '../../../data/topics';
+import { SITE } from '../../../config';
+import { t, ta } from '../../../i18n/lang';
+import { ui } from '../../../i18n/ui';
+
+const lang = 'en' as const;
+
+const jsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'CollectionPage',
+  name: `${ui('topics.title', lang)} — ${SITE.name}`,
+  description: ui('topics.description', lang),
+  url: `${SITE.url}/en/topics`,
+  inLanguage: 'en',
+};
+---
+
+<BaseLayout
+  title={ui('topics.title', lang)}
+  description={ui('topics.description', lang)}
+  jsonLd={jsonLd}
+  lang={lang}
+  alternateUrl="/topicos"
+>
+  <section class="container" style="padding-top: 3rem; padding-bottom: 2rem;">
+    <div class="section-header">
+      <div>
+        <span class="mono" style="color: var(--accent);">[ {ui('topics.coverageMap', lang)} ]</span>
+        <h1>{ui('topics.title', lang)}</h1>
+      </div>
+      <span class="mono" style="color: var(--fg-muted);">{topics.length} {ui('topics.title', lang).toUpperCase()}</span>
+    </div>
+    <p style="font-size: var(--step-1); color: var(--fg-soft); max-width: 60ch;">
+      {ui('topics.description', lang)}
+    </p>
+  </section>
+
+  <section class="container" style="padding-bottom: 4rem;">
+    <div class="grid grid-3">
+      {topics.map((topic, i) => (
+        <a href={`/en/topics/${t(topic.slug, lang)}`} class="topic-card">
+          <span class="topic-card__num">T.{String(i + 1).padStart(2, '0')} / {String(topics.length).padStart(2, '0')}</span>
+          <h3 class="topic-card__title">{t(topic.name, lang)}</h3>
+          <p class="topic-card__desc">{t(topic.shortDescription, lang)}</p>
+          <span class="topic-card__count">{topic.faqs.length} {ui('section.questions', lang)} · {ta(topic.keywords, lang).length} {ui('section.keywords', lang)} →</span>
+        </a>
+      ))}
+    </div>
+  </section>
+</BaseLayout>

@@ -1,0 +1,174 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+import NewsletterCard from '../../../components/NewsletterCard.astro';
+import { topics } from '../../../data/topics';
+import { concepts } from '../../../data/concepts';
+import { SITE } from '../../../config';
+import { t, ta } from '../../../i18n/lang';
+import { ui } from '../../../i18n/ui';
+
+const lang = 'en' as const;
+
+export async function getStaticPaths() {
+  return topics.map((topic) => ({
+    params: { topic: t(topic.slug, 'en') },
+    props: { topic },
+  }));
+}
+
+const { topic } = Astro.props;
+
+const newsletters = await getCollection('newsletters-en', ({ data }) => !data.draft);
+const relatedNewsletters = newsletters
+  .filter((n) => n.data.tags.includes(topic.id))
+  .sort((a, b) => b.data.date.localeCompare(a.data.date));
+
+const relatedConcepts = concepts.filter((c) =>
+  c.relatedTerms.includes(topic.id) || ta(topic.keywords, 'en').some((k) => t(c.term, 'en').toLowerCase().includes(k.toLowerCase()))
+);
+
+const faqJsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'FAQPage',
+  mainEntity: topic.faqs.map((faq) => ({
+    '@type': 'Question',
+    name: t(faq.question, 'en'),
+    acceptedAnswer: {
+      '@type': 'Answer',
+      text: t(faq.answer, 'en'),
+    },
+  })),
+};
+
+const breadcrumbJsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'BreadcrumbList',
+  itemListElement: [
+    { '@type': 'ListItem', position: 1, name: 'Home', item: `${SITE.url}/en/` },
+    { '@type': 'ListItem', position: 2, name: 'Topics', item: `${SITE.url}/en/topics` },
+    { '@type': 'ListItem', position: 3, name: t(topic.name, 'en'), item: `${SITE.url}/en/topics/${t(topic.slug, 'en')}` },
+  ],
+};
+
+const jsonLd = [
+  {
+    '@context': 'https://schema.org',
+    '@type': 'DefinedTermSet',
+    name: t(topic.name, 'en'),
+    description: t(topic.description, 'en'),
+    url: `${SITE.url}/en/topics/${t(topic.slug, 'en')}`,
+    inLanguage: 'en',
+  },
+  faqJsonLd,
+  breadcrumbJsonLd,
+];
+---
+
+<BaseLayout
+  title={t(topic.name, lang)}
+  description={t(topic.shortDescription, lang)}
+  tags={ta(topic.keywords, lang)}
+  jsonLd={jsonLd}
+  lang={lang}
+  alternateUrl={`/topicos/${t(topic.slug, 'pt-BR')}`}
+>
+  <!-- Hero -->
+  <section class="hero" style="border-bottom: 2px solid var(--line);">
+    <div class="container hero__content" style="padding-top: 3rem; padding-bottom: 3rem;">
+      <nav class="mono-sm" style="display: flex; gap: 0.5rem; margin-bottom: 1.5rem; color: var(--fg-muted);">
+        <a href="/en/" style="border: none; color: inherit;">HOME</a>
+        <span>/</span>
+        <a href="/en/topics" style="border: none; color: inherit;">TOPICS</a>
+        <span>/</span>
+        <span style="color: var(--fg);">{t(topic.slug, lang).toUpperCase()}</span>
+      </nav>
+
+      <span class="hero__eyebrow"><span>●</span> {ui('topic.label', lang)}</span>
+      <h1 style="font-size: var(--step-5); margin-bottom: 1.5rem;">{t(topic.name, lang)}</h1>
+      <p style="font-size: var(--step-1); color: var(--fg-soft); max-width: 60ch; line-height: 1.6;">
+        {t(topic.description, lang)}
+      </p>
+
+      <div style="display: flex; gap: 0.5rem; flex-wrap: wrap; margin-top: 1.5rem;">
+        {ta(topic.keywords, lang).slice(0, 6).map((kw) => (
+          <span class="tag">{kw}</span>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <!-- Related newsletters -->
+  {relatedNewsletters.length > 0 && (
+    <section class="container" style="padding-top: 3rem; padding-bottom: 3rem;">
+      <div class="section-header">
+        <div>
+          <span class="mono" style="color: var(--accent);">[ {ui('topic.relatedNews', lang)} ]</span>
+          <h2>{ui('newsletter.title', lang)}</h2>
+        </div>
+        <span class="mono" style="color: var(--fg-muted);">{relatedNewsletters.length} {ui('newsletter.editions', lang)}</span>
+      </div>
+
+      <div class="grid grid-2">
+        {relatedNewsletters.map((entry) => (
+          <NewsletterCard entry={entry} collection="newsletters-en" lang={lang} />
+        ))}
+      </div>
+    </section>
+  )}
+
+  <!-- FAQ -->
+  <section class="container" style="padding-bottom: 3rem;">
+    <div class="section-header">
+      <div>
+        <span class="mono" style="color: var(--accent);">[ {ui('topic.faq', lang)} ]</span>
+        <h2>{ui('topic.faqTitle', lang)}</h2>
+      </div>
+    </div>
+
+    <div style="max-width: 800px;">
+      {topic.faqs.map((faq, i) => (
+        <div class="radar-item" style="border-left: 3px solid var(--accent); margin-bottom: 1px;">
+          <details>
+            <summary style="font-family: var(--font-display); font-size: 1.125rem; cursor: pointer; line-height: 1.3; letter-spacing: -0.01em; text-transform: none; list-style: none; display: flex; gap: 0.75rem; align-items: start;">
+              <span class="mono-sm" style="color: var(--accent); flex-shrink: 0;">Q.{String(i + 1).padStart(2, '0')}</span>
+              <span>{t(faq.question, lang)}</span>
+            </summary>
+            <p style="margin-top: 1rem; padding-left: 2.5rem; color: var(--fg-soft); line-height: 1.7;">
+              {t(faq.answer, lang)}
+            </p>
+          </details>
+        </div>
+      ))}
+    </div>
+  </section>
+
+  <!-- Related concepts -->
+  {relatedConcepts.length > 0 && (
+    <section class="container" style="padding-bottom: 4rem;">
+      <div class="section-header">
+        <div>
+          <span class="mono" style="color: var(--accent);">[ {ui('topic.relatedConcepts', lang)} ]</span>
+          <h2>{ui('topic.glossaryTitle', lang)}</h2>
+        </div>
+        <a href="/en/concepts" class="mono" style="color: var(--fg-muted);">{ui('section.viewAll', lang)} →</a>
+      </div>
+
+      <div class="grid grid-4">
+        {relatedConcepts.map((concept) => (
+          <a href={`/en/concepts/${t(concept.slug, lang)}`} class="topic-card">
+            <span class="topic-card__num">{t(concept.category, lang).toUpperCase()}</span>
+            <h3 class="topic-card__title" style="font-size: 1rem;">{t(concept.term, lang)}</h3>
+            <p class="topic-card__desc" style="font-size: 0.8125rem;">{t(concept.definition, lang).slice(0, 80)}...</p>
+          </a>
+        ))}
+      </div>
+    </section>
+  )}
+</BaseLayout>
+
+<style>
+  summary::-webkit-details-marker { display: none; }
+  summary::marker { display: none; }
+  details[open] summary { color: var(--accent); }
+</style>

@@ -1,0 +1,60 @@
+---
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+import { concepts } from '../../../data/concepts';
+import { SITE } from '../../../config';
+import { t } from '../../../i18n/lang';
+import { ui } from '../../../i18n/ui';
+
+const lang = 'en' as const;
+
+const jsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'CollectionPage',
+  name: `${ui('concepts.title', lang)} — ${SITE.name}`,
+  description: ui('concepts.description', lang),
+  url: `${SITE.url}/en/concepts`,
+  inLanguage: 'en',
+};
+
+const categories = [...new Set(concepts.map((c) => t(c.category, 'en')))].sort();
+---
+
+<BaseLayout
+  title={ui('concepts.title', lang)}
+  description={ui('concepts.description', lang)}
+  jsonLd={jsonLd}
+  lang={lang}
+  alternateUrl="/conceitos"
+>
+  <section class="container" style="padding-top: 3rem; padding-bottom: 2rem;">
+    <div class="section-header">
+      <div>
+        <span class="mono" style="color: var(--accent);">[ {ui('concepts.glossary', lang)} ]</span>
+        <h1>{ui('concepts.title', lang)}</h1>
+      </div>
+      <span class="mono" style="color: var(--fg-muted);">{concepts.length} {ui('concepts.terms', lang)}</span>
+    </div>
+    <p style="font-size: var(--step-1); color: var(--fg-soft); max-width: 60ch;">
+      {ui('concepts.description', lang)}
+    </p>
+  </section>
+
+  {categories.map((category) => {
+    const categoryConcepts = concepts.filter((c) => t(c.category, 'en') === category);
+    return (
+      <section class="container" style="padding-bottom: 3rem;">
+        <div class="divider-label"><span>{category.toUpperCase()} — {categoryConcepts.length} {ui('concepts.terms', lang)}</span></div>
+        <div class="grid grid-2">
+          {categoryConcepts.map((concept) => (
+            <a href={`/en/concepts/${t(concept.slug, lang)}`} class="topic-card">
+              <span class="topic-card__num">{t(concept.category, lang).toUpperCase()}</span>
+              <h3 class="topic-card__title" style="font-size: 1.25rem;">{t(concept.term, lang)}</h3>
+              <p class="topic-card__desc">{t(concept.definition, lang).slice(0, 140)}...</p>
+              <span class="topic-card__count">{ui('concept.readDef', lang)} →</span>
+            </a>
+          ))}
+        </div>
+      </section>
+    );
+  })}
+</BaseLayout>

@@ -1,0 +1,35 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+---
+
+<BaseLayout
+  title="404 — Página não encontrada"
+  description="A página que você procura não existe ou foi movida."
+  noindex={true}
+>
+  <section class="container" style="padding-top: 6rem; padding-bottom: 6rem; text-align: center;">
+    <span class="crosshair crosshair--tl" style="position: relative; display: inline-block; top: 0; left: 0;"></span>
+
+    <span class="mono" style="color: var(--accent);">[ ERRO 404 ]</span>
+
+    <h1 style="font-size: var(--step-6); margin: 1rem 0; line-height: 0.85;">
+      404
+    </h1>
+
+    <p style="font-size: var(--step-2); color: var(--fg-soft); max-width: 48ch; margin: 0 auto 2rem;">
+      Esta página não existe, foi movida ou nunca existiu.
+      O sinal não foi encontrado nesta frequência.
+    </p>
+
+    <div style="display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;">
+      <a href="/" class="btn btn--accent btn--lg">VOLTAR AO INÍCIO →</a>
+      <a href="/newsletter" class="btn btn--lg">VER NEWSLETTER</a>
+      <a href="/topicos" class="btn btn--lg">EXPLORAR TÓPICOS</a>
+    </div>
+
+    <div style="margin-top: 4rem;">
+      <div class="warning-stripe" style="max-width: 400px; margin: 0 auto;"></div>
+      <p class="mono-sm" style="margin-top: 1rem;">SIGNAL LOST — UNIT NOT FOUND</p>
+    </div>
+  </section>
+</BaseLayout>

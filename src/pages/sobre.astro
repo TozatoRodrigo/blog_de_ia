@@ -1,0 +1,92 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { SITE } from '../config';
+
+const jsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'AboutPage',
+  name: `Sobre — ${SITE.name}`,
+  description: `Conheça o Produto com IA e seu editor, ${SITE.author}.`,
+  url: `${SITE.url}/sobre`,
+  mainEntity: {
+    '@type': 'Person',
+    name: SITE.author,
+    jobTitle: SITE.authorRole,
+    url: SITE.linkedin,
+    knowsAbout: SITE.keywords,
+  },
+};
+---
+
+<BaseLayout
+  title="Sobre"
+  description="Conheça o Produto com IA: newsletter diária de inteligência artificial para product managers, editada por Rodrigo Tozato."
+  jsonLd={jsonLd}
+  lang="pt-BR"
+  alternateUrl="/en/about"
+>
+  <section class="container" style="padding-top: 3rem; max-width: 840px;">
+    <div class="section-header">
+      <div>
+        <span class="mono" style="color: var(--accent);">[ SOBRE ]</span>
+        <h1>Quem está por trás</h1>
+      </div>
+    </div>
+
+    <div class="article-body" style="max-width: none;">
+      <p style="font-size: var(--step-2); color: var(--fg); font-weight: 600; line-height: 1.4;">
+        O Produto com IA é uma newsletter diária que faz curadoria de inteligência artificial, produto e
+        tecnologia para quem toma decisão em empresas de tecnologia.
+      </p>
+
+      <hr />
+
+      <h2>A proposta</h2>
+      <p>
+        Toda semana chega dezenas de notícias novas sobre IA. Modelo novo, ferramenta nova, benchmark
+        novo. A maioria não muda nada na sua decisão de produto. O que muda é o dado real, o case
+        operacional, o alerta de segurança que ninguém comentou.
+      </p>
+      <p>
+        O Produto com IA existe para separar isso. Cada edição traz uma análise profunda sobre um tema
+        que importa para product managers — precificação de IA, custo de agentes, governança, adoção
+        — e um radar com as notícias mais relevantes do dia, sem hype e com link para a fonte.
+      </p>
+
+      <h2>Para quem é</h2>
+      <p>
+        Para <strong>Product Managers</strong> e <strong>Product Owners</strong> que trabalham com
+        tecnologia e precisam acompanhar o que está acontecendo em IA sem perder tempo filtrando ruído.
+        Para líderes de produto que constroem o business case de IA dentro de casa. Para quem trabalha
+        em fintech e quer entender o cruzamento entre IA e produto financeiro.
+      </p>
+
+      <h2>Quem escreve</h2>
+      <p>
+        <strong>{SITE.author}</strong> — {SITE.authorRole}. Trabalha com produto em crédito e recebíveis
+        e escreve diariamente sobre IA com foco em dado real, não opinião. A perspectiva vem de quem
+        está dentro da operação, não de quem observa de fora.
+      </p>
+
+      <h2>O que você encontra aqui</h2>
+      <ul>
+        <li><strong>Newsletter diária</strong> — análise profunda de um tema + radar de notícias do dia</li>
+        <li><strong>Tópicos</strong> — mapas de cobertura por tema, com FAQ para referência rápida</li>
+        <li><strong>Conceitos</strong> — glossário de termos de IA com explicação contextual e cases reais</li>
+      </ul>
+
+      <h2>Como acompanhar</h2>
+      <p>
+        A edição sai todo dia no LinkedIn. Aqui no blog você encontra o arquivo completo, organizado
+        por tópico e conceito, para buscar referência quando precisar.
+      </p>
+
+      <div style="margin-top: 2rem; display: flex; gap: 1rem; flex-wrap: wrap;">
+        <a href={SITE.linkedin} target="_blank" rel="noopener noreferrer" class="btn btn--accent btn--lg">
+          SEGUIR NO LINKEDIN →
+        </a>
+        <a href="/newsletter" class="btn btn--lg">VER NEWSLETTER</a>
+      </div>
+    </div>
+  </section>
+</BaseLayout>

@@ -1,0 +1,16 @@
+{
+  "name": "Produto com IA",
+  "short_name": "ProdutoIA",
+  "description": "Inteligência Artificial para Product Managers",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#f4f4f0",
+  "theme_color": "#0a0a0a",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    }
+  ]
+}

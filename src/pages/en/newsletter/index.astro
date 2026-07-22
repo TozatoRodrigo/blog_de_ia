@@ -1,0 +1,50 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+import NewsletterCard from '../../../components/NewsletterCard.astro';
+import { SITE } from '../../../config';
+import { ui } from '../../../i18n/ui';
+
+const lang = 'en' as const;
+
+const newsletters = await getCollection('newsletters-en', ({ data }) => !data.draft);
+newsletters.sort((a, b) => b.data.date.localeCompare(a.data.date));
+
+const jsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'CollectionPage',
+  name: `${ui('newsletter.title', lang)} — ${SITE.name}`,
+  description: ui('newsletter.description', lang),
+  url: `${SITE.url}/en/newsletter`,
+  inLanguage: 'en',
+};
+---
+
+<BaseLayout
+  title={ui('newsletter.title', lang)}
+  description={ui('newsletter.description', lang)}
+  jsonLd={jsonLd}
+  lang={lang}
+  alternateUrl="/newsletter"
+>
+  <section class="container" style="padding-top: 3rem; padding-bottom: 2rem;">
+    <div class="section-header">
+      <div>
+        <span class="mono" style="color: var(--accent);">[ {ui('newsletter.archive', lang)} ]</span>
+        <h1>{ui('newsletter.title', lang)}</h1>
+      </div>
+      <span class="mono" style="color: var(--fg-muted);">{newsletters.length} {ui('newsletter.editions', lang)}</span>
+    </div>
+    <p style="font-size: var(--step-1); color: var(--fg-soft); max-width: 60ch;">
+      {ui('newsletter.description', lang)}
+    </p>
+  </section>
+
+  <section class="container" style="padding-bottom: 4rem;">
+    <div class="grid grid-2">
+      {newsletters.map((entry) => (
+        <NewsletterCard entry={entry} collection="newsletters-en" lang={lang} />
+      ))}
+    </div>
+  </section>
+</BaseLayout>
