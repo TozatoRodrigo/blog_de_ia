@@ -28,7 +28,13 @@ function fileUrl(file) {
   return new URL(relative, `${ORIGIN}/`).toString();
 }
 
-const requiredFiles = ['robots.txt', 'rss.xml', 'sitemap-index.xml', 'sitemap-0.xml'];
+const requiredFiles = [
+  'robots.txt', 'rss.xml', 'sitemap-index.xml', 'sitemap-0.xml', 'llms.txt', 'llms-full.txt',
+  'downloads/estado-ia-gestao-de-produto-2026.pdf',
+  'downloads/state-of-ai-in-product-management-2026.pdf',
+  'downloads/template-avaliacao-agente-de-ia.csv',
+  'downloads/ai-agent-evaluation-template.csv',
+];
 const missingFiles = requiredFiles.filter((file) => !existsSync(path.join(DIST, file)));
 const allFiles = await walk(DIST);
 const htmlFiles = allFiles.filter((file) => file.endsWith('.html'));

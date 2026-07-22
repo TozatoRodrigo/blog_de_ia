@@ -1,8 +1,30 @@
 ---
 import { getCollection } from 'astro:content';
 import BaseLayout from '../../layouts/BaseLayout.astro';
-const guides = (await getCollection('guides', ({ data }) => !data.draft)).sort((a,b) => b.data.dateModified.localeCompare(a.data.dateModified));
+import { guideClusters } from '../../data/guideClusters';
+
+const guides = await getCollection('guides', ({ data }) => !data.draft);
+const guideById = new Map(guides.map((guide) => [guide.id, guide]));
 ---
-<BaseLayout title="Guias de IA para Product Managers" description="Guias práticos e aprofundados sobre inteligência artificial, gestão de produtos e governança de IA para Product Managers." lang="pt-BR" alternateUrl="/en/guides/">
-  <section class="container" style="padding-top:4rem;padding-bottom:4rem"><span class="mono" style="color:var(--accent)">[ BIBLIOTECA ]</span><h1>Guias de IA para Product Managers</h1><p style="max-width:68ch;color:var(--fg-soft)">Referências práticas, verificadas e atualizadas para transformar IA em decisões melhores de produto.</p><div class="grid grid-2" style="margin-top:3rem">{guides.map((guide) => <a class="topic-card" href={`/guias/${guide.id}/`}><span class="topic-card__num">ATUALIZADO {guide.data.dateModified}</span><h2 class="topic-card__title">{guide.data.title}</h2><p class="topic-card__desc">{guide.data.description}</p></a>)}</div></section>
+<BaseLayout title="Guias de IA para Product Managers" description="Guias práticos sobre agentes de IA, governança e gestão de produto para transformar IA em decisões melhores." lang="pt-BR" alternateUrl="/en/guides/">
+  <section class="container" style="padding-top:4rem;padding-bottom:4rem">
+    <span class="mono" style="color:var(--accent)">[ BIBLIOTECA ]</span>
+    <h1>Guias de IA para Product Managers</h1>
+    <p style="max-width:68ch;color:var(--fg-soft)">Referências verificadas e conectadas para entender agentes, governar risco e melhorar decisões de produto.</p>
+    {guideClusters.map((cluster) => {
+      const clusterGuides = cluster.items.map((item) => guideById.get(item.pt)).filter(Boolean);
+      return <section data-guide-cluster={cluster.id} style="margin-top:3.5rem">
+        <span class="mono-sm">[ NÚCLEO EDITORIAL ]</span>
+        <h2>{cluster.name['pt-BR']}</h2>
+        <p style="max-width:68ch;color:var(--fg-soft)">{cluster.description['pt-BR']}</p>
+        <div class="grid grid-2" style="margin-top:1.5rem">
+          {clusterGuides.map((guide) => guide && <a class="topic-card" href={`/guias/${guide.id}/`}>
+            <span class="topic-card__num">{guide.data.isHub ? 'GUIA PRINCIPAL' : `ATUALIZADO ${guide.data.dateModified}`}</span>
+            <span class="topic-card__title">{guide.data.title}</span>
+            <span class="topic-card__desc">{guide.data.description}</span>
+          </a>)}
+        </div>
+      </section>;
+    })}
+  </section>
 </BaseLayout>

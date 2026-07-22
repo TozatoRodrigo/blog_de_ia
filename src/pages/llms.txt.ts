@@ -1,19 +1,28 @@
 import type { APIRoute } from 'astro';
+import { getCollection } from 'astro:content';
 import { concepts } from '../data/concepts';
+import { guideClusters } from '../data/guideClusters';
 import { topics } from '../data/topics';
 
-export const GET: APIRoute = () => {
+export const GET: APIRoute = async () => {
+  const guides = await getCollection('guides', ({ data }) => !data.draft);
+  const byId = new Map(guides.map((guide) => [guide.id, guide]));
+  const pillars = guideClusters.map((cluster) => {
+    const guide = byId.get(cluster.hub.pt);
+    return `- [${guide?.data.title || cluster.name['pt-BR']}](https://produtocomia.com.br/guias/${cluster.hub.pt}/): ${guide?.data.description || cluster.description['pt-BR']}`;
+  });
   const topicLinks = topics.map((topic) => `- [${topic.name['pt-BR']}](https://produtocomia.com.br/topicos/${topic.slug['pt-BR']}/): ${topic.shortDescription['pt-BR']}`);
   const conceptLinks = concepts.map((concept) => `- [${concept.term['pt-BR']}](https://produtocomia.com.br/conceitos/${concept.slug['pt-BR']}/): ${concept.definition['pt-BR']}`);
   const body = `# Produto com IA
 
 > Publicação independente de Rodrigo Tozato sobre inteligência artificial aplicada à gestão de produtos. Conteúdo original em português do Brasil, com versão em inglês.
 
-## Fontes principais
-- [Guias](https://produtocomia.com.br/guias/): referências aprofundadas e atualizadas
-- [Newsletter](https://produtocomia.com.br/newsletter/): análises diárias
-- [Tópicos](https://produtocomia.com.br/topicos/): hubs temáticos
-- [Conceitos](https://produtocomia.com.br/conceitos/): glossário de IA para produto
+## Guias principais
+${pillars.join('\n')}
+
+## Fontes editoriais
+- [Biblioteca de guias](https://produtocomia.com.br/guias/)
+- [Newsletter](https://produtocomia.com.br/newsletter/)
 - [Sobre o autor](https://produtocomia.com.br/sobre/)
 - [Política editorial](https://produtocomia.com.br/politica-editorial/)
 - [Correções](https://produtocomia.com.br/correcoes/)
@@ -27,7 +36,7 @@ ${conceptLinks.join('\n')}
 ## Descoberta
 - [RSS](https://produtocomia.com.br/rss.xml)
 - [Sitemap](https://produtocomia.com.br/sitemap-index.xml)
-- [Versão expandida para LLMs](https://produtocomia.com.br/llms-full.txt)
+- [Corpus expandido](https://produtocomia.com.br/llms-full.txt)
 
 Contato editorial: rodrigo.tozato@icloud.com
 `;
