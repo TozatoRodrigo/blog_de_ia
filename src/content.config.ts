@@ -30,6 +30,11 @@ const guideSchema = z.object({
   datePublished: z.string(), dateModified: z.string(),
   tags: z.array(z.string()).default([]), alternateSlug: z.string(),
   sources: z.array(z.object({ name: z.string(), url: z.string().url() })).default([]),
+  cluster: z.enum(['agents', 'governance', 'product']).optional(),
+  isHub: z.boolean().default(false),
+  faq: z.array(z.object({ question: z.string(), answer: z.string() })).default([]),
+  howToSteps: z.array(z.object({ name: z.string(), text: z.string() })).default([]),
+  downloads: z.array(z.object({ label: z.string(), href: z.string(), format: z.string() })).default([]),
   draft: z.boolean().default(false),
 });
 
