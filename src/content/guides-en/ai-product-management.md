@@ -6,6 +6,8 @@ datePublished: "2026-07-22"
 dateModified: "2026-07-22"
 tags: ["AI product management", "product discovery", "product strategy"]
 alternateSlug: "gestao-de-produtos-com-ia"
+cluster: product
+isHub: false
 sources:
   - name: "Google PAIR — People + AI Guidebook"
     url: "https://pair.withgoogle.com/guidebook-v2/"
@@ -65,3 +67,5 @@ Provide evidence, constraints and a decision format. Ask the model to identify m
 Choose a frequent, reversible and measurable task. Feedback synthesis with links to sources is a better starting point than automatic roadmap prioritization.
 
 AI improves product management when it improves the quality of team thinking—not merely the speed of artifact production.
+
+Continue with the [product management guide](/en/guides/product-management/) and [State of AI in Product Management 2026](/en/guides/state-of-ai-in-product-management-2026/).

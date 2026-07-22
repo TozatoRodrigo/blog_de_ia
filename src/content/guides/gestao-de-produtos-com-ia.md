@@ -6,6 +6,8 @@ datePublished: "2026-07-22"
 dateModified: "2026-07-22"
 tags: ["gestão de produtos", "inteligência artificial", "discovery"]
 alternateSlug: "ai-product-management"
+cluster: product
+isHub: false
 sources:
   - name: "Google PAIR — People + AI Guidebook"
     url: "https://pair.withgoogle.com/guidebook-v2/"
@@ -75,3 +77,5 @@ Forneça evidências, restrições e um formato de decisão. Peça que o modelo 
 Escolha algo frequente, reversível e fácil de avaliar. Síntese de feedback com links para a fonte costuma ser melhor começo do que priorização automática do roadmap.
 
 IA melhora gestão de produtos quando aumenta a qualidade do pensamento do time — não apenas a velocidade de produzir artefatos.
+
+Veja também o [guia de gestão de produto](/guias/gestao-de-produto/) e a análise [Estado da IA na Gestão de Produto 2026](/guias/estado-ia-gestao-de-produto-2026/).

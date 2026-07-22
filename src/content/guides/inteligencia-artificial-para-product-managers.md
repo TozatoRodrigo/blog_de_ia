@@ -6,6 +6,8 @@ datePublished: "2026-07-22"
 dateModified: "2026-07-22"
 tags: ["inteligência artificial", "product manager", "produto"]
 alternateSlug: "artificial-intelligence-for-product-managers"
+cluster: product
+isHub: false
 sources:
   - name: "Google PAIR — People + AI Guidebook"
     url: "https://pair.withgoogle.com/guidebook-v2/"
@@ -79,3 +81,5 @@ Quando o impacto do erro é alto, quando faltam evidências de qualidade ou quan
 - revisão após lançamento agendada.
 
 O PM de IA não promete inteligência. Ele desenha um sistema em que capacidade, produto e operação produzem valor repetível.
+
+Para aprofundar os fundamentos, consulte [Gestão de Produto](/guias/gestao-de-produto/) e [Estado da IA na Gestão de Produto 2026](/guias/estado-ia-gestao-de-produto-2026/).

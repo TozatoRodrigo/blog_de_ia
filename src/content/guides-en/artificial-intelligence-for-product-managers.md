@@ -6,6 +6,8 @@ datePublished: "2026-07-22"
 dateModified: "2026-07-22"
 tags: ["artificial intelligence", "product manager", "AI product"]
 alternateSlug: "inteligencia-artificial-para-product-managers"
+cluster: product
+isHub: false
 sources:
   - name: "Google PAIR — People + AI Guidebook"
     url: "https://pair.withgoogle.com/guidebook-v2/"
@@ -72,3 +74,5 @@ When errors have high impact, quality evidence is weak or a decision requires hu
 - scheduled post-launch review.
 
 An AI PM does not promise intelligence. They design a system where capability, product and operations deliver repeatable value.
+
+For the foundations of the role, read [Product Management](/en/guides/product-management/) and [State of AI in Product Management 2026](/en/guides/state-of-ai-in-product-management-2026/).

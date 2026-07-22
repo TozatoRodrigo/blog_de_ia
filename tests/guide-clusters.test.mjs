@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict';
+import { access, readFile } from 'node:fs/promises';
 import test from 'node:test';
 
 import { clusterForGuide, guideClusters, guidePair } from '../src/data/guideClusters.ts';
@@ -23,4 +24,18 @@ test('cluster lookup and language pairing are reciprocal', () => {
   assert.deepEqual(guidePair('product-management', 'en'), {
     current: 'product-management', alternate: 'gestao-de-produto',
   });
+});
+
+test('every cluster entry has reciprocal Markdown content', async () => {
+  for (const cluster of guideClusters) {
+    for (const item of cluster.items) {
+      const ptUrl = new URL(`../src/content/guides/${item.pt}.md`, import.meta.url);
+      const enUrl = new URL(`../src/content/guides-en/${item.en}.md`, import.meta.url);
+      await access(ptUrl);
+      await access(enUrl);
+      const [pt, en] = await Promise.all([readFile(ptUrl, 'utf8'), readFile(enUrl, 'utf8')]);
+      assert.match(pt, new RegExp(`alternateSlug: ["']${item.en}["']`));
+      assert.match(en, new RegExp(`alternateSlug: ["']${item.pt}["']`));
+    }
+  }
 });
