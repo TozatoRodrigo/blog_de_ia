@@ -11,14 +11,15 @@ interface Props {
   featured?: boolean;
 }
 
-const { entry, collection, lang = 'pt-BR', featured = false } = Astro.props;
+const { entry, lang = 'pt-BR', featured = false } = Astro.props;
 const { data, body } = entry;
+const contentBody = body || '';
 
-const firstParagraph = body
+const firstParagraph = contentBody
   .split('\n\n')
   .filter((p) => !p.startsWith('#') && !p.startsWith('---') && p.trim().length > 50)[0] || data.excerpt;
 
-const wordCount = body.split(/\s+/).length;
+const wordCount = contentBody.split(/\s+/).length;
 const readTime = Math.max(1, Math.ceil(wordCount / 200));
 
 const prefix = lang === 'pt-BR' ? '/newsletter' : '/en/newsletter';

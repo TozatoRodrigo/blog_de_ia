@@ -1,0 +1,8 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+const guides = (await getCollection('guides-en', ({ data }) => !data.draft)).sort((a,b) => b.data.dateModified.localeCompare(a.data.dateModified));
+---
+<BaseLayout title="AI Guides for Product Managers" description="Practical guides to artificial intelligence, AI product management and AI governance for product leaders." lang="en" alternateUrl="/guias/">
+  <section class="container" style="padding-top:4rem;padding-bottom:4rem"><span class="mono" style="color:var(--accent)">[ LIBRARY ]</span><h1>AI Guides for Product Managers</h1><p style="max-width:68ch;color:var(--fg-soft)">Verified, actionable references for turning AI capabilities into better product decisions.</p><div class="grid grid-2" style="margin-top:3rem">{guides.map((guide) => <a class="topic-card" href={`/en/guides/${guide.id}/`}><span class="topic-card__num">UPDATED {guide.data.dateModified}</span><h2 class="topic-card__title">{guide.data.title}</h2><p class="topic-card__desc">{guide.data.description}</p></a>)}</div></section>
+</BaseLayout>

@@ -7,6 +7,7 @@ import { concepts } from '../../data/concepts';
 import { SITE } from '../../config';
 import { t, ta } from '../../i18n/lang';
 import { ui } from '../../i18n/ui';
+import { guideForTag } from '../../data/guideLinks';
 
 const lang = 'pt-BR' as const;
 
@@ -23,6 +24,7 @@ const relatedNewsletters = newsletters
 
 const relatedConcepts = concepts.filter((c) => c.relatedTerms.includes(topic.id));
 const alternateUrl = `/en/topics/${topic.slug['en']}`;
+const recommendedGuide = guideForTag(topic.id, lang);
 
 const faqJsonLd = { '@context': 'https://schema.org', '@type': 'FAQPage', mainEntity: topic.faqs.map((faq) => ({ '@type': 'Question', name: t(faq.question, lang), acceptedAnswer: { '@type': 'Answer', text: t(faq.answer, lang) } })) };
 const breadcrumbJsonLd = { '@context': 'https://schema.org', '@type': 'BreadcrumbList', itemListElement: [{ '@type': 'ListItem', position: 1, name: 'Início', item: SITE.url }, { '@type': 'ListItem', position: 2, name: 'Tópicos', item: `${SITE.url}/topicos` }, { '@type': 'ListItem', position: 3, name: t(topic.name, lang), item: `${SITE.url}/topicos/${t(topic.slug, lang)}` }] };
@@ -43,6 +45,7 @@ const jsonLd = [{ '@context': 'https://schema.org', '@type': 'DefinedTermSet', n
       <div style="display: flex; gap: 0.5rem; flex-wrap: wrap; margin-top: 1.5rem;">{ta(topic.keywords, lang).slice(0, 6).map((kw) => <span class="tag">{kw}</span>)}</div>
     </div>
   </section>
+  <section class="container" style="padding-top:2rem"><aside class="radar-item" style="border-left:3px solid var(--accent)"><span class="mono-sm">GUIA ESSENCIAL</span><h2>{recommendedGuide.title}</h2><a class="btn" href={recommendedGuide.href}>LER GUIA →</a></aside></section>
 
   {relatedNewsletters.length > 0 && (
     <section class="container" style="padding-top: 3rem; padding-bottom: 3rem;">

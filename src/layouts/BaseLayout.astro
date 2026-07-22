@@ -50,6 +50,7 @@ const htmlLang = lang === 'pt-BR' ? 'pt-BR' : 'en';
     <button class="back-to-top" id="back-to-top" aria-label={ui('lang.backToTop', lang)}>↑</button>
 
     <script>
+      document.documentElement.dataset.client = 'ready';
       const progress = document.getElementById('reading-progress');
       const backToTop = document.getElementById('back-to-top');
       const navClose = document.getElementById('nav-close');

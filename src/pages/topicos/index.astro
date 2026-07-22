@@ -1,7 +1,7 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import { topics } from '../../data/topics';
-import { t } from '../../i18n/lang';
+import { t, ta } from '../../i18n/lang';
 import { ui } from '../../i18n/ui';
 
 const lang = 'pt-BR' as const;
@@ -23,7 +23,7 @@ const jsonLd = { '@context': 'https://schema.org', '@type': 'CollectionPage', na
           <span class="topic-card__num">T.{String(i + 1).padStart(2, '0')} / {String(topics.length).padStart(2, '0')}</span>
           <h3 class="topic-card__title">{t(topic.name, lang)}</h3>
           <p class="topic-card__desc">{t(topic.shortDescription, lang)}</p>
-          <span class="topic-card__count">{topic.faqs.length} {ui('section.questions', lang)} · {t(topic.keywords, lang).length} {ui('section.keywords', lang)} →</span>
+          <span class="topic-card__count">{topic.faqs.length} {ui('section.questions', lang)} · {ta(topic.keywords, lang).length} {ui('section.keywords', lang)} →</span>
         </a>
       ))}
     </div>

@@ -35,6 +35,7 @@ const topicsPath = lang === 'pt-BR' ? '/topicos' : '/en/topics';
         <h4>{ui('footer.nav', lang)}</h4>
         <a href={lang === 'pt-BR' ? '/' : '/en/'}>{ui('nav.home', lang)}</a>
         <a href={`${prefix}/newsletter`}>{ui('nav.newsletter', lang)}</a>
+        <a href={`${prefix}/${lang === 'pt-BR' ? 'guias' : 'guides'}`}>{ui('nav.guides', lang)}</a>
         <a href={topicsPath}>{ui('nav.topics', lang)}</a>
         <a href={`${prefix}/${lang === 'pt-BR' ? 'conceitos' : 'concepts'}`}>{ui('nav.concepts', lang)}</a>
         <a href={`${prefix}/${lang === 'pt-BR' ? 'sobre' : 'about'}`}>{ui('nav.about', lang)}</a>
@@ -51,6 +52,8 @@ const topicsPath = lang === 'pt-BR' ? '/topicos' : '/en/topics';
         <h4>{ui('footer.contact', lang)}</h4>
         <a href={SITE.linkedin} target="_blank" rel="noopener noreferrer">LinkedIn</a>
         <a href={`mailto:${SITE.email}`}>{SITE.email}</a>
+        <a href={lang === 'pt-BR' ? '/politica-editorial/' : '/en/editorial-policy/'}>{lang === 'pt-BR' ? 'Política editorial' : 'Editorial policy'}</a>
+        <a href={lang === 'pt-BR' ? '/correcoes/' : '/en/corrections/'}>{lang === 'pt-BR' ? 'Correções' : 'Corrections'}</a>
       </div>
     </div>
 

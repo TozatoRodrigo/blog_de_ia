@@ -48,7 +48,7 @@ for (const file of htmlFiles) {
     requireHreflang: !noindex,
   });
   errors.push(...result.errors.map((error) => `${expectedUrl}: ${error}`));
-  warnings.push(...result.warnings.map((warning) => `${expectedUrl}: ${warning}`));
+  if (!noindex) warnings.push(...result.warnings.map((warning) => `${expectedUrl}: ${warning}`));
   pages.push({ expectedUrl, $, noindex });
 }
 

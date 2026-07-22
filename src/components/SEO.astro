@@ -2,6 +2,7 @@
 import { SITE, SITE_LOCALE } from '../config';
 import type { Lang } from '../i18n/lang';
 import { absoluteUrl, buildAlternates } from '../utils/seo';
+import { organizationSchema, personSchema, websiteSchema } from '../utils/schema';
 
 interface Props {
   title?: string;
@@ -22,7 +23,7 @@ interface Props {
 const {
   title,
   description: suppliedDescription,
-  image = '/og-image.svg',
+  image = '/og/default.png',
   type = 'website',
   publishedTime,
   modifiedTime,
@@ -36,34 +37,32 @@ const {
 } = Astro.props;
 
 const localizedSite = SITE_LOCALE[lang];
-const description = suppliedDescription || localizedSite.description;
-const pageTitle = title ? `${title} — ${SITE.name}` : `${SITE.name} — ${localizedSite.tagline}`;
+const trimAtWord = (value: string, max: number) => value.length <= max
+  ? value
+  : `${value.slice(0, max - 1).replace(/\s+\S*$/, '')}…`;
+const rawDescription = suppliedDescription || localizedSite.description;
+const description = trimAtWord(
+  rawDescription.length < 70 ? `${rawDescription} ${localizedSite.tagline}.` : rawDescription,
+  160,
+);
+const titleWithBrand = title ? `${title} — ${SITE.name}` : `${SITE.name} — ${localizedSite.tagline}`;
+const shortTitle = titleWithBrand.length < 30
+  ? `${titleWithBrand} | ${lang === 'pt-BR' ? 'IA e Produto' : 'AI & Product'}`
+  : titleWithBrand;
+const compactTitle = shortTitle.length > 60
+  ? (title || `${localizedSite.tagline} — ${SITE.name}`)
+  : shortTitle;
+const pageTitle = trimAtWord(compactTitle, 60);
 const canonicalURL = absoluteUrl(canonical || Astro.url.pathname);
 const imageURL = new URL(image, Astro.site).toString();
 const localeStr = lang === 'pt-BR' ? 'pt_BR' : 'en_US';
-const inLanguage = lang === 'pt-BR' ? 'pt-BR' : 'en';
-
 const structuredData = jsonLd
   ? Array.isArray(jsonLd)
     ? jsonLd
     : [jsonLd]
   : [];
 
-const defaultJsonLd = {
-  '@context': 'https://schema.org',
-  '@type': 'WebSite',
-  name: SITE.name,
-  url: SITE.url,
-  description: localizedSite.description,
-  inLanguage,
-  publisher: {
-    '@type': 'Organization',
-    name: SITE.name,
-    url: SITE.url,
-  },
-};
-
-const allStructuredData = [defaultJsonLd, ...structuredData];
+const allStructuredData = [websiteSchema(lang), organizationSchema(), personSchema(), ...structuredData];
 
 const alternateUrls = alternateUrl
   ? buildAlternates(

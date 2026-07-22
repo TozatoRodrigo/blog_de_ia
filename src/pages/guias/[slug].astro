@@ -1,0 +1,11 @@
+---
+import { getCollection, render } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { articleSchema, breadcrumbSchema } from '../../utils/schema';
+export async function getStaticPaths(){const entries=await getCollection('guides',({data})=>!data.draft);return entries.map(entry=>({params:{slug:entry.id},props:{entry}}));}
+const {entry}=Astro.props; const {Content}=await render(entry); const lang='pt-BR' as const; const url=`/guias/${entry.id}/`; const image=`/og/guides/${entry.id}.png`;
+const jsonLd=[articleSchema({url,title:entry.data.title,description:entry.data.description,datePublished:entry.data.datePublished,dateModified:entry.data.dateModified,image,lang,tags:entry.data.tags}),breadcrumbSchema([['Início','/'],['Guias','/guias/'],[entry.data.title,url]])];
+---
+<BaseLayout title={entry.data.seoTitle} description={entry.data.description} image={image} type="article" publishedTime={entry.data.datePublished} modifiedTime={entry.data.dateModified} tags={entry.data.tags} jsonLd={jsonLd} lang={lang} alternateUrl={`/en/guides/${entry.data.alternateSlug}/`}>
+<article class="container" style="padding-top:2rem;padding-bottom:4rem"><nav class="mono-sm"><a href="/">INÍCIO</a> / <a href="/guias/">GUIAS</a></nav><header class="article-header"><div class="article-header__eyebrow"><span class="accent">●</span><span>GUIA ATUALIZADO EM {entry.data.dateModified}</span></div><h1>{entry.data.title}</h1><p style="font-size:var(--step-1);color:var(--fg-soft);max-width:70ch">{entry.data.description}</p></header><div class="article-body"><Content /><section><h2>Fontes primárias</h2><ul>{entry.data.sources.map(source=><li><a href={source.url} target="_blank" rel="noopener noreferrer">{source.name}</a></li>)}</ul></section></div></article>
+</BaseLayout>

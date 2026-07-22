@@ -6,6 +6,8 @@ import { formatDate, formatDateISO } from '../../../utils/format';
 import { topics } from '../../../data/topics';
 import { t } from '../../../i18n/lang';
 import { ui } from '../../../i18n/ui';
+import { blogPostingSchema, breadcrumbSchema } from '../../../utils/schema';
+import { guideForTag } from '../../../data/guideLinks';
 
 const lang = 'en' as const;
 
@@ -31,50 +33,23 @@ const topicHref = (tag: string) => {
   const topic = topics.find((candidate) => candidate.id === tag);
   return topic ? `/en/topics/${t(topic.slug, lang)}/` : '/en/topics/';
 };
+const articleUrl = `/en/newsletter/${entry.id}/`;
+const articleImage = `/og/newsletter/en-${entry.id}.png`;
+const recommendedGuide = guideForTag(entry.data.tags[0] || 'inteligencia-artificial', lang);
 
 const jsonLd = [
-  {
-    '@context': 'https://schema.org',
-    '@type': 'BlogPosting',
-    headline: entry.data.title,
-    description: entry.data.excerpt,
-    datePublished: formatDateISO(entry.data.date),
-    dateModified: formatDateISO(entry.data.date),
-    author: {
-      '@type': 'Person',
-      name: SITE.author,
-      jobTitle: SITE.authorRole,
-      url: SITE.linkedin,
-    },
-    publisher: {
-      '@type': 'Organization',
-      name: SITE.name,
-      url: SITE.url,
-    },
-    mainEntityOfPage: {
-      '@type': 'WebPage',
-      '@id': `${SITE.url}/en/newsletter/${entry.id}`,
-    },
-    keywords: entry.data.tags.join(', '),
-    inLanguage: 'en',
-  },
-  {
-    '@context': 'https://schema.org',
-    '@type': 'BreadcrumbList',
-    itemListElement: [
-      { '@type': 'ListItem', position: 1, name: 'Home', item: `${SITE.url}/en/` },
-      { '@type': 'ListItem', position: 2, name: 'Newsletter', item: `${SITE.url}/en/newsletter` },
-      { '@type': 'ListItem', position: 3, name: entry.data.title, item: `${SITE.url}/en/newsletter/${entry.id}` },
-    ],
-  },
+  blogPostingSchema({ url: articleUrl, title: entry.data.title, description: entry.data.excerpt, datePublished: formatDateISO(entry.data.date), dateModified: formatDateISO(entry.data.date), image: articleImage, lang, tags: entry.data.tags }),
+  breadcrumbSchema([['Home', '/en/'], ['Newsletter', '/en/newsletter/'], [entry.data.title, articleUrl]]),
 ];
 ---
 
 <BaseLayout
   title={entry.data.title}
   description={entry.data.excerpt}
+  image={articleImage}
   type="article"
   publishedTime={formatDateISO(entry.data.date)}
+  modifiedTime={formatDateISO(entry.data.date)}
   tags={entry.data.tags}
   jsonLd={jsonLd}
   lang={lang}
@@ -110,6 +85,7 @@ const jsonLd = [
     <div class="article-body">
       <Content />
     </div>
+    <aside class="radar-item" style="max-width:760px;margin:2rem auto;border-left:3px solid var(--accent)"><span class="mono-sm">RECOMMENDED READING</span><h2 style="font-size:1.25rem;margin:.5rem 0">{recommendedGuide.title}</h2><a href={recommendedGuide.href}>READ THE COMPLETE GUIDE →</a></aside>
 
     <!-- Tags -->
     <div style="max-width: 760px; margin: 3rem auto 0; padding-top: 2rem; border-top: 2px solid var(--line);">

@@ -25,4 +25,15 @@ const newslettersEn = defineCollection({
   }),
 });
 
-export const collections = { newsletters, 'newsletters-en': newslettersEn };
+const guideSchema = z.object({
+  title: z.string(), seoTitle: z.string(), description: z.string(),
+  datePublished: z.string(), dateModified: z.string(),
+  tags: z.array(z.string()).default([]), alternateSlug: z.string(),
+  sources: z.array(z.object({ name: z.string(), url: z.string().url() })).default([]),
+  draft: z.boolean().default(false),
+});
+
+const guides = defineCollection({ loader: glob({ pattern: '**/*.md', base: './src/content/guides' }), schema: guideSchema });
+const guidesEn = defineCollection({ loader: glob({ pattern: '**/*.md', base: './src/content/guides-en' }), schema: guideSchema });
+
+export const collections = { newsletters, 'newsletters-en': newslettersEn, guides, 'guides-en': guidesEn };

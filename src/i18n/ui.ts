@@ -6,6 +6,7 @@ export const UI: Dict = {
   // Header / Nav
   'nav.home': { 'pt-BR': 'Início', 'en': 'Home' },
   'nav.newsletter': { 'pt-BR': 'Newsletter', 'en': 'Newsletter' },
+  'nav.guides': { 'pt-BR': 'Guias', 'en': 'Guides' },
   'nav.topics': { 'pt-BR': 'Tópicos', 'en': 'Topics' },
   'nav.concepts': { 'pt-BR': 'Conceitos', 'en': 'Concepts' },
   'nav.about': { 'pt-BR': 'Sobre', 'en': 'About' },
