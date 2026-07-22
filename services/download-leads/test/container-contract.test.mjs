@@ -59,3 +59,20 @@ test('environment example documents production variables without working secrets
   assert.match(env, /^LEAD_NOTIFICATION_TO=rodrigo\.tozato@icloud\.com$/m);
   assert.doesNotMatch(env, /(re_[A-Za-z0-9]{20,}|0x4AAAA[A-Za-z0-9_-]+|sk-[A-Za-z0-9]{20,})/);
 });
+
+test('operations runbook covers activation, privacy requests and recovery', async () => {
+  const runbook = await text('docs/operations/download-leads-runbook.md');
+  for (const section of [
+    'Resend', 'Cloudflare Turnstile', 'Variáveis do servidor', 'Teste de aceitação',
+    'Exportar leads', 'Excluir um lead', 'Backup', 'Restauração', 'Rotação de chaves',
+    'Incidente de segurança',
+  ]) {
+    assert.match(runbook, new RegExp(`^## ${section}$`, 'm'));
+  }
+  assert.match(runbook, /rodrigo\.tozato@icloud\.com/);
+  assert.match(runbook, /leads\.produtocomia\.com\.br/);
+  assert.match(runbook, /\/home\/rodrigo\/apps\/radar-ia\/\.env\.download-leads/);
+  assert.match(runbook, /openssl rand -hex 32/);
+  assert.match(runbook, /chmod 600/);
+  assert.match(runbook, /nunca[^\n]*html/i);
+});
