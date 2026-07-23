@@ -57,6 +57,7 @@ test('smoke tests cover protected downloads, public discovery and secret-free co
   assert.match(smoke, /TURNSTILE_SECRET_KEY|turnstileSecretKey/);
   assert.match(smoke, /type="email"/);
   assert.match(smoke, /\/downloads\/ai-risk-matrix\.csv\?smoke=\$\{Date\.now\(\)\}/);
+  assert.match(smoke, /\/robots\.txt\?smoke=\$\{Date\.now\(\)\}/);
 });
 
 test('build audit derives required protected files from the catalog', () => {

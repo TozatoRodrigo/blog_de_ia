@@ -14,7 +14,10 @@ const checks = [
 
 let failures = 0;
 for (const [path, expectedStatus, expectedText] of checks) {
-  const response = await fetch(`${origin}${path}`, { redirect: 'follow' });
+  const requestUrl = path === '/robots.txt'
+    ? `${origin}/robots.txt?smoke=${Date.now()}`
+    : `${origin}${path}`;
+  const response = await fetch(requestUrl, { redirect: 'follow' });
   const text = await response.text();
   if (response.status !== expectedStatus || (expectedText && !text.includes(expectedText))) {
     console.error(`FAIL ${path}: status ${response.status}; expected ${expectedStatus} and ${JSON.stringify(expectedText)}`);
