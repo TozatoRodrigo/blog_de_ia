@@ -69,6 +69,7 @@ test('build audit derives required protected files from the catalog', () => {
 
 test('Nginx permanently redirects legacy newsletters before static routing', () => {
   assert.match(nginx, /map_hash_bucket_size 128;/);
+  assert.match(nginx, /absolute_redirect off;/);
   assert.match(nginx, /include \/usr\/share\/nginx\/html\/_newsletter-redirects\.map;/);
   assert.match(nginx, /return 301 \$newsletter_redirect/);
   assert.doesNotMatch(nginx, /\$uri\/index\.html/);
