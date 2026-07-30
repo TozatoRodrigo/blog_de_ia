@@ -5,6 +5,7 @@ import test from 'node:test';
 const deploy = await readFile(new URL('../scripts/deploy.sh', import.meta.url), 'utf8');
 const smoke = await readFile(new URL('../scripts/smoke-test.mjs', import.meta.url), 'utf8');
 const audit = await readFile(new URL('../scripts/audit-dist.mjs', import.meta.url), 'utf8');
+const nginx = await readFile(new URL('../deploy/nginx.conf', import.meta.url), 'utf8');
 
 test('deployment validates and verifies separate site and service packages', () => {
   assert.ok(deploy.indexOf('npm run validate') < deploy.indexOf('tar -C dist'));
@@ -64,4 +65,10 @@ test('build audit derives required protected files from the catalog', () => {
   assert.match(audit, /config\/downloads\.json/);
   assert.match(audit, /downloadCatalog/);
   assert.match(audit, /downloads\/\$\{item\.filename\}/);
+});
+
+test('Nginx permanently redirects legacy newsletters before static routing', () => {
+  assert.match(nginx, /include \/usr\/share\/nginx\/html\/_newsletter-redirects\.map;/);
+  assert.match(nginx, /return 301 \$newsletter_redirect/);
+  assert.doesNotMatch(nginx, /\$uri\/index\.html/);
 });

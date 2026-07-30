@@ -13,3 +13,14 @@ export function assertUniqueNewsletterSlugs(entries: Array<{ data: { seoSlug: st
   const slugs = entries.map((entry) => entry.data.seoSlug);
   if (new Set(slugs).size !== slugs.length) throw new Error('duplicate-newsletter-seo-slug');
 }
+
+export function buildNewsletterRedirectMap(
+  lang: Lang,
+  entries: Array<{ id: string; data: { seoSlug: string } }>,
+) {
+  return entries.flatMap((entry) => {
+    const legacy = legacyNewsletterPath(lang, entry.id);
+    const target = newsletterPath(lang, entry.data.seoSlug);
+    return [`"${legacy.slice(0, -1)}" "${target}";`, `"${legacy}" "${target}";`];
+  });
+}

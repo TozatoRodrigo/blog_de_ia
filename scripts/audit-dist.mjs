@@ -31,6 +31,7 @@ function fileUrl(file) {
 
 const requiredFiles = [
   'robots.txt', 'rss.xml', 'sitemap-index.xml', 'sitemap-0.xml', 'llms.txt', 'llms-full.txt',
+  '_newsletter-redirects.map',
   ...downloadCatalog.map((item) => `downloads/${item.filename}`),
 ];
 const missingFiles = requiredFiles.filter((file) => !existsSync(path.join(DIST, file)));

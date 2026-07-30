@@ -3,6 +3,7 @@ import test from 'node:test';
 
 import {
   assertUniqueNewsletterSlugs,
+  buildNewsletterRedirectMap,
   legacyNewsletterPath,
   newsletterPath,
 } from '../src/utils/newsletter-routes.ts';
@@ -10,6 +11,19 @@ import {
 test('newsletterPath builds localized canonical paths', () => {
   assert.equal(newsletterPath('pt-BR', 'custo-inferencia-priorizacao'), '/newsletter/custo-inferencia-priorizacao/');
   assert.equal(newsletterPath('en', 'inference-cost-prioritization'), '/en/newsletter/inference-cost-prioritization/');
+});
+
+test('redirect map covers legacy paths with and without trailing slash', () => {
+  assert.deepEqual(
+    buildNewsletterRedirectMap('pt-BR', [{
+      id: '2026-07-29-custo-por-inferencia-priorizacao-produto',
+      data: { seoSlug: 'custo-inferencia-priorizacao' },
+    }]),
+    [
+      '"/newsletter/2026-07-29-custo-por-inferencia-priorizacao-produto" "/newsletter/custo-inferencia-priorizacao/";',
+      '"/newsletter/2026-07-29-custo-por-inferencia-priorizacao-produto/" "/newsletter/custo-inferencia-priorizacao/";',
+    ],
+  );
 });
 
 test('legacyNewsletterPath preserves the content entry identifier', () => {
