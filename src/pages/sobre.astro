@@ -12,7 +12,8 @@ const jsonLd = {
     '@type': 'Person',
     name: SITE.author,
     jobTitle: SITE.authorRole,
-    url: SITE.linkedin,
+    url: `${SITE.url}/sobre/`,
+    sameAs: [SITE.linkedin],
     knowsAbout: SITE.keywords,
   },
 };
@@ -82,9 +83,7 @@ const jsonLd = {
       </p>
 
       <div style="margin-top: 2rem; display: flex; gap: 1rem; flex-wrap: wrap;">
-        <a href={SITE.linkedin} target="_blank" rel="noopener noreferrer" class="btn btn--accent btn--lg">
-          SEGUIR NO LINKEDIN →
-        </a>
+        <a href={`mailto:${SITE.email}`} class="btn btn--accent btn--lg">FALE COM O EDITOR →</a>
         <a href="/newsletter" class="btn btn--lg">VER NEWSLETTER</a>
       </div>
     </div>

@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import { readFile } from 'node:fs/promises';
+import { readdir, readFile } from 'node:fs/promises';
 import test from 'node:test';
 
 import * as cheerio from 'cheerio';
@@ -7,6 +7,16 @@ import * as cheerio from 'cheerio';
 async function loadPage(pathname) {
   const html = await readFile(new URL(`../dist/${pathname}`, import.meta.url), 'utf8');
   return cheerio.load(html);
+}
+
+async function walkHtml(directory) {
+  const entries = await readdir(directory, { withFileTypes: true });
+  const nested = await Promise.all(entries.map((entry) => {
+    const url = new URL(entry.name, directory);
+    if (entry.isDirectory()) return walkHtml(new URL(`${entry.name}/`, directory));
+    return entry.isFile() && entry.name.endsWith('.html') ? [url] : [];
+  }));
+  return nested.flat();
 }
 
 function alternates($) {
@@ -88,4 +98,23 @@ test('LLM discovery files include pillar guides and the expanded corpus', async 
   assert.match(summary, /guias\/gestao-de-produto/);
   assert.match(full, /Como um agente de IA funciona/);
   assert.match(full, /State of AI in Product Management 2026/);
+});
+
+test('every indexable page has unique bounded metadata and no LinkedIn anchor', async () => {
+  const files = await walkHtml(new URL('../dist/', import.meta.url));
+  const rows = await Promise.all(files.map(async (file) => {
+    const $ = cheerio.load(await readFile(file, 'utf8'));
+    return {
+      title: $('title').text().trim(),
+      description: $('meta[name="description"]').attr('content')?.trim() || '',
+      noindex: /noindex/.test($('meta[name="robots"]').attr('content') || ''),
+      linkedinAnchors: $('a[href*="linkedin.com"]').length,
+    };
+  }));
+  const indexable = rows.filter((row) => !row.noindex);
+  assert.equal(new Set(indexable.map((row) => row.title)).size, indexable.length);
+  assert.equal(new Set(indexable.map((row) => row.description)).size, indexable.length);
+  assert.ok(indexable.every((row) => row.title.length >= 35 && row.title.length <= 60));
+  assert.ok(indexable.every((row) => row.description.length >= 70 && row.description.length <= 160));
+  assert.ok(rows.every((row) => row.linkedinAnchors === 0));
 });

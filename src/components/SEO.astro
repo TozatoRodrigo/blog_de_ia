@@ -46,8 +46,8 @@ const description = trimAtWord(
   160,
 );
 const titleWithBrand = title ? `${title} — ${SITE.name}` : `${SITE.name} — ${localizedSite.tagline}`;
-const shortTitle = titleWithBrand.length < 30
-  ? `${titleWithBrand} | ${lang === 'pt-BR' ? 'IA e Produto' : 'AI & Product'}`
+const shortTitle = titleWithBrand.length < 40
+  ? `${titleWithBrand} | ${lang === 'pt-BR' ? 'IA para PMs' : 'AI for PMs'}`
   : titleWithBrand;
 const compactTitle = shortTitle.length > 60
   ? (title || `${localizedSite.tagline} — ${SITE.name}`)

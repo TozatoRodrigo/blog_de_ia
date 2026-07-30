@@ -16,6 +16,8 @@ test('core entities use stable connected identifiers', () => {
   assert.equal(organizationSchema()['@id'], IDS.organization);
   assert.equal(personSchema()['@id'], IDS.person);
   assert.equal(websiteSchema('en').publisher['@id'], IDS.organization);
+  assert.equal(personSchema().url, 'https://produtocomia.com.br/sobre/');
+  assert.ok(personSchema().sameAs.includes('https://www.linkedin.com/in/rodrigo-tozato/'));
 });
 
 test('blog posting connects author, publisher, image and canonical page', () => {

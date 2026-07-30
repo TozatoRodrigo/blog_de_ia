@@ -50,7 +50,7 @@ const topicsPath = lang === 'pt-BR' ? '/topicos' : '/en/topics';
 
       <div>
         <h4>{ui('footer.contact', lang)}</h4>
-        <a href={SITE.linkedin} target="_blank" rel="noopener noreferrer">LinkedIn</a>
+        <a href={`${prefix}/${lang === 'pt-BR' ? 'sobre' : 'about'}`}>{lang === 'pt-BR' ? 'Sobre o editor' : 'About the editor'}</a>
         <a href={`mailto:${SITE.email}`}>{SITE.email}</a>
         <a href={lang === 'pt-BR' ? '/privacidade/' : '/en/privacy/'}>{lang === 'pt-BR' ? 'Privacidade' : 'Privacy'}</a>
         <a href={lang === 'pt-BR' ? '/politica-editorial/' : '/en/editorial-policy/'}>{lang === 'pt-BR' ? 'Política editorial' : 'Editorial policy'}</a>
