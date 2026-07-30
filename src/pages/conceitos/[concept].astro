@@ -39,6 +39,10 @@ const jsonLd = [
       <hr />
       <h2>{ui('concept.detailed', lang)}</h2>
       <p>{t(concept.longDescription, lang)}</p>
+      <section data-product-impact>
+        <h2>Como usar na decisão de produto</h2>
+        <p>{t(concept.productImpact, lang)}</p>
+      </section>
     </div>
     {relatedTopics.length > 0 && (
       <div style="margin-top: 3rem;"><div class="divider-label"><span>{ui('article.relatedTopics', lang)}</span></div><div style="display: flex; gap: 0.75rem; flex-wrap: wrap;">{relatedTopics.map((tp) => <a href={`/topicos/${t(tp.slug, lang)}`} class="btn">{t(tp.name, lang)} →</a>)}</div></div>

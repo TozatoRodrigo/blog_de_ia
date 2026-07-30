@@ -39,6 +39,7 @@ export interface Concept {
   term: LStr;
   definition: LStr;
   longDescription: LStr;
+  productImpact: LStr;
   category: LStr;
   relatedTerms: string[];
 }
