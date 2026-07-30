@@ -22,7 +22,24 @@ export function normalizePageUrl(input) {
   return url.href;
 }
 
-export function auditHtml({ html, expectedUrl, requireCanonical = true, requireHreflang = true }) {
+export function duplicateValues(rows) {
+  const groups = new Map();
+  for (const row of rows.filter((item) => item.value)) {
+    groups.set(row.value, [...(groups.get(row.value) || []), row.url]);
+  }
+
+  return [...groups.entries()]
+    .filter(([, urls]) => urls.length > 1)
+    .map(([value, urls]) => ({ value, urls }));
+}
+
+export function auditHtml({
+  html,
+  expectedUrl,
+  requireCanonical = true,
+  requireHreflang = true,
+  minWords = 0,
+}) {
   const $ = cheerio.load(html);
   const errors = [];
   const title = $('title').first().text().trim();
@@ -32,6 +49,7 @@ export function auditHtml({ html, expectedUrl, requireCanonical = true, requireH
 
   if (!lang) errors.push('missing-html-lang');
   if ($('h1').length !== 1) errors.push('expected-one-h1');
+  if (!description) errors.push('missing-description');
   if (requireCanonical && (!canonical || normalizePageUrl(canonical) !== normalizePageUrl(expectedUrl))) {
     errors.push('canonical-mismatch');
   }
@@ -56,8 +74,13 @@ export function auditHtml({ html, expectedUrl, requireCanonical = true, requireH
     }
   }
 
+  const words = $('main').text().trim().split(/\s+/).filter(Boolean).length;
+  if (minWords > 0 && words < minWords) errors.push(`content-under-${minWords}`);
+  if ($('a[href*="linkedin.com"]').length > 0) errors.push('crawler-blocked-anchor-linkedin');
+
   return {
     errors,
     warnings: metadataWarnings(title, description),
+    metrics: { title, description, words },
   };
 }

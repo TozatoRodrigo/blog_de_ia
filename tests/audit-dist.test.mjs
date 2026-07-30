@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 
-import { auditHtml } from '../scripts/lib/audit-dist.mjs';
+import { auditHtml, duplicateValues } from '../scripts/lib/audit-dist.mjs';
 
 const validHtml = `<!doctype html>
 <html lang="pt-BR"><head>
@@ -76,4 +76,33 @@ test('auditHtml can skip canonical and hreflang checks for noindex pages', () =>
   });
 
   assert.deepEqual(result.errors, []);
+});
+
+test('auditHtml rejects missing descriptions, thin main content and visible LinkedIn links', () => {
+  const html = validHtml
+    .replace(/\s*<meta name="description"[^>]+>/, '')
+    .replace('<body>', '<body><main><p>Conteúdo curto.</p><a href="https://www.linkedin.com/in/rodrigo-tozato/">LinkedIn</a></main>');
+
+  const result = auditHtml({
+    html,
+    expectedUrl: 'https://produtocomia.com.br/guias/gestao-de-produtos-com-ia/',
+    minWords: 200,
+  });
+
+  assert.ok(result.errors.includes('missing-description'));
+  assert.ok(result.errors.includes('content-under-200'));
+  assert.ok(result.errors.includes('crawler-blocked-anchor-linkedin'));
+  assert.equal(result.metrics.words, 2);
+});
+
+test('duplicateValues groups only repeated non-empty values', () => {
+  assert.deepEqual(
+    duplicateValues([
+      { url: '/a/', value: 'Repeated title' },
+      { url: '/b/', value: 'Unique title' },
+      { url: '/c/', value: 'Repeated title' },
+      { url: '/d/', value: '' },
+    ]),
+    [{ value: 'Repeated title', urls: ['/a/', '/c/'] }],
+  );
 });

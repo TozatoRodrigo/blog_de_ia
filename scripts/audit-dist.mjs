@@ -5,7 +5,7 @@ import process from 'node:process';
 
 import * as cheerio from 'cheerio';
 
-import { auditHtml, normalizePageUrl } from './lib/audit-dist.mjs';
+import { auditHtml, duplicateValues, normalizePageUrl } from './lib/audit-dist.mjs';
 
 const ORIGIN = 'https://produtocomia.com.br';
 const DIST = path.resolve('dist');
@@ -45,15 +45,32 @@ for (const file of htmlFiles) {
   const expectedUrl = fileUrl(file);
   const $ = cheerio.load(html);
   const noindex = /noindex/i.test($('meta[name="robots"]').attr('content') || '');
+  const pathname = new URL(expectedUrl).pathname;
+  const isConcept = pathname.startsWith('/conceitos/') || pathname.startsWith('/en/concepts/');
   const result = auditHtml({
     html,
     expectedUrl,
     requireCanonical: !noindex,
     requireHreflang: !noindex,
+    minWords: isConcept ? 200 : 0,
   });
   errors.push(...result.errors.map((error) => `${expectedUrl}: ${error}`));
   if (!noindex) warnings.push(...result.warnings.map((warning) => `${expectedUrl}: ${warning}`));
-  pages.push({ expectedUrl, $, noindex });
+  pages.push({ expectedUrl, $, noindex, ...result.metrics });
+}
+
+const indexablePages = pages.filter((page) => !page.noindex);
+for (const duplicate of duplicateValues(indexablePages.map((page) => ({
+  url: page.expectedUrl,
+  value: page.title,
+})))) {
+  errors.push(`duplicate-title "${duplicate.value}": ${duplicate.urls.join(', ')}`);
+}
+for (const duplicate of duplicateValues(indexablePages.map((page) => ({
+  url: page.expectedUrl,
+  value: page.description,
+})))) {
+  errors.push(`duplicate-description "${duplicate.value}": ${duplicate.urls.join(', ')}`);
 }
 
 const knownPages = new Set(pages.map((page) => normalizePageUrl(page.expectedUrl)));
