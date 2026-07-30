@@ -2,13 +2,11 @@
 import { getCollection } from 'astro:content';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import NewsletterCard from '../../components/NewsletterCard.astro';
-import { t, ta } from '../../i18n/lang';
 import { ui } from '../../i18n/ui';
 
 const lang = 'pt-BR' as const;
 const newsletters = await getCollection('newsletters', ({ data }) => !data.draft);
 newsletters.sort((a, b) => b.data.date.localeCompare(a.data.date));
-const { topics } = await import('../../data/topics');
 
 const jsonLd = { '@context': 'https://schema.org', '@type': 'CollectionPage', name: `${ui('newsletter.title', lang)} — Produto com IA`, description: ui('newsletter.description', lang), url: 'https://produtocomia.com.br/newsletter' };
 ---
