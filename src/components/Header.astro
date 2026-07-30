@@ -51,7 +51,7 @@ const switchLabel = lang === 'pt-BR' ? 'Switch to English' : 'Mudar para Portugu
 
       <nav class="site-nav" id="site-nav" aria-label={lang === 'pt-BR' ? 'Navegação principal' : 'Main navigation'}>
         {navItems.map((item) => (
-          <a href={item.href} aria-current={isActive(item.href) ? 'page' : undefined}>
+          <a href={item.href} data-astro-prefetch aria-current={isActive(item.href) ? 'page' : undefined}>
             {ui(item.key, lang)}
           </a>
         ))}

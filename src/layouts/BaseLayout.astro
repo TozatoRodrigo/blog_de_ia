@@ -31,7 +31,6 @@ const htmlLang = lang === 'pt-BR' ? 'pt-BR' : 'en';
   <head>
     <SEO {...rest} lang={lang} alternateUrl={alternateUrl} />
     <script async defer src="https://analytics.servidortozato.cloud/script.js" data-website-id="3b6d559f-9bec-4f01-9d11-d166999d4b11"></script>
-    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5583302148964069" crossorigin="anonymous"></script>
   </head>
   <body>
     <div class="reading-progress" id="reading-progress"></div>
@@ -59,11 +58,13 @@ const htmlLang = lang === 'pt-BR' ? 'pt-BR' : 'en';
       const navToggle = document.getElementById('nav-toggle');
       const siteNav = document.getElementById('site-nav');
 
+      let framePending = false;
       function updateProgress() {
         const scrollTop = window.scrollY;
         const docHeight = document.documentElement.scrollHeight - window.innerHeight;
-        if (docHeight > 0 && progress) {
-          progress.style.width = (scrollTop / docHeight * 100) + '%';
+        if (progress) {
+          const ratio = docHeight > 0 ? scrollTop / docHeight : 0;
+          progress.style.transform = `scaleX(${Math.min(1, Math.max(0, ratio))})`;
         }
         if (backToTop) {
           if (scrollTop > 400) {
@@ -72,9 +73,14 @@ const htmlLang = lang === 'pt-BR' ? 'pt-BR' : 'en';
             backToTop.classList.remove('show');
           }
         }
+        framePending = false;
       }
 
-      window.addEventListener('scroll', updateProgress, { passive: true });
+      window.addEventListener('scroll', () => {
+        if (framePending) return;
+        framePending = true;
+        requestAnimationFrame(updateProgress);
+      }, { passive: true });
       updateProgress();
 
       if (backToTop) {

@@ -63,7 +63,7 @@ const jsonLd = [
         <div class="latest-body">
           <h3 class="latest-body__title"><a href={newsletterPath(lang, latest.data.seoSlug)} style="border: none;">{latest.data.title}</a></h3>
           <p class="latest-body__excerpt">{latest.data.excerpt}</p>
-          <a href={newsletterPath(lang, latest.data.seoSlug)} class="btn btn--accent">{ui('article.readComplete', lang)} →</a>
+          <a href={newsletterPath(lang, latest.data.seoSlug)} class="btn btn--accent" data-astro-prefetch>{ui('article.readComplete', lang)} →</a>
         </div>
       </div>
     </article>

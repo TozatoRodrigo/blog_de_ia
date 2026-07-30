@@ -3,6 +3,30 @@
    Neobrutalist · High-contrast · Grid-deterministic
    ============================================ */
 
+@font-face {
+  font-family: 'Archivo Black';
+  src: url('/fonts/archivo-black-latin-400-normal.woff2') format('woff2');
+  font-style: normal;
+  font-weight: 400;
+  font-display: optional;
+}
+
+@font-face {
+  font-family: 'Inter';
+  src: url('/fonts/inter-latin-wght-normal.woff2') format('woff2-variations');
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: optional;
+}
+
+@font-face {
+  font-family: 'JetBrains Mono';
+  src: url('/fonts/jetbrains-mono-latin-wght-normal.woff2') format('woff2-variations');
+  font-style: normal;
+  font-weight: 100 800;
+  font-display: optional;
+}
+
 /* ---------- 1. RESET & TOKENS ---------- */
 *,
 *::before,
@@ -1201,8 +1225,10 @@ img {
   height: 3px;
   background: var(--accent);
   z-index: 9998;
-  width: 0;
-  transition: width 0.1s linear;
+  width: 100%;
+  transform: scaleX(0);
+  transform-origin: left;
+  will-change: transform;
 }
 
 /* ---------- BACK TO TOP ---------- */
