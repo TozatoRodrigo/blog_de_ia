@@ -1,6 +1,7 @@
 ---
 title: "Bonsai 27B: IA que cabe no bolso, sem depender da nuvem"
 date: "2026-07-15"
+seoSlug: "bonsai-27b-ia-local"
 excerpt: "O Bonsai 27B roda diretamente em um iPhone, preservando cerca de 90% da qualidade do modelo original e sem enviar dados à nuvem. Para produtos de crédito e finanças, isso muda a conversa sobre segurança, custo e conformidade."
 tags: ["inteligencia-artificial", "fintech", "produto"]
 featured: true

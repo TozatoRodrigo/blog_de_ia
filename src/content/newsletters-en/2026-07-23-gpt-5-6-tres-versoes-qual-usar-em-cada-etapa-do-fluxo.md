@@ -1,6 +1,7 @@
 ---
 title: "GPT-5.6 arrives in three versions: which one to use at each stage of the workflow"
 date: "2026-07-23"
+seoSlug: "gpt-5-6-versions-workflow"
 excerpt: "The new GPT-5.6 family offers three options for reasoning, balanced cost and quality, and high volume. For product teams, the question shifts from which AI to use to which model to use at each stage of the workflow."
 tags: ["inteligencia-artificial", "produto", "fintech"]
 featured: true

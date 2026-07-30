@@ -1,6 +1,7 @@
 ---
 title: "Dark patterns em chatbots de IA: de debate a material de auditoria"
 date: "2026-07-18"
+seoSlug: "dark-patterns-chatbots-ia"
 excerpt: "Um estudo catalogou 37 dark patterns em chatbots de IA e já começa a aparecer no radar de reguladores. Para produtos financeiros, confiança e transparência não podem ser tratadas como detalhe de UX."
 tags: ["inteligencia-artificial", "produto", "fintech", "governanca-de-ia"]
 featured: true

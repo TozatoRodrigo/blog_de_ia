@@ -1,6 +1,7 @@
 ---
 title: "Ask Ad Manager: quando o relatório de B2B vira uma pergunta"
 date: "2026-07-14"
+seoSlug: "ask-ad-manager-relatorio-b2b"
 excerpt: "O Ask Ad Manager troca relatórios e navegação complexa por perguntas em linguagem natural. O case do Google aponta um padrão replicável para produtos B2B com operações densas de dados, inclusive crédito."
 tags: ["inteligencia-artificial", "fintech", "automacao", "produto"]
 featured: true

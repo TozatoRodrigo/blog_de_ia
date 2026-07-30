@@ -1,6 +1,7 @@
 ---
 title: "Dark patterns in AI chatbots: from debate to audit evidence"
 date: "2026-07-18"
+seoSlug: "dark-patterns-ai-chatbots"
 excerpt: "A study catalogued 37 dark patterns in AI chatbots and is already drawing regulators' attention. In financial products, trust and transparency cannot be treated as a UX detail."
 tags: ["inteligencia-artificial", "produto", "fintech", "governanca-de-ia"]
 featured: true

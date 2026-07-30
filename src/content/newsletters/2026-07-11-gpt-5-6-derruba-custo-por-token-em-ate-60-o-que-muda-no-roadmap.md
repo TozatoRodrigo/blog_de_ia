@@ -1,6 +1,7 @@
 ---
 title: "GPT-5.6 derruba custo por token em até 60%: o que muda no roadmap"
 date: "2026-07-11"
+seoSlug: "gpt-5-6-custo-token-roadmap"
 excerpt: "A família GPT-5.6 já reduz o custo por token de 20% a 60% para parceiros. Para produtos de crédito e recebíveis, isso amplia o conjunto de automações que se torna viável em escala."
 tags: ["inteligencia-artificial", "produto", "fintech"]
 featured: true

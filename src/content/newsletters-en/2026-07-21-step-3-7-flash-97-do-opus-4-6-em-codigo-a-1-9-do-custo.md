@@ -1,6 +1,7 @@
 ---
 title: "Step 3.7 Flash: 97% of Opus 4.6's coding quality at one-ninth of the cost"
 date: "2026-07-21"
+seoSlug: "step-3-7-flash-coding-cost"
 excerpt: "Step 3.7 Flash proposes using a smaller model to drive the work and escalating to more expensive intelligence only at critical points. For AI products, the gain comes from designing the right routing for every step."
 tags: ["inteligencia-artificial", "produto", "automacao", "fintech"]
 featured: true

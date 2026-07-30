@@ -1,6 +1,7 @@
 ---
 title: "Shopify corta custo de IA em 30x sem perder qualidade"
 date: "2026-07-08"
+seoSlug: "shopify-reduz-custo-ia-30x"
 excerpt: "A Shopify construiu um pipeline de destilação de modelos que reduziu o custo de IA em produção em até 30 vezes. Modelo grande é para explorar; modelo pequeno é para escalar."
 tags: ["finops-de-ia", "modelos-de-ia", "produto", "precificacao-de-ia"]
 featured: true

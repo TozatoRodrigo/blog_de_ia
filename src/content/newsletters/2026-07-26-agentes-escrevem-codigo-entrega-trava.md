@@ -1,6 +1,7 @@
 ---
 title: "Agentes escrevem mais código e a entrega não sobe: onde trava"
 date: "2026-07-26"
+seoSlug: "agentes-codigo-entrega-trava"
 excerpt: "Agentes de código podem elevar a produtividade medida sem aumentar a entrega de produto. O gargalo está no contexto, na clareza da especificação e na revisão — trabalho que passa a definir o ganho real."
 tags: ["inteligencia-artificial", "agentes-de-ia", "coding-agents", "produto"]
 featured: true

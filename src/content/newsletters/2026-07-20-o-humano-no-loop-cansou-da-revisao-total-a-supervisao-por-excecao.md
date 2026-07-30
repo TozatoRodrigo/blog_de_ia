@@ -1,6 +1,7 @@
 ---
 title: "O humano no loop cansou: da revisão total à supervisão por exceção"
 date: "2026-07-20"
+seoSlug: "humano-no-loop-supervisao-excecao"
 excerpt: "Quando agentes multiplicam decisões, revisar tudo deixa de ser proteção e vira gargalo. Para produtos financeiros, supervisão por exceção é desenho de risco desde a concepção."
 tags: ["inteligencia-artificial", "produto", "automacao", "fintech"]
 featured: true

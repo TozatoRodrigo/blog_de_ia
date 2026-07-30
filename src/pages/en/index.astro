@@ -8,6 +8,7 @@ import { formatDate, formatDateISO } from '../../utils/format';
 import { SITE, SITE_LOCALE } from '../../config';
 import { t, ta } from '../../i18n/lang';
 import { ui } from '../../i18n/ui';
+import { newsletterPath } from '../../utils/newsletter-routes';
 
 const lang = 'en' as const;
 const newsletters = await getCollection('newsletters-en', ({ data }) => !data.draft);
@@ -60,9 +61,9 @@ const jsonLd = [
           <div><p class="mono-sm" style="color: var(--fg-muted);">{ui('section.edition', lang)}</p><p class="mono latest-meta__num">{formatDateISO(latest.data.date).replace(/[-:]/g, '').slice(0, 8)}</p><div class="latest-meta__tags">{latest.data.tags.slice(0, 3).map((tag) => <span class="tag" style="border-color: var(--fg-muted); color: var(--fg-invert);">#{tag}</span>)}</div></div>
         </div>
         <div class="latest-body">
-          <h3 class="latest-body__title"><a href={`/en/newsletter/${latest.id}`} style="border: none;">{latest.data.title}</a></h3>
+          <h3 class="latest-body__title"><a href={newsletterPath(lang, latest.data.seoSlug)} style="border: none;">{latest.data.title}</a></h3>
           <p class="latest-body__excerpt">{latest.data.excerpt}</p>
-          <a href={`/en/newsletter/${latest.id}`} class="btn btn--accent">{ui('article.readComplete', lang)} →</a>
+          <a href={newsletterPath(lang, latest.data.seoSlug)} class="btn btn--accent">{ui('article.readComplete', lang)} →</a>
         </div>
       </div>
     </article>

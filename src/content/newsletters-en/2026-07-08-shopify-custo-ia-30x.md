@@ -1,6 +1,7 @@
 ---
 title: "Shopify cuts AI costs by 30x without losing quality"
 date: "2026-07-08"
+seoSlug: "shopify-cuts-ai-costs-30x"
 excerpt: "Shopify built a model distillation pipeline that cut the cost of AI in production by up to 30x. Large models are for exploring; small models are for scaling."
 tags: ["finops-de-ia", "modelos-de-ia", "produto", "precificacao-de-ia"]
 featured: true

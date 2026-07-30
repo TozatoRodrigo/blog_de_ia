@@ -1,6 +1,7 @@
 ---
 title: "Claude Code virou orquestrador: centenas de agentes, uma sessão só"
 date: "2026-07-19"
+seoSlug: "claude-code-orquestra-agentes"
 excerpt: "Os dynamic workflows do Claude Code mostram uma mudança de papel para agentes de IA: eles passam a planejar e distribuir o próprio trabalho. Para produtos financeiros, a oportunidade vem junto da necessidade de desenhar bem a aprovação humana."
 tags: ["inteligencia-artificial", "produto", "automacao", "fintech"]
 featured: true

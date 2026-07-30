@@ -1,6 +1,7 @@
 ---
 title: "Claude Code became an orchestrator: hundreds of agents, one session"
 date: "2026-07-19"
+seoSlug: "claude-code-agent-orchestration"
 excerpt: "Claude Code's dynamic workflows point to a shift in the role of AI agents: they can now plan and distribute their own work. For financial products, the opportunity also calls for careful design of human approval."
 tags: ["inteligencia-artificial", "produto", "automacao", "fintech"]
 featured: true

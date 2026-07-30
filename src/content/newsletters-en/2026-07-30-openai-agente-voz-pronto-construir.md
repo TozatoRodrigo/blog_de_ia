@@ -1,6 +1,7 @@
 ---
 title: "OpenAI ships a ready-made voice agent: does building still make sense?"
 date: "2026-07-30"
+seoSlug: "openai-voice-agent-build-buy"
 excerpt: "Presence, OpenAI’s new platform for real-time voice agents and chatbots, shifts the product decision: less effort on the voice layer and more attention to rules, authorization and human escalation."
 tags: ["agentes-de-ia", "governanca-de-ia", "produto", "fintech"]
 featured: true

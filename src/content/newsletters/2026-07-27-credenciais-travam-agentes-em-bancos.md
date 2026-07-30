@@ -1,6 +1,7 @@
 ---
 title: "O que trava agentes em bancos não é o modelo, é a credencial"
 date: "2026-07-27"
+seoSlug: "credenciais-agentes-bancos"
 excerpt: "Em bancos, agentes de IA só saem do piloto quando conseguem agir com permissões granulares, escopo limitado e trilha de auditoria — sem expor credenciais ao modelo."
 tags: ["inteligencia-artificial", "agentes-de-ia", "governanca-de-ia", "produto"]
 featured: true

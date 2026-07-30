@@ -1,6 +1,7 @@
 ---
 title: "Microsoft aposta US$ 2,5 bi: o gargalo da IA não é o modelo"
 date: "2026-07-06"
+seoSlug: "microsoft-gargalo-adocao-ia"
 excerpt: "A Microsoft lançou a Frontier Company com US$ 2,5 bilhões e 6 mil pessoas para ajudar empresas a implementar IA nos processos existentes. O gargalo não é o modelo — é a adoção."
 tags: ["adoção-de-ia", "governança-de-ia", "produto", "automação", "fintech"]
 featured: true

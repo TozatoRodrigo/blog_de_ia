@@ -1,6 +1,7 @@
 ---
 title: "GPT-5.6 em três versões e o custo de IA caindo: o que muda no roadmap"
 date: "2026-07-24"
+seoSlug: "custo-ia-caindo-roadmap"
 excerpt: "GPT-5.6 chega em três versões enquanto Grok e Meta lançam no mesmo dia, pressionando o custo de inferência. Para produto, isso muda a conta de quais casos de uso de IA já cabem no roadmap e no orçamento."
 tags: ["inteligencia-artificial", "produto", "fintech", "automacao"]
 featured: true

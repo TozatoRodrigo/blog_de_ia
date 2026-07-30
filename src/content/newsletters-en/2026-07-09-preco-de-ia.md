@@ -1,6 +1,7 @@
 ---
 title: "AI pricing: why low cost shouldn't turn into a discount"
 date: "2026-07-09"
+seoSlug: "ai-pricing-cost-value"
 excerpt: "If your AI product became cheap to build, that doesn't mean it should be cheap to sell. Price comes from the value generated, not from the cost of running the model."
 tags: ["precificacao-de-ia", "produto", "fintech", "finops-de-ia"]
 featured: true

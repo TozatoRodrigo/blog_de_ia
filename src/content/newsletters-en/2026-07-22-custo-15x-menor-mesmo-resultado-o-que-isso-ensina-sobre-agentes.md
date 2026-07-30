@@ -1,6 +1,7 @@
 ---
 title: "15x lower cost, same result: what it teaches us about agents"
 date: "2026-07-22"
+seoSlug: "ai-agents-15x-lower-cost"
 excerpt: "A Cursor experiment showed that an agent team's architecture can change cost by 15x without changing the result. For AI products, deciding how agents work together matters as much as choosing the model."
 tags: ["inteligencia-artificial", "produto", "agentes-de-ia", "fintech"]
 featured: true

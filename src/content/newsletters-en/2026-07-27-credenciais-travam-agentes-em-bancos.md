@@ -1,6 +1,7 @@
 ---
 title: "What holds AI agents back in banks is not the model — it is the credential"
 date: "2026-07-27"
+seoSlug: "credentials-ai-agents-banks"
 excerpt: "In banks, AI agents only move beyond pilots when they can act with granular permissions, limited scope and audit trails — without exposing credentials to the model."
 tags: ["inteligencia-artificial", "agentes-de-ia", "governanca-de-ia", "produto"]
 featured: true

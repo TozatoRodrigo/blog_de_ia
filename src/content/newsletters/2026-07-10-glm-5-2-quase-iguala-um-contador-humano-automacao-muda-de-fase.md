@@ -1,6 +1,7 @@
 ---
 title: "GLM 5.2 quase iguala um contador humano: automação muda de fase"
 date: "2026-07-10"
+seoSlug: "glm-5-2-automacao-contabilidade"
 excerpt: "O GLM 5.2 chegou perto da precisão humana ao classificar lançamentos de IVA. O benchmark aponta uma nova régua para automatizar processos financeiros estruturados, com supervisão humana voltada às exceções."
 tags: ["inteligencia-artificial", "produto", "fintech", "automacao"]
 featured: true

@@ -1,6 +1,7 @@
 import rss from '@astrojs/rss';
 import { getCollection } from 'astro:content';
 import { SITE } from '../config';
+import { newsletterPath } from '../utils/newsletter-routes';
 
 export async function GET(context) {
   const newsletters = await getCollection('newsletters', ({ data }) => !data.draft);
@@ -14,7 +15,7 @@ export async function GET(context) {
       title: entry.data.title,
       pubDate: new Date(entry.data.date + 'T00:00:00'),
       description: entry.data.excerpt,
-      link: `/newsletter/${entry.id}/`,
+      link: newsletterPath('pt-BR', entry.data.seoSlug),
       categories: entry.data.tags,
       author: SITE.email,
     })),

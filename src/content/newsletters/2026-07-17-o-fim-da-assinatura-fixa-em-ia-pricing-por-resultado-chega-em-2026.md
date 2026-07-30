@@ -1,6 +1,7 @@
 ---
 title: "O fim da assinatura fixa em IA: pricing por resultado chega em 2026"
 date: "2026-07-17"
+seoSlug: "pricing-ia-por-resultado"
 excerpt: "A assinatura fixa está perdendo espaço para modelos híbridos e cobrança por resultado em IA. Para produtos financeiros, a mudança exige métricas claras, confiáveis e difíceis de contestar."
 tags: ["inteligencia-artificial", "precificacao-de-ia", "fintech", "produto"]
 featured: true

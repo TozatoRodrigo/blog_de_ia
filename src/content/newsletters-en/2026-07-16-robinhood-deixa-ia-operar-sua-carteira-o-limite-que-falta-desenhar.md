@@ -1,6 +1,7 @@
 ---
 title: "Robinhood lets AI manage your portfolio: the boundary that still needs designing"
 date: "2026-07-16"
+seoSlug: "robinhood-ai-agents-portfolio"
 excerpt: "Robinhood now allows AI agents to execute stock buy and sell orders on a user's behalf. For financial products, the case reinforces the need to design permissions, reversibility, and audit trails before expanding autonomy."
 tags: ["inteligencia-artificial", "agentes-de-ia", "fintech", "produto"]
 featured: true

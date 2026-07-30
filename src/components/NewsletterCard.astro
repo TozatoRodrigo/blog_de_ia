@@ -3,6 +3,7 @@ import type { CollectionEntry } from 'astro:content';
 import { formatDateShort, formatDateISO } from '../utils/format';
 import { ui } from '../i18n/ui';
 import type { Lang } from '../i18n/lang';
+import { newsletterPath } from '../utils/newsletter-routes';
 
 interface Props {
   entry: CollectionEntry<'newsletters'> | CollectionEntry<'newsletters-en'>;
@@ -22,7 +23,7 @@ const firstParagraph = contentBody
 const wordCount = contentBody.split(/\s+/).length;
 const readTime = Math.max(1, Math.ceil(wordCount / 200));
 
-const prefix = lang === 'pt-BR' ? '/newsletter' : '/en/newsletter';
+const href = newsletterPath(lang, data.seoSlug);
 ---
 
 <article class={`newsletter-card ${featured ? 'newsletter-card--featured' : ''}`}>
@@ -32,7 +33,7 @@ const prefix = lang === 'pt-BR' ? '/newsletter' : '/en/newsletter';
   </div>
   <div class="newsletter-card__body">
     <h3 class="newsletter-card__title">
-      <a href={`${prefix}/${entry.id}`} style="border: none;">
+      <a href={href} style="border: none;">
         {data.title}
       </a>
     </h3>

@@ -1,6 +1,7 @@
 ---
 title: "Kimi-K3 open weights: what changes for AI in credit"
 date: "2026-07-28"
+seoSlug: "kimi-k3-open-weights-credit"
 excerpt: "With open weights, Kimi-K3 puts a third option on the table for AI projects in credit: running an advanced model inside your own infrastructure, with greater control over sensitive data and cost."
 tags: ["inteligencia-artificial", "modelos-de-ia", "fintech", "produto"]
 featured: true

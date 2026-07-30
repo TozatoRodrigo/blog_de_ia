@@ -1,6 +1,7 @@
 ---
 title: "Lovable gastou US$85 mil em tokens para multiplicar PRs por 5x"
 date: "2026-07-05"
+seoSlug: "lovable-tokens-85-mil-prs"
 excerpt: "Como a Lovable escalou de 20-30 para mais de 150 pull requests por semana usando múltiplos agentes de codificação em paralelo — e o que isso significa para quem automatiza processos de produto."
 tags: ["agentes-de-ia", "coding-agents", "finops-de-ia", "automação", "produto"]
 featured: true

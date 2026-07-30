@@ -1,6 +1,7 @@
 ---
 title: "The human in the loop is tired: from total review to exception-based oversight"
 date: "2026-07-20"
+seoSlug: "human-in-loop-exception-oversight"
 excerpt: "As agents multiply decisions, reviewing everything stops being protection and becomes a bottleneck. For financial products, exception-based oversight is risk design from the outset."
 tags: ["inteligencia-artificial", "produto", "automacao", "fintech"]
 featured: true

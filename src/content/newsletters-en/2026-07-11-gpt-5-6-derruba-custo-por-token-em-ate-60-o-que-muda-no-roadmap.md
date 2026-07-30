@@ -1,6 +1,7 @@
 ---
 title: "GPT-5.6 cuts token costs by up to 60%: what changes in the roadmap"
 date: "2026-07-11"
+seoSlug: "gpt-5-6-token-cost-roadmap"
 excerpt: "The GPT-5.6 family is already cutting token costs by 20% to 60% for partners. For credit and receivables products, that expands the set of automations that can be viable at scale."
 tags: ["inteligencia-artificial", "produto", "fintech"]
 featured: true

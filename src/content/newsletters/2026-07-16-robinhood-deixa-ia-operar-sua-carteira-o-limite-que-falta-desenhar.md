@@ -1,6 +1,7 @@
 ---
 title: "Robinhood deixa IA operar sua carteira: o limite que falta desenhar"
 date: "2026-07-16"
+seoSlug: "robinhood-agentes-ia-carteira"
 excerpt: "A Robinhood passou a permitir que agentes de IA executem ordens de compra e venda em nome do usuário. Para produtos financeiros, o caso reforça a importância de desenhar permissões, reversibilidade e trilhas de auditoria antes de ampliar a autonomia."
 tags: ["inteligencia-artificial", "agentes-de-ia", "fintech", "produto"]
 featured: true

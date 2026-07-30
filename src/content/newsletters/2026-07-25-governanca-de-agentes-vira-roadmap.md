@@ -1,6 +1,7 @@
 ---
 title: "40% das apps com agentes até dezembro: governança vira roadmap"
 date: "2026-07-25"
+seoSlug: "governanca-agentes-roadmap"
 excerpt: "A projeção de agentes embarcados em 40% das aplicações corporativas até o fim do ano desloca a discussão de capacidade para identidade, permissões e auditoria. Para produto, governança passa a ser requisito de roadmap."
 tags: ["inteligencia-artificial", "agentes-de-ia", "produto", "governanca-de-ia"]
 featured: true

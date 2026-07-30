@@ -1,6 +1,7 @@
 ---
 title: "The end of fixed AI subscriptions: outcome-based pricing arrives in 2026"
 date: "2026-07-17"
+seoSlug: "outcome-based-ai-pricing"
 excerpt: "Fixed subscriptions are giving way to hybrid and outcome-based AI pricing. For financial products, the shift requires metrics that are clear, reliable, and difficult to dispute."
 tags: ["inteligencia-artificial", "precificacao-de-ia", "fintech", "produto"]
 featured: true

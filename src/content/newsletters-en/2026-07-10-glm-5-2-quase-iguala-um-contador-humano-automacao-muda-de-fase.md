@@ -1,6 +1,7 @@
 ---
 title: "GLM 5.2 nearly matches a human accountant: automation enters a new phase"
 date: "2026-07-10"
+seoSlug: "glm-5-2-accounting-automation"
 excerpt: "GLM 5.2 came close to human accuracy in classifying VAT entries. The benchmark sets a new bar for automating structured financial processes, with human supervision focused on exceptions."
 tags: ["inteligencia-artificial", "produto", "fintech", "automacao"]
 featured: true

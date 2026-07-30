@@ -1,6 +1,7 @@
 ---
 title: "OpenAI entrega o agente de voz montado: construir ainda faz sentido?"
 date: "2026-07-30"
+seoSlug: "agente-voz-openai-construir"
 excerpt: "A Presence, nova plataforma da OpenAI para agentes de voz e chatbots em tempo real, transforma a decisão de produto: menos esforço na camada de voz e mais atenção a regras, autorizações e escalonamento."
 tags: ["agentes-de-ia", "governanca-de-ia", "produto", "fintech"]
 featured: true

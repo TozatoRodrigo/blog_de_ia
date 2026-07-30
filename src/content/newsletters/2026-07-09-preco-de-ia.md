@@ -1,6 +1,7 @@
 ---
 title: "Preço de IA: por que custo baixo não deveria virar desconto"
 date: "2026-07-09"
+seoSlug: "precificacao-ia-custo-valor"
 excerpt: "Se seu produto de IA ficou barato de construir, isso não significa que ele deveria ser barato de vender. O preço vem do valor gerado, não do custo de rodar o modelo."
 tags: ["precificacao-de-ia", "produto", "fintech", "finops-de-ia"]
 featured: true

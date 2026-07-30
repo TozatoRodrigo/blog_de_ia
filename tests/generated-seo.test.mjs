@@ -56,7 +56,7 @@ test('Portuguese topic emits self, English and x-default alternates', async () =
 });
 
 test('English newsletter links every tag to its translated topic route', async () => {
-  const $ = await loadPage('en/newsletter/2026-07-15-bonsai-27b-ia-que-cabe-no-bolso-sem-depender-da-nuvem/index.html');
+  const $ = await loadPage('en/newsletter/bonsai-27b-local-ai/index.html');
   const topicLinks = $('a[href^="/en/topics/"]')
     .toArray()
     .map((element) => $(element).attr('href'));

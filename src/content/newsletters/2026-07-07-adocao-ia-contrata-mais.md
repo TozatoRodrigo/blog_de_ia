@@ -1,6 +1,7 @@
 ---
 title: "O dado que contraria o medo: adoção forte de IA contrata mais gente"
 date: "2026-07-07"
+seoSlug: "adocao-ia-contrata-mais"
 excerpt: "Estudo do Ramp Economics Lab com 21 mil empresas mostra que adoção intensa de IA aumenta o headcount em 10% após dois anos. O efeito não é automático — exige integração real ao processo."
 tags: ["adoção-de-ia", "produto", "fintech", "governança-de-ia"]
 featured: false

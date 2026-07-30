@@ -1,6 +1,7 @@
 ---
 title: "Kimi-K3 com pesos abertos: o que muda para IA em crédito"
 date: "2026-07-28"
+seoSlug: "kimi-k3-pesos-abertos-credito"
 excerpt: "Com pesos abertos, o Kimi-K3 coloca uma terceira opção na mesa para projetos de IA em crédito: rodar um modelo avançado dentro da própria infraestrutura, com mais controle sobre dados e custo."
 tags: ["inteligencia-artificial", "modelos-de-ia", "fintech", "produto"]
 featured: true

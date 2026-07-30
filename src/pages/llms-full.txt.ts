@@ -2,6 +2,7 @@ import type { APIRoute } from 'astro';
 import { getCollection } from 'astro:content';
 import { concepts } from '../data/concepts';
 import { topics } from '../data/topics';
+import { newsletterPath } from '../utils/newsletter-routes';
 
 export const GET: APIRoute = async () => {
   const [pt, en, guidesPt, guidesEn] = await Promise.all([
@@ -10,9 +11,9 @@ export const GET: APIRoute = async () => {
     getCollection('guides', ({ data }) => !data.draft),
     getCollection('guides-en', ({ data }) => !data.draft),
   ]);
-  const editions = [...pt.map((entry) => ({ ...entry, base: '/newsletter/' })), ...en.map((entry) => ({ ...entry, base: '/en/newsletter/' }))]
+  const editions = [...pt.map((entry) => ({ ...entry, language: 'pt-BR' as const })), ...en.map((entry) => ({ ...entry, language: 'en' as const }))]
     .sort((a, b) => b.data.date.localeCompare(a.data.date))
-    .map((entry) => `## ${entry.data.title}\nURL: https://produtocomia.com.br${entry.base}${entry.id}/\nData: ${entry.data.date}\nResumo: ${entry.data.excerpt}\nTópicos: ${entry.data.tags.join(', ')}`);
+    .map((entry) => `## ${entry.data.title}\nURL: https://produtocomia.com.br${newsletterPath(entry.language, entry.data.seoSlug)}\nData: ${entry.data.date}\nResumo: ${entry.data.excerpt}\nTópicos: ${entry.data.tags.join(', ')}`);
   const guides = [
     ...guidesPt.map((entry) => ({ ...entry, base: '/guias/', language: 'pt-BR' })),
     ...guidesEn.map((entry) => ({ ...entry, base: '/en/guides/', language: 'en' })),

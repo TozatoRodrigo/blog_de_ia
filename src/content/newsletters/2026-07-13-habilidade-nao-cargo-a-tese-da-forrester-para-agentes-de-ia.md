@@ -1,6 +1,7 @@
 ---
 title: "Habilidade, não cargo: a tese da Forrester para agentes de IA"
 date: "2026-07-13"
+seoSlug: "habilidade-agentes-ia-forrester"
 excerpt: "A Forrester propõe organizar o trabalho com agentes pela habilidade cognitiva, não por cargos separados. Em crédito e recebíveis, isso ajuda a decidir dinamicamente o que fica com pessoas, agentes ou ambos."
 tags: ["inteligencia-artificial", "agentes-de-ia", "produto"]
 featured: true

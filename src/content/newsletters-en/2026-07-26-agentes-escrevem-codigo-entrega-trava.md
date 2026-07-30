@@ -1,6 +1,7 @@
 ---
 title: "AI agents write more code but delivery stalls: where it breaks"
 date: "2026-07-26"
+seoSlug: "coding-agents-delivery-bottleneck"
 excerpt: "Coding agents can raise measured productivity without increasing product delivery. The bottleneck is context, specification clarity and review — the work that now determines whether speed becomes real progress."
 tags: ["inteligencia-artificial", "agentes-de-ia", "coding-agents", "produto"]
 featured: true

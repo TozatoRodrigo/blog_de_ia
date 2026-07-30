@@ -1,6 +1,7 @@
 ---
 title: "Microsoft bets $2.5B: the AI bottleneck isn't the model"
 date: "2026-07-06"
+seoSlug: "microsoft-ai-adoption-bottleneck"
 excerpt: "Microsoft launched the Frontier Company with $2.5 billion and 6,000 people to help companies implement AI into existing processes. The bottleneck isn't the model — it's adoption."
 tags: ["adoção-de-ia", "governança-de-ia", "produto", "automação", "fintech"]
 featured: true

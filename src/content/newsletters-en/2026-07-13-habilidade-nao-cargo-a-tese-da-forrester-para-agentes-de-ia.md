@@ -1,6 +1,7 @@
 ---
 title: "Skill, not role: Forrester's thesis for AI agents"
 date: "2026-07-13"
+seoSlug: "ai-agent-skills-forrester"
 excerpt: "Forrester proposes organizing work with agents around cognitive skills rather than separate roles. In credit and receivables, this helps dynamically decide what stays with people, agents, or both."
 tags: ["inteligencia-artificial", "agentes-de-ia", "produto"]
 featured: true

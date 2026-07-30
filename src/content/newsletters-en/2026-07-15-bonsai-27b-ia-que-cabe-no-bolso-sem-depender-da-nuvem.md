@@ -1,6 +1,7 @@
 ---
 title: "Bonsai 27B: AI that fits in your pocket, without relying on the cloud"
 date: "2026-07-15"
+seoSlug: "bonsai-27b-local-ai"
 excerpt: "Bonsai 27B runs directly on an iPhone, retaining around 90% of the original model's quality without sending data to the cloud. For credit and financial products, it changes the conversation around security, cost, and compliance."
 tags: ["inteligencia-artificial", "fintech", "produto"]
 featured: true

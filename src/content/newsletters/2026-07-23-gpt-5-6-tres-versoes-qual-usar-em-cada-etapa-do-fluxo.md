@@ -1,6 +1,7 @@
 ---
 title: "GPT-5.6 chega em três versões: qual usar em cada etapa do fluxo"
 date: "2026-07-23"
+seoSlug: "gpt-5-6-versoes-fluxo"
 excerpt: "A nova família GPT-5.6 traz três opções para raciocínio, equilíbrio entre custo e qualidade e alto volume. Para produto, a decisão deixa de ser qual IA usar e passa a ser qual modelo usar em cada etapa do fluxo."
 tags: ["inteligencia-artificial", "produto", "fintech"]
 featured: true

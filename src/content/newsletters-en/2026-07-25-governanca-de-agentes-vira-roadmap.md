@@ -1,6 +1,7 @@
 ---
 title: "40% of apps with agents by December: governance becomes roadmap work"
 date: "2026-07-25"
+seoSlug: "ai-agent-governance-roadmap"
 excerpt: "The projection that 40% of enterprise applications will embed agents by year-end moves the conversation from capability to identity, permissions and auditability. For product teams, governance is now a roadmap requirement."
 tags: ["inteligencia-artificial", "agentes-de-ia", "produto", "governanca-de-ia"]
 featured: true

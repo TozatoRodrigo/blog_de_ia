@@ -7,6 +7,7 @@ const newsletters = defineCollection({
   schema: z.object({
     title: z.string(),
     date: z.string(),
+    seoSlug: z.string().regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/),
     excerpt: z.string(),
     tags: z.array(z.string()).default([]),
     featured: z.boolean().default(false),
@@ -19,6 +20,7 @@ const newslettersEn = defineCollection({
   schema: z.object({
     title: z.string(),
     date: z.string(),
+    seoSlug: z.string().regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/),
     excerpt: z.string(),
     tags: z.array(z.string()).default([]),
     featured: z.boolean().default(false),

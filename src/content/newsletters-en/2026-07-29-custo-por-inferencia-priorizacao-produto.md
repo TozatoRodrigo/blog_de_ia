@@ -1,6 +1,7 @@
 ---
 title: "Inference cost: the prioritization yardstick that is now outdated"
 date: "2026-07-29"
+seoSlug: "inference-cost-prioritization"
 excerpt: "For AI product work, estimating development alone is not enough: inference at scale, retraining and adjustment change a feature’s economics. The new yardstick is impact per inference call."
 tags: ["inteligencia-artificial", "produto", "fintech", "finops-de-ia"]
 featured: true

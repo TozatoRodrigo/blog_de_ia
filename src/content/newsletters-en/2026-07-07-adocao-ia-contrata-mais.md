@@ -1,6 +1,7 @@
 ---
 title: "The data that defies fear: heavy AI adoption hires more people"
 date: "2026-07-07"
+seoSlug: "heavy-ai-adoption-hires-more"
 excerpt: "A study by Ramp Economics Lab across 21,000 companies shows that intense AI adoption increases headcount by 10% after two years. The effect isn't automatic — it requires real integration into the process."
 tags: ["adoção-de-ia", "produto", "fintech", "governança-de-ia"]
 featured: false

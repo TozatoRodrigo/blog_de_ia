@@ -8,13 +8,15 @@ import { t } from '../../../i18n/lang';
 import { ui } from '../../../i18n/ui';
 import { blogPostingSchema, breadcrumbSchema } from '../../../utils/schema';
 import { guideForTag } from '../../../data/guideLinks';
+import { assertUniqueNewsletterSlugs, newsletterPath } from '../../../utils/newsletter-routes';
 
 const lang = 'en' as const;
 
 export async function getStaticPaths() {
   const newsletters = await getCollection('newsletters-en', ({ data }) => !data.draft);
+  assertUniqueNewsletterSlugs(newsletters);
   return newsletters.map((entry) => ({
-    params: { slug: entry.id },
+    params: { slug: entry.data.seoSlug },
     props: { entry },
   }));
 }
@@ -33,7 +35,10 @@ const topicHref = (tag: string) => {
   const topic = topics.find((candidate) => candidate.id === tag);
   return topic ? `/en/topics/${t(topic.slug, lang)}/` : '/en/topics/';
 };
-const articleUrl = `/en/newsletter/${entry.id}/`;
+const alternateNewsletters = await getCollection('newsletters', ({ data }) => !data.draft);
+const alternateEntry = alternateNewsletters.find((candidate) => candidate.data.date === entry.data.date);
+if (!alternateEntry) throw new Error(`missing-newsletter-translation:${entry.data.date}`);
+const articleUrl = newsletterPath(lang, entry.data.seoSlug);
 const articleImage = `/og/newsletter/en-${entry.id}.png`;
 const recommendedGuide = guideForTag(entry.data.tags[0] || 'inteligencia-artificial', lang);
 
@@ -53,7 +58,7 @@ const jsonLd = [
   tags={entry.data.tags}
   jsonLd={jsonLd}
   lang={lang}
-  alternateUrl={`/newsletter/${entry.id}`}
+  alternateUrl={newsletterPath('pt-BR', alternateEntry.data.seoSlug)}
 >
   <article class="container" style="padding-top: 2rem;">
     <!-- Breadcrumb -->
@@ -125,12 +130,12 @@ const jsonLd = [
     <!-- Navigation -->
     <div style="max-width: 760px; margin: 3rem auto 0;" class="pagination">
       {prev ? (
-        <a href={`/en/newsletter/${prev.id}`} style="border: none;">← {ui('article.prev', lang)}</a>
+        <a href={newsletterPath(lang, prev.data.seoSlug)} style="border: none;">← {ui('article.prev', lang)}</a>
       ) : (
         <span style="color: var(--fg-muted);">← {ui('article.prev', lang)}</span>
       )}
       {next ? (
-        <a href={`/en/newsletter/${next.id}`} style="border: none;">{ui('article.next', lang)} →</a>
+        <a href={newsletterPath(lang, next.data.seoSlug)} style="border: none;">{ui('article.next', lang)} →</a>
       ) : (
         <span style="color: var(--fg-muted);">{ui('article.next', lang)} →</span>
       )}

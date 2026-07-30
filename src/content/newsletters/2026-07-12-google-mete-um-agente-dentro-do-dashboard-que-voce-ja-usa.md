@@ -1,6 +1,7 @@
 ---
 title: "Google mete um agente dentro do dashboard que você já usa"
 date: "2026-07-12"
+seoSlug: "agente-google-dashboard"
 excerpt: "O Ask Ad Manager mostra como agentes embutidos no produto podem transformar dados existentes em decisões mais rápidas. Para crédito e recebíveis, o ganho está em orientar o próximo passo dentro do dashboard que a equipe já usa."
 tags: ["inteligencia-artificial", "agentes-de-ia", "produto", "fintech"]
 featured: true

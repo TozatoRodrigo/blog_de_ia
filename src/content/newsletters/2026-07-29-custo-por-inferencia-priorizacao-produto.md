@@ -1,6 +1,7 @@
 ---
 title: "Custo por inferência: a régua de priorização que ficou velha"
 date: "2026-07-29"
+seoSlug: "custo-inferencia-priorizacao"
 excerpt: "Em produto com IA, estimar só o desenvolvimento não basta: inferência em escala, retreino e ajuste mudam a conta de uma feature. A nova régua é impacto por chamada de inferência."
 tags: ["inteligencia-artificial", "produto", "fintech", "finops-de-ia"]
 featured: true

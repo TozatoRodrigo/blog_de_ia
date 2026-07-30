@@ -1,6 +1,7 @@
 ---
 title: "Custo 15x menor, mesmo resultado: o que isso ensina sobre agentes"
 date: "2026-07-22"
+seoSlug: "agentes-ia-custo-15x-menor"
 excerpt: "Um experimento da Cursor mostrou que a arquitetura de um time de agentes pode mudar o custo em 15 vezes sem alterar o resultado. Para produtos com IA, decidir como os agentes trabalham juntos pesa tanto quanto escolher o modelo."
 tags: ["inteligencia-artificial", "produto", "agentes-de-ia", "fintech"]
 featured: true
