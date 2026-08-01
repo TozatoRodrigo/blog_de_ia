@@ -26,6 +26,16 @@ test('redirect map covers legacy paths with and without trailing slash', () => {
   );
 });
 
+test('redirect map omits entries whose identifier already is the SEO slug', () => {
+  assert.deepEqual(
+    buildNewsletterRedirectMap('pt-BR', [{
+      id: '2026-08-01-modelo-ia-peca-trocavel',
+      data: { seoSlug: '2026-08-01-modelo-ia-peca-trocavel' },
+    }]),
+    [],
+  );
+});
+
 test('legacyNewsletterPath preserves the content entry identifier', () => {
   assert.equal(
     legacyNewsletterPath('en', '2026-07-29-custo-por-inferencia-priorizacao-produto'),

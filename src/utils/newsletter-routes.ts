@@ -19,6 +19,7 @@ export function buildNewsletterRedirectMap(
   entries: Array<{ id: string; data: { seoSlug: string } }>,
 ) {
   return entries.flatMap((entry) => {
+    if (entry.id === entry.data.seoSlug) return [];
     const legacy = legacyNewsletterPath(lang, entry.id);
     const target = newsletterPath(lang, entry.data.seoSlug);
     return [`"${legacy.slice(0, -1)}" "${target}";`, `"${legacy}" "${target}";`];
