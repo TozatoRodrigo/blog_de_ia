@@ -3,7 +3,7 @@ title: "AI Agents: what they are, how they work and when to use them"
 seoTitle: "AI Agents: a practical, complete guide"
 description: "Learn how AI agents use tools, state, guardrails and evaluations, and decide when agentic systems make sense for products and operations."
 datePublished: "2026-07-22"
-dateModified: "2026-07-22"
+dateModified: "2026-08-10"
 tags: ["AI agents", "automation", "product management"]
 alternateSlug: "agentes-de-ia"
 cluster: agents
@@ -83,5 +83,7 @@ Measure task completion, tool accuracy, safety, latency, cost and escalation qua
 Agents may choose the wrong tool, trust malicious content, expose data, repeat actions or accumulate excessive privileges. Use least privilege, isolation, confirmation for sensitive actions, execution limits, parameter validation, logs and rollback.
 
 Connect these controls to the [AI governance guide](/en/guides/ai-governance/). To move from idea to implementation, use [how to build AI agents](/en/guides/how-to-build-ai-agents/) and the [AI agent evaluation template](/en/guides/ai-agent-evaluation-template/).
+
+After launch, the [AI agent operations guide](/en/guides/ai-agent-operations/) organizes observability, SLOs, costs, incidents and reversible changes. It includes [reproducible documentation research](/en/guides/research-ai-agent-operations/) and a protected checklist that turns the controls into operational evidence.
 
 Do not use an agent when the process is fully predictable, success cannot be measured, data access cannot be secured or the action cannot be monitored and reversed. The right agent is not the most autonomous one; it is the system that completes a useful task with evidence, known cost and proportionate limits.

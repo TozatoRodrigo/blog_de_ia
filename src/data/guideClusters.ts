@@ -15,6 +15,8 @@ export const guideClusters = [
       { pt: 'agentes-de-ia-com-n8n', en: 'ai-agents-with-n8n' },
       { pt: 'exemplos-de-agentes-de-ia', en: 'ai-agent-examples' },
       { pt: 'template-avaliacao-agente-de-ia', en: 'ai-agent-evaluation-template' },
+      { pt: 'operacao-de-agentes-de-ia', en: 'ai-agent-operations' },
+      { pt: 'pesquisa-operacao-agentes-de-ia', en: 'research-ai-agent-operations' },
     ],
   },
   {

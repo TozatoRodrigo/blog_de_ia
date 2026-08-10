@@ -11,7 +11,7 @@ const catalog = JSON.parse(
 );
 
 test('download catalog has unique ids and files', async () => {
-  assert.equal(catalog.length, 12);
+  assert.equal(catalog.length, 14);
   assert.equal(new Set(catalog.map((item) => item.id)).size, catalog.length);
   assert.equal(new Set(catalog.map((item) => item.filename)).size, catalog.length);
 

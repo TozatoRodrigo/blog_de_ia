@@ -3,7 +3,7 @@ title: "Agentes de IA: o que são, como funcionam e quando usar"
 seoTitle: "Agentes de IA: guia completo e prático"
 description: "Entenda o que são agentes de IA, como usam ferramentas, memória e avaliações, e quando fazem sentido em produtos e operações."
 datePublished: "2026-07-22"
-dateModified: "2026-07-22"
+dateModified: "2026-08-10"
 tags: ["agentes de IA", "automação", "gestão de produtos"]
 alternateSlug: "ai-agents"
 cluster: agents
@@ -108,6 +108,8 @@ Meça conclusão correta, precisão de ferramentas, segurança, custo, latência
 Agentes podem usar ferramentas erradas, confiar em conteúdo malicioso, revelar dados, repetir ações, acumular privilégios ou produzir uma justificativa convincente para uma decisão incorreta. Reduza exposição com permissões mínimas, isolamento, confirmação para ações sensíveis, limites de execução, validação de parâmetros, logs e rollback.
 
 O [guia de governança de IA](/guias/governanca-de-ia/) ajuda a conectar esses controles ao inventário, à classificação de risco e à resposta a incidentes. Para implementar um caso, use o [método para criar agentes de IA](/guias/como-criar-agentes-de-ia/) e o [template de avaliação](/guias/template-avaliacao-agente-de-ia/).
+
+Depois do lançamento, o [guia de operação de agentes de IA](/guias/operacao-de-agentes-de-ia/) organiza observabilidade, SLOs, custos, incidentes e mudanças reversíveis. Ele inclui uma [pesquisa documental reproduzível](/guias/pesquisa-operacao-agentes-de-ia/) e uma checklist protegida para transformar os controles em evidência de operação.
 
 ## Quando não usar
 
