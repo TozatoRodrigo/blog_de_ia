@@ -15,6 +15,7 @@ test('deployment validates and verifies separate site and service packages', () 
   assert.match(deploy, /shasum -a 256 "\$SERVICE_ARCHIVE"/);
   assert.match(deploy, /sha256sum "\$SITE_ARCHIVE"/);
   assert.match(deploy, /sha256sum "\$SERVICE_ARCHIVE"/);
+  assert.match(deploy, /tar -czf "\$SERVICE_ARCHIVE" services\/download-leads config\/downloads\.json private-downloads deploy\/docker-compose\.yml deploy\/nginx\.conf/);
   assert.doesNotMatch(deploy, /scp[^\n]*\.env\.download-leads/);
 });
 
@@ -25,7 +26,10 @@ test('remote activation protects secrets, persistent data and private downloads'
   assert.match(deploy, /DOWNLOAD_LEADS_UID="\$\(id -u\)"/);
   assert.match(deploy, /DOWNLOAD_LEADS_GID="\$\(id -g\)"/);
   assert.match(deploy, /export DOWNLOAD_LEADS_UID DOWNLOAD_LEADS_GID/);
-  assert.match(deploy, /mv "\$NEW_SITE\/downloads" "\$NEW_PRIVATE"/);
+  assert.match(deploy, /test -d "\$NEW_SERVICE_ROOT\/private-downloads"/);
+  assert.match(deploy, /mv "\$NEW_SERVICE_ROOT\/private-downloads" "\$NEW_PRIVATE"/);
+  assert.doesNotMatch(deploy, /test -d "\$NEW_SITE\/downloads"/);
+  assert.doesNotMatch(deploy, /mv "\$NEW_SITE\/downloads"/);
   assert.match(deploy, /BACKUP_HTML/);
   assert.match(deploy, /BACKUP_PRIVATE/);
   assert.match(deploy, /BACKUP_NGINX/);
@@ -61,10 +65,10 @@ test('smoke tests cover protected downloads, public discovery and secret-free co
   assert.match(smoke, /\/robots\.txt\?smoke=\$\{Date\.now\(\)\}/);
 });
 
-test('build audit derives required protected files from the catalog', () => {
-  assert.match(audit, /config\/downloads\.json/);
-  assert.match(audit, /downloadCatalog/);
-  assert.match(audit, /downloads\/\$\{item\.filename\}/);
+test('build audit keeps protected downloads out of static output', () => {
+  assert.match(audit, /private-assets-leaked/);
+  assert.match(audit, /pathname\.startsWith\('\/downloads\/'\)/);
+  assert.doesNotMatch(audit, /downloadCatalog/);
 });
 
 test('Nginx permanently redirects legacy newsletters before static routing', () => {

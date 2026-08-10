@@ -21,7 +21,7 @@ Nunca edite o HTML diretamente na VPS. O conteúdo publicado deve sempre ser pro
 
 ## Downloads com captura de leads
 
-Os materiais são entregues por um serviço privado; eles nunca devem ser copiados diretamente para o diretório público `html`. A publicação em produção exige o arquivo exclusivo do servidor `.env.download-leads` e as credenciais de Resend e Cloudflare Turnstile.
+Os materiais são versionados em `private-downloads/` e entregues por um serviço privado; eles não entram em `public/`, `dist/` ou no archive do site. O archive separado do serviço os instala no volume privado antes da troca atômica. A publicação em produção exige o arquivo exclusivo do servidor `.env.download-leads` e as credenciais de Resend e Cloudflare Turnstile.
 
 - [Desenho da solução](docs/superpowers/specs/2026-07-22-captura-leads-downloads-design.md)
 - [Plano de implementação](docs/superpowers/plans/2026-07-22-captura-leads-downloads.md)

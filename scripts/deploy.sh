@@ -11,7 +11,7 @@ REMOTE_SERVICE_ARCHIVE="/tmp/produtocomia-${STAMP}-service.tar.gz"
 
 npm run validate
 tar -C dist -czf "$SITE_ARCHIVE" .
-tar -czf "$SERVICE_ARCHIVE" services/download-leads config/downloads.json deploy/docker-compose.yml deploy/nginx.conf
+tar -czf "$SERVICE_ARCHIVE" services/download-leads config/downloads.json private-downloads deploy/docker-compose.yml deploy/nginx.conf
 SITE_SHA="$(shasum -a 256 "$SITE_ARCHIVE" | awk '{print $1}')"
 SERVICE_SHA="$(shasum -a 256 "$SERVICE_ARCHIVE" | awk '{print $1}')"
 shasum -a 256 "$SITE_ARCHIVE"
@@ -74,12 +74,12 @@ tar -xzf "$SITE_ARCHIVE" -C "$NEW_SITE"
 tar -xzf "$SERVICE_ARCHIVE" -C "$NEW_SERVICE_ROOT"
 test -s "$NEW_SITE/index.html"
 test -s "$NEW_SITE/llms.txt"
-test -d "$NEW_SITE/downloads"
 test -s "$NEW_SERVICE_ROOT/services/download-leads/src/server.mjs"
 test -s "$NEW_SERVICE_ROOT/config/downloads.json"
 test -s "$NEW_SERVICE_ROOT/deploy/nginx.conf"
 test -s "$NEW_SERVICE_ROOT/deploy/docker-compose.yml"
-mv "$NEW_SITE/downloads" "$NEW_PRIVATE"
+test -d "$NEW_SERVICE_ROOT/private-downloads"
+mv "$NEW_SERVICE_ROOT/private-downloads" "$NEW_PRIVATE"
 
 ACTIVE=1
 docker compose -f "$BASE/docker-compose.yml" down

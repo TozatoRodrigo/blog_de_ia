@@ -9,7 +9,6 @@ import { auditHtml, duplicateValues, normalizePageUrl } from './lib/audit-dist.m
 
 const ORIGIN = 'https://produtocomia.com.br';
 const DIST = path.resolve('dist');
-const downloadCatalog = JSON.parse(await readFile(path.resolve('config/downloads.json'), 'utf8'));
 
 async function walk(directory) {
   const entries = await readdir(directory, { withFileTypes: true });
@@ -32,13 +31,14 @@ function fileUrl(file) {
 const requiredFiles = [
   'robots.txt', 'rss.xml', 'sitemap-index.xml', 'sitemap-0.xml', 'llms.txt', 'llms-full.txt',
   '_newsletter-redirects.map',
-  ...downloadCatalog.map((item) => `downloads/${item.filename}`),
 ];
 const missingFiles = requiredFiles.filter((file) => !existsSync(path.join(DIST, file)));
+const privateAssetsLeaked = existsSync(path.join(DIST, 'downloads'));
 const allFiles = await walk(DIST);
 const htmlFiles = allFiles.filter((file) => file.endsWith('.html'));
 const pages = [];
 const errors = missingFiles.map((file) => `${file}: missing-required-file`);
+if (privateAssetsLeaked) errors.push('downloads: private-assets-leaked');
 const warnings = [];
 
 for (const file of htmlFiles) {
@@ -90,6 +90,7 @@ for (const page of pages) {
   for (const link of links) {
     if (!knownPages.has(link)) {
       const pathname = new URL(link).pathname;
+      if (pathname.startsWith('/downloads/')) continue;
       const staticFile = path.join(DIST, pathname.replace(/^\//, ''));
       if (!existsSync(staticFile)) errors.push(`${page.expectedUrl}: broken-link ${link}`);
       continue;

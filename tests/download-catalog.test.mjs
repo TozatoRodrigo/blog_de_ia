@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict';
+import { existsSync } from 'node:fs';
 import { glob, readFile } from 'node:fs/promises';
 import test from 'node:test';
 import { fileURLToPath } from 'node:url';
@@ -20,9 +21,11 @@ test('download catalog has unique ids and files', async () => {
     assert.ok(item.labels['pt-BR']);
     assert.ok(item.labels.en);
     assert.match(item.contentType, /^(application|text)\//);
-    const bytes = await readFile(new URL(`../public/downloads/${item.filename}`, import.meta.url));
+    const bytes = await readFile(new URL(`../private-downloads/${item.filename}`, import.meta.url));
     assert.ok(bytes.length > 80);
   }
+
+  assert.equal(existsSync(new URL('../public/downloads/', import.meta.url)), false);
 });
 
 test('every editorial download link is allowlisted', async () => {
