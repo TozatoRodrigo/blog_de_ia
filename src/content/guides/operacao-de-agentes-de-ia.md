@@ -3,7 +3,7 @@ title: "Como operar agentes de IA em produção: observabilidade, SLOs e inciden
 seoTitle: "Operação de agentes de IA em produção: guia prático"
 description: "Aprenda a operar agentes de IA com observabilidade, SLOs proporcionais, controle de custos, resposta a incidentes e mudanças reversíveis."
 datePublished: "2026-08-10"
-dateModified: "2026-08-10"
+dateModified: "2026-08-17"
 tags: ["agentes de IA", "observabilidade", "operações", "SRE", "gestão de produto"]
 alternateSlug: "ai-agent-operations"
 cluster: agents
@@ -44,6 +44,8 @@ draft: false
 Operar um agente de IA em produção significa conseguir responder, para cada execução: **o que o agente tentou fazer, com qual versão, usando quais ferramentas, com qual resultado, custo e risco — e como interromper ou reverter a operação**. Logs de erro e uma média de latência não bastam, porque o comportamento depende de contexto, modelo, ferramentas, permissões e decisões que podem variar entre execuções.
 
 Este guia organiza uma baseline prática para Product Managers, engenharia, SRE e governança. Ele não prescreve um SLO universal nem promete que uma plataforma gerenciada resolva o problema por você. A recomendação é começar com uma superfície operacional pequena, verificável e proporcional ao impacto do agente.
+
+Quando uma execução já falhou ou produziu um efeito indevido, use o [guia de resposta a incidentes de agentes de IA](/guias/resposta-incidentes-agentes-de-ia/) para separar detecção, contenção, recuperação de estado, compensação e rollback. Este guia continua sendo a página pilar da operação; o novo material aprofunda o momento de crise.
 
 ## Neste guia
 

@@ -3,7 +3,7 @@ title: "How to operate AI agents in production: observability, SLOs and incident
 seoTitle: "AI agent operations in production: a practical guide"
 description: "Learn how to operate AI agents with observability, proportionate SLOs, cost controls, incident response and reversible changes."
 datePublished: "2026-08-10"
-dateModified: "2026-08-10"
+dateModified: "2026-08-17"
 tags: ["AI agents", "observability", "operations", "SRE", "product management"]
 alternateSlug: "operacao-de-agentes-de-ia"
 cluster: agents
@@ -44,6 +44,8 @@ draft: false
 Operating an AI agent in production means being able to answer, for every run: **what the agent tried to do, with which version, using which tools, with what outcome, cost and risk — and how to stop or reverse it**. Error logs and an average latency number are not enough because behavior depends on context, model, tools, permissions and decisions that can vary from run to run.
 
 This guide gives Product Managers, engineers, SREs and governance teams a practical baseline. It does not prescribe a universal SLO or suggest that a managed platform solves operations by itself. Start with a small, verifiable operational surface that is proportional to the agent’s impact.
+
+When an execution has already failed or produced an unwanted effect, use the [AI agent incident response guide](/en/guides/ai-agent-incident-response/) to separate detection, containment, state recovery, compensation and rollback. This remains the pillar page for agent operations; the new guide goes deeper on the moment of crisis.
 
 ## In this guide
 

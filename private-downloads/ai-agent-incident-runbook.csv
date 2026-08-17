@@ -1,0 +1,13 @@
+phase,control,criterion,required,record_here,owner,status,example
+INSTRUCTIONS,How to use,"Duplicate the control rows for each incident, record minimum evidence, and never place secrets, full prompts or personal data in this file.",no,"Use one row per criterion; mark Compliant only when you have consultable evidence.",,,"This file is a template; EXAMPLE-001 is fictional."
+PREPARE,Identity,"Run ID, current version and known-good baseline are recorded.",yes,,,,"run-2026-08-17-EXAMPLE-001; agent-v3.4; baseline agent-v3.2"
+PREPARE,Ownership,"Owner, backup and authority to contain are defined.",yes,,,,"owner: product-ops; backup: platform-oncall; authority: pause-tool"
+DETECT,Telemetry,"Signal, first-seen time, affected window and trace/log links are recorded.",yes,,,,"alert: tool_error_rate; first_seen: 2026-08-17T10:14Z; window: 10:00–10:20Z"
+TRIAGE,Impact,"Severity, external effect, scope, reversibility and escalation duty are classified.",yes,,,,"SEV-2; no external write; 18 failed suggestions; reversible; platform owner notified"
+CONTAIN,Next effect,"The tool, version, traffic or safe mode that prevents new actions is identified and tested.",yes,,,,"Paused invoice-write tool; traffic switched to suggestion mode; verified in staging"
+CONTAIN,Approval,"Required approval or rejection, authority and expiry are recorded.",yes,,,,"No approval needed for containment; restore requires platform lead approval"
+RECOVER,State,"Checkpoint, completed step, idempotency key and replay limit are recorded.",yes,,,,"checkpoint cp-184; last completed: classify; key: EXAMPLE-001; replay: 0"
+RECOVER,Fallback,"Alternative path, capability loss and degradation communication are documented.",yes,,,,"Manual queue; 30-minute delay; user-facing degraded-mode notice"
+RECOVER,External effect,"Each effect already executed has a receipt, before/after state and compensation or reconciliation path.",yes,,,,"No external effect; reconciliation not required; confirmed by destination audit"
+RESTORE,Rollback,"Baseline, validation cases, approver, restoration time and exit criterion are recorded.",yes,,,,"Restored agent-v3.2; 12 regression cases passed; approved by platform lead; traffic reopened at 10:42Z"
+LEARN,Prevention,"Confirmed cause, regression test, owner, due date and effectiveness check are defined.",yes,,,,"Cause: tool timeout loop; add bounded retry test; owner: platform; due: 2026-08-24; review after 7 days"

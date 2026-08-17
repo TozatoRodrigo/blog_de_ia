@@ -1,0 +1,13 @@
+phase,control,criterion,required,record_here,owner,status,example
+INSTRUÇÕES,Como usar,"Duplique as linhas de controle para cada incidente, preencha evidência mínima e não coloque segredos, prompts completos ou dados pessoais.",não,"Use uma linha por critério; marque Conforme somente com evidência consultável.",,,"Este arquivo é um modelo; EXAMPLE-001 é fictício."
+PREPARAÇÃO,Identidade,"Run ID, versão atual e baseline conhecida estão registrados.",sim,,,,"run-2026-08-17-EXAMPLE-001; agent-v3.4; baseline agent-v3.2"
+PREPARAÇÃO,Proprietário,"Proprietário, substituto e autoridade para conter estão definidos.",sim,,,,"owner: product-ops; backup: platform-oncall; authority: pause-tool"
+DETECÇÃO,Telemetria,"Sinal, horário da primeira evidência, janela afetada e links para trace/log estão registrados.",sim,,,,"alert: tool_error_rate; first_seen: 2026-08-17T10:14Z; window: 10:00–10:20Z"
+TRIAGEM,Impacto,"Severidade, efeito externo, alcance, reversibilidade e obrigação de escalonamento estão classificados.",sim,,,,"SEV-2; no external write; 18 failed suggestions; reversible; platform owner notified"
+CONTENÇÃO,Próximo efeito,"A ferramenta, versão, tráfego ou modo seguro que impede novas ações está identificado e testado.",sim,,,,"Paused invoice-write tool; traffic switched to suggestion mode; verified in staging"
+CONTENÇÃO,Aprovação,"Aprovação ou rejeição necessária, autoridade e prazo de expiração estão registrados.",sim,,,,"No approval needed for containment; restore requires platform lead approval"
+RECUPERAÇÃO,Estado,"Checkpoint, etapa concluída, chave de idempotência e limite de replay estão registrados.",sim,,,,"checkpoint cp-184; last completed: classify; key: EXAMPLE-001; replay: 0"
+RECUPERAÇÃO,Fallback,"Alternativa, perda de capacidade e comunicação da degradação estão documentadas.",sim,,,,"Manual queue; 30-minute delay; user-facing degraded-mode notice"
+RECUPERAÇÃO,Efeito externo,"Para cada efeito já executado existe recibo, estado antes/depois e caminho de compensação ou reconciliação.",sim,,,,"No external effect; reconciliation not required; confirmed by destination audit"
+RESTAURAÇÃO,Rollback,"Baseline, casos de validação, aprovador, horário de restauração e critério de saída estão registrados.",sim,,,,"Restored agent-v3.2; 12 regression cases passed; approved by platform lead; traffic reopened at 10:42Z"
+APRENDIZADO,Prevenção,"Causa confirmada, teste de regressão, responsável, prazo e verificação de eficácia estão definidos.",sim,,,,"Cause: tool timeout loop; add bounded retry test; owner: platform; due: 2026-08-24; review after 7 days"

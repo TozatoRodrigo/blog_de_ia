@@ -12,5 +12,7 @@
   {"id":"estado-ia-produto-2026","filename":"estado-ia-gestao-de-produto-2026.pdf","contentType":"application/pdf","labels":{"pt-BR":"Estado da IA em gestão de produto 2026","en":"State of AI in product management 2026 (Portuguese)"}},
   {"id":"state-ai-product-2026","filename":"state-of-ai-in-product-management-2026.pdf","contentType":"application/pdf","labels":{"pt-BR":"Estado da IA em gestão de produto 2026 (inglês)","en":"State of AI in product management 2026"}},
   {"id":"checklist-operacao-agente-ia","filename":"checklist-operacao-agente-de-ia.csv","contentType":"text/csv; charset=utf-8","labels":{"pt-BR":"Checklist de operação de agente de IA","en":"AI agent operations checklist (Portuguese)"}},
-  {"id":"ai-agent-operations-checklist","filename":"ai-agent-operations-checklist.csv","contentType":"text/csv; charset=utf-8","labels":{"pt-BR":"Checklist de operação de agente de IA (inglês)","en":"AI agent operations checklist"}}
+  {"id":"ai-agent-operations-checklist","filename":"ai-agent-operations-checklist.csv","contentType":"text/csv; charset=utf-8","labels":{"pt-BR":"Checklist de operação de agente de IA (inglês)","en":"AI agent operations checklist"}},
+  {"id":"runbook-incidentes-agente-de-ia","filename":"runbook-incidentes-agente-de-ia.csv","contentType":"text/csv; charset=utf-8","labels":{"pt-BR":"Runbook de incidentes de agente de IA","en":"AI agent incident runbook (Portuguese)"}},
+  {"id":"ai-agent-incident-runbook","filename":"ai-agent-incident-runbook.csv","contentType":"text/csv; charset=utf-8","labels":{"pt-BR":"Runbook de incidentes de agente de IA (inglês)","en":"AI agent incident runbook"}}
 ]

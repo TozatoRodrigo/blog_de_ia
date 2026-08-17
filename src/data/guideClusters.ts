@@ -17,6 +17,8 @@ export const guideClusters = [
       { pt: 'template-avaliacao-agente-de-ia', en: 'ai-agent-evaluation-template' },
       { pt: 'operacao-de-agentes-de-ia', en: 'ai-agent-operations' },
       { pt: 'pesquisa-operacao-agentes-de-ia', en: 'research-ai-agent-operations' },
+      { pt: 'resposta-incidentes-agentes-de-ia', en: 'ai-agent-incident-response' },
+      { pt: 'pesquisa-resposta-incidentes-agentes-de-ia', en: 'research-ai-agent-incident-response' },
     ],
   },
   {
