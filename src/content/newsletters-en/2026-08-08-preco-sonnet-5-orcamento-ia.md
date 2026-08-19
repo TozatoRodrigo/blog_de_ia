@@ -1,7 +1,7 @@
 ---
 title: "Sonnet 5 prices rise 50% in September: what changes in your AI budget"
 date: "2026-08-08"
-seoSlug: "2026-08-08-preco-sonnet-5-orcamento-ia"
+seoSlug: "sonnet-5-ai-budget"
 excerpt: "Claude Sonnet 5 pricing rises 50% on August 31, turning a US$2,000 monthly workload into US$3,000 with no change in usage. For AI products, the case reinforces the need to model costs, protect margin and keep a multi-model strategy."
 tags: ["inteligencia-artificial", "produto", "finops-de-ia", "precificacao-de-ia", "fintech"]
 featured: true

@@ -1,7 +1,7 @@
 ---
 title: "Humano no loop erra 1 em cada 3 vezes: o que isso muda em produto"
 date: "2026-08-07"
-seoSlug: "2026-08-07-humano-no-loop-supervisao-agentes"
+seoSlug: "humano-no-loop-supervisao-agentes"
 excerpt: "Um estudo com 409 mil decisões de aprovação em agentes de IA encontrou acurácia humana média de 66% — e desempenho pior nos casos sensíveis. Para produtos de crédito, a lição é clara: revisão humana total não escala sozinha; supervisão baseada em risco precisa fazer parte do desenho do produto."
 tags: ["inteligencia-artificial", "agentes-de-ia", "governanca-de-ia", "fintech", "produto"]
 featured: true

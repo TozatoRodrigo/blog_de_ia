@@ -7,6 +7,8 @@ import {
   breadcrumbSchema,
   faqPageSchema,
   howToSchema,
+  itemListSchema,
+  definedTermSetSchema,
   organizationSchema,
   personSchema,
   websiteSchema,
@@ -57,4 +59,23 @@ test('HowTo schema exposes ordered visible steps', () => {
   assert.equal(schema['@type'], 'HowTo');
   assert.equal(schema.step[0].position, 1);
   assert.equal(schema.step[1].position, 2);
+});
+
+test('collection schemas expose ordered items and glossary terms', () => {
+  const list = itemListSchema({
+    name: 'Guias', url: '/guias/', lang: 'pt-BR',
+    items: [{ name: 'Agentes de IA', url: '/guias/agentes-de-ia/' }],
+  });
+  assert.equal(list['@type'], 'ItemList');
+  assert.equal(list.numberOfItems, 1);
+  assert.equal(list.itemListElement[0].position, 1);
+  assert.equal(list.itemListElement[0].item.url, 'https://produtocomia.com.br/guias/agentes-de-ia/');
+
+  const terms = definedTermSetSchema({
+    name: 'Conceitos', description: 'Glossário', url: '/conceitos/', lang: 'pt-BR',
+    terms: [{ name: 'RAG', description: 'Recuperação e geração.', url: '/conceitos/o-que-e-rag/' }],
+  });
+  assert.equal(terms['@type'], 'DefinedTermSet');
+  assert.equal(terms.hasDefinedTerm[0]['@type'], 'DefinedTerm');
+  assert.equal(terms.hasDefinedTerm[0].inDefinedTermSet, 'https://produtocomia.com.br/conceitos/');
 });

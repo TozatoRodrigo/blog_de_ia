@@ -1,7 +1,7 @@
 ---
 title: "Gemini Spark mostra onde um agente de IA deve parar"
 date: "2026-08-16"
-seoSlug: "2026-08-16-agentes-ia-limite-pagamento"
+seoSlug: "agentes-ia-limite-pagamento"
 excerpt: "O Gemini Spark opera o Chrome com contas e senhas salvas, mas devolve o controle ao usuário antes de qualquer pagamento. Esse limite é uma referência útil para desenhar agentes de IA em crédito, onde autonomia e responsabilidade precisam caminhar juntas."
 tags: ["inteligencia-artificial", "agentes-de-ia", "automacao", "fintech", "governanca-de-ia", "seguranca-de-ia"]
 featured: true

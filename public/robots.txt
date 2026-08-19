@@ -23,5 +23,7 @@ User-agent: Amazonbot
 Allow: /
 User-agent: *
 Allow: /
+Disallow: /downloads/
+Disallow: /api/download-leads/
 
 Sitemap: https://produtocomia.com.br/sitemap-index.xml

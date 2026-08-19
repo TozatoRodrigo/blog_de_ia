@@ -1,6 +1,7 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
 import { SITE } from '../config';
+import ContactEmail from '../components/ContactEmail.astro';
 
 const jsonLd = {
   '@context': 'https://schema.org',
@@ -82,8 +83,8 @@ const jsonLd = {
         por tópico e conceito, para buscar referência quando precisar.
       </p>
 
-      <div style="margin-top: 2rem; display: flex; gap: 1rem; flex-wrap: wrap;">
-        <a href={`mailto:${SITE.email}`} class="btn btn--accent btn--lg">FALE COM O EDITOR →</a>
+      <div id="contato" style="margin-top: 2rem; display: flex; gap: 1rem; flex-wrap: wrap; align-items: center;">
+        <ContactEmail class="btn btn--accent btn--lg" />
         <a href="/newsletter" class="btn btn--lg">VER NEWSLETTER</a>
       </div>
     </div>

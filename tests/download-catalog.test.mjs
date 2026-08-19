@@ -20,6 +20,11 @@ test('download catalog has unique ids and files', async () => {
     assert.equal(item.filename.includes('/'), false);
     assert.ok(item.labels['pt-BR']);
     assert.ok(item.labels.en);
+    assert.ok(item.language === 'pt-BR' || item.language === 'en');
+    assert.ok(item.description['pt-BR']);
+    assert.ok(item.description.en);
+    assert.match(item.relatedUrl['pt-BR'], /^\/[^?]+\/$/);
+    assert.match(item.relatedUrl.en, /^\/en\/[^?]+\/$/);
     assert.match(item.contentType, /^(application|text)\//);
     const bytes = await readFile(new URL(`../private-downloads/${item.filename}`, import.meta.url));
     assert.ok(bytes.length > 80);

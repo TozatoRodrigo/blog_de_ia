@@ -1,7 +1,7 @@
 ---
 title: "Marca d’água de IA cai fácil: o problema real da fraude documental"
 date: "2026-08-14"
-seoSlug: "2026-08-14-fraude-documental-marca-dagua"
+seoSlug: "fraude-documental-marca-dagua"
 excerpt: "Marcas d’água em texto gerado por IA podem ser removidas com reescrita e paráfrase. Em crédito, a defesa contra fraude documental precisa combinar sinais transacionais, múltiplas fontes, biometria e rastreabilidade."
 tags: ["inteligencia-artificial", "fintech", "governanca-de-ia", "seguranca-de-ia", "produto"]
 featured: true

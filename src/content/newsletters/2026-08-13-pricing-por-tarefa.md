@@ -1,7 +1,7 @@
 ---
 title: "43% do SaaS já cobra por tarefa, não por assento: o que muda pra você"
 date: "2026-08-13"
-seoSlug: "2026-08-13-pricing-por-tarefa"
+seoSlug: "pricing-por-tarefa"
 excerpt: "Em 2026, 43% das empresas de SaaS já usam algum modelo híbrido de pricing. A migração do assento para a tarefa coloca custo por chamada, valor entregue e monetização dentro das decisões de produto."
 tags: ["inteligencia-artificial", "precificacao-de-ia", "fintech", "produto"]
 featured: true

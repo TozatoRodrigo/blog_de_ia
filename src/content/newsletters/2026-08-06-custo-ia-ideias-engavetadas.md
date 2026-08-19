@@ -1,7 +1,7 @@
 ---
 title: "Token 80% mais barato: a fila de ideias engavetadas volta a fechar"
 date: "2026-08-06"
-seoSlug: "2026-08-06-custo-ia-ideias-engavetadas"
+seoSlug: "custo-ia-ideias-engavetadas"
 excerpt: "Com o custo de entrada do GPT-5.6 Luna 80% menor e modelos abertos competindo por preço, casos de uso de IA antes inviáveis voltam ao roadmap. Para produto, a queda do custo de inferência muda a matemática — e desloca o valor para fluxo, dados e regras do negócio."
 tags: ["inteligencia-artificial", "produto", "fintech", "finops-de-ia"]
 featured: true

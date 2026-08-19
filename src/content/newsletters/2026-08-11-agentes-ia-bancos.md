@@ -1,7 +1,7 @@
 ---
 title: "15 dos 20 maiores bancos já rodam agentes de IA especializados"
 date: "2026-08-11"
-seoSlug: "2026-08-11-agentes-ia-bancos"
+seoSlug: "agentes-ia-bancos"
 excerpt: "Startups de agentes de IA verticais captaram US$ 1,8 bilhão em julho, enquanto a Hebbia já está presente em 15 dos 20 maiores bancos do mundo. O sinal para produto é claro: especialização, governança e resultado comprovado estão vencendo o assistente genérico."
 tags: ["inteligencia-artificial", "agentes-de-ia", "fintech", "produto", "governanca-de-ia"]
 featured: true

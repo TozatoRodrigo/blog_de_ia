@@ -1,0 +1,23 @@
+---
+import { SITE } from '../config';
+import type { Lang } from '../i18n/lang';
+
+interface Props {
+  class?: string;
+  lang?: Lang;
+}
+
+const { class: className = '', lang = 'pt-BR' } = Astro.props;
+const [user, domain] = SITE.email.split('@');
+const fallbackLabel = lang === 'en' ? 'Editor email' : 'E-mail do editor';
+const ariaLabel = lang === 'en' ? 'Email the editor' : 'Enviar e-mail ao editor';
+---
+
+<span
+  class={className}
+  data-contact-email
+  data-contact-user={user}
+  data-contact-domain={domain}
+  data-contact-aria-label={ariaLabel}
+  aria-label={fallbackLabel}
+>{fallbackLabel}</span>

@@ -28,7 +28,7 @@ function downloadItem(href: string) {
     <div class="grid grid-2">
       {resources.map((resource) => {
         const item = downloadItem(resource.href);
-        const href = item && lang === 'en' ? `${resource.href}?lang=en` : resource.href;
+        const href = resource.href;
         return (
         <a
           class="topic-card"

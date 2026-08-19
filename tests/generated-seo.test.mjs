@@ -118,3 +118,62 @@ test('every indexable page has unique bounded metadata and no LinkedIn anchor', 
   assert.ok(indexable.every((row) => row.description.length >= 70 && row.description.length <= 160));
   assert.ok(rows.every((row) => row.linkedinAnchors === 0));
 });
+
+test('internal download links never expose language query parameters', async () => {
+  const files = await walkHtml(new URL('../dist/', import.meta.url));
+  const queryLinks = [];
+  for (const file of files) {
+    const $ = cheerio.load(await readFile(file, 'utf8'));
+    $('a[href^="/downloads/"]').each((_, element) => {
+      const href = $(element).attr('href') || '';
+      if (href.includes('?')) queryLinks.push(`${file.pathname}: ${href}`);
+    });
+  }
+  assert.deepEqual(queryLinks, []);
+});
+
+test('contact links stay on owned routes and avoid Cloudflare email wrappers', async () => {
+  const files = await walkHtml(new URL('../dist/', import.meta.url));
+  const violations = [];
+  for (const file of files) {
+    const $ = cheerio.load(await readFile(file, 'utf8'));
+    if ($('a[href^="mailto:"]').length > 0) violations.push(`${file.pathname}: mailto`);
+    if ($('a[href*="/cdn-cgi/"]').length > 0) violations.push(`${file.pathname}: Cloudflare email wrapper`);
+  }
+  assert.deepEqual(violations, []);
+});
+
+test('editorial index pages provide enough context beyond navigation and cards', async () => {
+  const pages = [
+    'conceitos/index.html',
+    'correcoes/index.html',
+    'en/concepts/index.html',
+    'en/corrections/index.html',
+    'guias/index.html',
+    'en/guides/index.html',
+    'topicos/index.html',
+    'en/topics/index.html',
+  ];
+  for (const pathname of pages) {
+    const $ = await loadPage(pathname);
+    $('.topic-card, script, style, nav, footer, header').remove();
+    const words = $('main').text().replace(/\s+/g, ' ').trim().split(/\s+/).filter(Boolean);
+    assert.ok(words.length >= 180, `${pathname}: ${words.length} editorial words`);
+  }
+});
+
+test('collection pages expose structured lists and glossary terms for discovery', async () => {
+  const cases = [
+    ['conceitos/index.html', 'DefinedTermSet'],
+    ['en/concepts/index.html', 'DefinedTermSet'],
+    ['topicos/index.html', 'ItemList'],
+    ['en/topics/index.html', 'ItemList'],
+    ['guias/index.html', 'ItemList'],
+    ['en/guides/index.html', 'ItemList'],
+  ];
+  for (const [pathname, type] of cases) {
+    const $ = await loadPage(pathname);
+    const schemas = $('script[type="application/ld+json"]').toArray().map((element) => $(element).text());
+    assert.ok(schemas.some((schema) => schema.includes(`"@type":"${type}"`)), `${pathname}: missing ${type}`);
+  }
+});

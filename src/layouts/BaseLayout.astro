@@ -123,6 +123,19 @@ const htmlLang = lang === 'pt-BR' ? 'pt-BR' : 'en';
         });
       }
 
+      document.querySelectorAll<HTMLElement>('[data-contact-email]').forEach((element) => {
+        const user = element.dataset.contactUser;
+        const domain = element.dataset.contactDomain;
+        if (!user || !domain) return;
+        const link = document.createElement('a');
+        link.href = `mailto:${user}@${domain}`;
+        link.textContent = `${user}@${domain}`;
+        link.setAttribute('aria-label', element.dataset.contactAriaLabel || 'Enviar e-mail ao editor');
+        link.className = element.className;
+        element.className = '';
+        element.replaceChildren(link);
+      });
+
       document.addEventListener('keydown', (e) => {
         if (e.key === 'Escape') closeNav();
       });

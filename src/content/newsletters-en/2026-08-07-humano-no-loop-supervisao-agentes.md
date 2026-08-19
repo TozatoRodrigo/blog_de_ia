@@ -1,7 +1,7 @@
 ---
 title: "Human-in-the-loop gets 1 in 3 approvals wrong: what this changes for product"
 date: "2026-08-07"
-seoSlug: "2026-08-07-humano-no-loop-supervisao-agentes"
+seoSlug: "human-in-loop-agent-supervision"
 excerpt: "A study of 409,000 approval decisions made while supervising AI agents found average human accuracy of 66%—with worse performance in sensitive cases. For credit products, the lesson is clear: full human review does not scale on its own; risk-based agent supervision belongs in the product design."
 tags: ["inteligencia-artificial", "agentes-de-ia", "governanca-de-ia", "fintech", "produto"]
 featured: true

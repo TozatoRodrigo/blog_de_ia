@@ -1,7 +1,7 @@
 ---
 title: "Google torna IA privada viável: o que libera para crédito e saúde"
 date: "2026-08-15"
-seoSlug: "2026-08-15-ia-privada-credito-saude"
+seoSlug: "ia-privada-credito-saude"
 excerpt: "A criptografia totalmente homomórfica pode permitir que modelos processem dados sensíveis sem expor o conteúdo. Para crédito e saúde, isso reduz o trade-off entre privacidade e inteligência aplicada — sem transformar a tecnologia em promessa de produção imediata."
 tags: ["inteligencia-artificial", "fintech", "governanca-de-ia", "seguranca-de-ia", "produto"]
 featured: true

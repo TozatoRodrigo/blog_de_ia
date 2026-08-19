@@ -51,7 +51,7 @@ const topicsPath = lang === 'pt-BR' ? '/topicos' : '/en/topics';
       <div>
         <h4>{ui('footer.contact', lang)}</h4>
         <a href={`${prefix}/${lang === 'pt-BR' ? 'sobre' : 'about'}`}>{lang === 'pt-BR' ? 'Sobre o editor' : 'About the editor'}</a>
-        <a href={`mailto:${SITE.email}`}>{SITE.email}</a>
+        <a href={`${prefix}/${lang === 'pt-BR' ? 'sobre#contato' : 'about#contact'}`}>{lang === 'pt-BR' ? 'Fale com o editor' : 'Contact the editor'}</a>
         <a href={lang === 'pt-BR' ? '/privacidade/' : '/en/privacy/'}>{lang === 'pt-BR' ? 'Privacidade' : 'Privacy'}</a>
         <a href={lang === 'pt-BR' ? '/politica-editorial/' : '/en/editorial-policy/'}>{lang === 'pt-BR' ? 'Política editorial' : 'Editorial policy'}</a>
         <a href={lang === 'pt-BR' ? '/correcoes/' : '/en/corrections/'}>{lang === 'pt-BR' ? 'Correções' : 'Corrections'}</a>
@@ -60,6 +60,15 @@ const topicsPath = lang === 'pt-BR' ? '/topicos' : '/en/topics';
 
     <div class="site-footer__bottom">
       <p>© {year} {SITE.name.toUpperCase()} — {ui('footer.rights', lang)}</p>
+      <p class="site-footer__credit">
+        {lang === 'pt-BR' ? 'Construído por' : 'Built by'}{' '}
+        <a
+          class="site-footer__credit-link"
+          href="https://www.striviumtech.com.br"
+          target="_blank"
+          rel="noopener noreferrer"
+        >Strivium Tech</a>
+      </p>
       <p>REV. {year}.07 — BUILD: {new Date().toISOString().split('T')[0]}</p>
     </div>
   </div>

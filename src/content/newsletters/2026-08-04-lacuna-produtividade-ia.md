@@ -1,7 +1,7 @@
 ---
 title: "A IA parece mais rápida. A métrica de ponta a ponta discorda."
 date: "2026-08-04"
-seoSlug: "2026-08-04-lacuna-produtividade-ia"
+seoSlug: "lacuna-produtividade-ia"
 excerpt: "A sensação de velocidade com IA é real, mas não prova valor entregue. Para transformar produtividade com IA em resultado, times de produto precisam medir o fluxo de ponta a ponta, incluindo revisão, retrabalho e integração."
 tags: ["inteligencia-artificial", "produto", "agentes-de-ia", "fintech"]
 featured: true

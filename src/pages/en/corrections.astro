@@ -1,6 +1,17 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
+import ContactEmail from '../../components/ContactEmail.astro';
 ---
 <BaseLayout title="Editorial corrections and updates" description="Transparent record of material corrections and updates to content published by Produto com IA." lang="en" alternateUrl="/correcoes/">
-<article class="container article-body" style="padding-top:4rem;padding-bottom:4rem"><h1>Editorial corrections and updates</h1><p>This log documents corrections that change how an article is understood. Typographical fixes may be made without individual entries.</p><h2>Request a correction</h2><p>Send the URL, passage and supporting source to <a href="mailto:rodrigo.tozato@icloud.com">rodrigo.tozato@icloud.com</a>. We will review the request and update the page and this log when warranted.</p><h2>Log</h2><p>No material corrections recorded as of July 22, 2026.</p></article>
+<article class="container article-body" style="padding-top:4rem;padding-bottom:4rem">
+  <h1>Editorial corrections and updates</h1>
+  <p>This log documents corrections that change how an article is understood. Typographical fixes may be made without individual entries, but changes to numbers, sources, dates, conclusions, or recommendations should be reviewed and recorded.</p>
+  <p>Transparency is part of the editorial method: a correction should make clear what changed, why the change was necessary, and which version of the information is now valid. When a page receives a meaningful update, its modification date helps readers interpret the material over time.</p>
+  <h2>Request a correction</h2>
+  <p>Send the URL, exact passage, and supporting source to <ContactEmail lang="en" />. Include a concise explanation of the issue and, when possible, evidence that lets us reproduce the check. We will review the request and update the page and this log when warranted.</p>
+  <h2>What happens next</h2>
+  <p>The editor reviews the claim in its original context, checks the source, and assesses whether the change is material. Confirmed corrections receive a short description in this log; style or spelling edits may be applied directly without adding an entry that distracts from the main information.</p>
+  <h2>Log</h2>
+  <p>No material corrections recorded as of July 22, 2026. This only means that no material correction had been published by the date of this review.</p>
+</article>
 </BaseLayout>

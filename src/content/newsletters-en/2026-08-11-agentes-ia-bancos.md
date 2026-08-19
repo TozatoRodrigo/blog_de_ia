@@ -1,7 +1,7 @@
 ---
 title: "15 of the 20 largest banks already run specialized AI agents"
 date: "2026-08-11"
-seoSlug: "2026-08-11-agentes-ia-bancos"
+seoSlug: "ai-agents-banks"
 excerpt: "Vertical AI-agent startups raised US$1.8 billion in July, while Hebbia is already present in 15 of the world's 20 largest banks. The product signal is clear: specialization, governance and proven results are beating the generic assistant."
 tags: ["inteligencia-artificial", "agentes-de-ia", "fintech", "produto", "governanca-de-ia"]
 featured: true

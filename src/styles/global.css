@@ -513,6 +513,15 @@ img {
   margin: 0;
 }
 
+.site-footer__credit-link {
+  display: inline;
+  padding: 0;
+  color: var(--fg-invert);
+  font: inherit;
+  letter-spacing: inherit;
+  text-transform: none;
+}
+
 /* Hero */
 .hero {
   position: relative;

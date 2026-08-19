@@ -21,6 +21,17 @@ Revogue uma chave antiga depois de confirmar que a nova envia corretamente. Chav
 4. Copie separadamente a chave pública e a secreta. A pública vai em `TURNSTILE_SITE_KEY`; a secreta vai em `TURNSTILE_SECRET_KEY`, somente no servidor.
 5. Antes dos valores de produção, rode os testes com as chaves de teste oficiais “always pass” do Cloudflare. Não misture chaves de teste e produção.
 
+## Cloudflare e links de contato
+
+O site não publica mais `mailto:` no HTML inicial. O endereço é montado no navegador para evitar que o recurso **Email Address Obfuscation** do Cloudflare transforme os links em `/cdn-cgi/l/email-protection`, que é um endpoint operacional e não uma página de contato.
+
+Depois de publicar uma versão com essa correção:
+
+1. No Cloudflare, abra **Scrape Shield → Email Address Obfuscation** e confirme que a configuração não está reescrevendo o HTML público. Se a proteção estiver ativa por política da zona, mantenha os contatos somente no formato dinâmico usado pelo site.
+2. Faça purge dos caminhos de contato e políticas: `/sobre/`, `/en/about/`, `/privacidade/`, `/en/privacy/`, `/politica-editorial/`, `/en/editorial-policy/`, `/correcoes/` e `/en/corrections/`.
+3. Valide a origem e o cache com `curl` ou um crawler: não deve existir `href` para `/cdn-cgi/l/email-protection`, e os links de contato devem apontar para as seções internas localizadas ou ser montados após o carregamento.
+4. Não crie um redirect artificial para `/cdn-cgi/l/email-protection`. O caminho é um artefato do Cloudflare; a correção correta é remover os anchors estáticos e invalidar o HTML antigo.
+
 ## Variáveis do servidor
 
 O arquivo real fica em `/home/rodrigo/apps/radar-ia/.env.download-leads`. Comece a partir de `deploy/download-leads.env.example`, preencha os valores no próprio servidor e nunca envie esse arquivo pelo processo de publicação.

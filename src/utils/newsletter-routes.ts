@@ -11,6 +11,7 @@ export function legacyNewsletterPath(lang: Lang, id: string) {
 
 export function assertUniqueNewsletterSlugs(entries: Array<{ data: { seoSlug: string } }>) {
   const slugs = entries.map((entry) => entry.data.seoSlug);
+  if (slugs.some((slug) => /^\d{4}-\d{2}-\d{2}-/.test(slug))) throw new Error('dated-newsletter-seo-slug');
   if (new Set(slugs).size !== slugs.length) throw new Error('duplicate-newsletter-seo-slug');
 }
 

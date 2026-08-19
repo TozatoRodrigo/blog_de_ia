@@ -1,7 +1,7 @@
 ---
 title: "OpenAI desliga o Atlas: a capacidade certa no container errado"
 date: "2026-08-03"
-seoSlug: "2026-08-03-openai-desliga-atlas"
+seoSlug: "openai-desliga-atlas"
 excerpt: "A OpenAI vai descontinuar o Atlas menos de um ano após o lançamento, mas mantém a navegação agêntica no ChatGPT e no Chrome. A lição para produto: capacidade boa não basta se ela exigir que o usuário mude de lugar."
 tags: ["inteligencia-artificial", "agentes-de-ia", "produto", "fintech"]
 featured: true

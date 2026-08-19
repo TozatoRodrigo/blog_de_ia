@@ -1,7 +1,7 @@
 ---
 title: "Google makes private AI practical: what it unlocks for credit and healthcare"
 date: "2026-08-15"
-seoSlug: "2026-08-15-ia-privada-credito-saude"
+seoSlug: "private-ai-credit-healthcare"
 excerpt: "Fully homomorphic encryption could let models process sensitive data without exposing its contents. For credit and healthcare, that narrows the trade-off between privacy and applied intelligence—without turning the technology into a promise of immediate production."
 tags: ["inteligencia-artificial", "fintech", "governanca-de-ia", "seguranca-de-ia", "produto"]
 featured: true

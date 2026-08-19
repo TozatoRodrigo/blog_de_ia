@@ -1,7 +1,7 @@
 ---
 title: "OpenAI shuts down Atlas: the right capability in the wrong container"
 date: "2026-08-03"
-seoSlug: "2026-08-03-openai-desliga-atlas"
+seoSlug: "openai-atlas-shutdown"
 excerpt: "OpenAI is discontinuing Atlas less than a year after launch, while keeping agentic browsing in ChatGPT and Chrome. The product lesson: a useful capability still fails if it asks users to move their work elsewhere."
 tags: ["inteligencia-artificial", "agentes-de-ia", "produto", "fintech"]
 featured: true

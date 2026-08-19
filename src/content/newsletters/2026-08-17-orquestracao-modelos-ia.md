@@ -1,7 +1,7 @@
 ---
 title: "Stripe fecha acordo de US$ 7 bi pela OpenRouter: orquestração de modelos virou produto"
 date: "2026-08-17"
-seoSlug: "2026-08-17-orquestracao-modelos-ia"
+seoSlug: "orquestracao-modelos-ia"
 excerpt: "A Stripe fechou acordo para comprar a OpenRouter por mais de US$ 7 bilhões. O movimento mostra que a camada que roteia modelos, custos e observabilidade virou infraestrutura estratégica e uma decisão central de produto."
 tags: ["inteligencia-artificial", "modelos-de-ia", "finops-de-ia", "fintech", "produto"]
 featured: true

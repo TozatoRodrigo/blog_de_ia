@@ -4,6 +4,7 @@ import { topics } from '../../../data/topics';
 import { SITE } from '../../../config';
 import { t, ta } from '../../../i18n/lang';
 import { ui } from '../../../i18n/ui';
+import { itemListSchema } from '../../../utils/schema';
 
 const lang = 'en' as const;
 
@@ -15,12 +16,19 @@ const jsonLd = {
   url: `${SITE.url}/en/topics`,
   inLanguage: 'en',
 };
+const enrichedJsonLd = [
+  jsonLd,
+  itemListSchema({
+    name: ui('topics.title', lang), url: '/en/topics/', lang,
+    items: topics.map((topic) => ({ name: t(topic.name, lang), description: t(topic.shortDescription, lang), url: `/en/topics/${t(topic.slug, lang)}/` })),
+  }),
+];
 ---
 
 <BaseLayout
   title={ui('topics.title', lang)}
   description={ui('topics.description', lang)}
-  jsonLd={jsonLd}
+  jsonLd={enrichedJsonLd}
   lang={lang}
   alternateUrl="/topicos"
 >
@@ -35,6 +43,15 @@ const jsonLd = {
     <p style="font-size: var(--step-1); color: var(--fg-soft); max-width: 60ch;">
       {ui('topics.description', lang)}
     </p>
+  </section>
+
+  <section class="container article-body" style="padding-bottom: 3rem; max-width: 860px;">
+    <h2>How to navigate the topics</h2>
+    <p>These topics act as coverage maps for Produto com IA. Each page brings together concepts, newsletters, guides, and frequently asked questions around a recurring product or technology problem, so a specific question can lead to a fuller explanation.</p>
+    <p>Use the maps to find patterns across stories that may look disconnected on their own. AI adoption depends on strategy and operating change; agents depend on evaluation and oversight; costs depend on architecture, volume, and delivered value. This structure helps separate a trend, a tool, and a decision.</p>
+    <p>The counts on each card indicate the current depth of coverage. For a quick definition, visit the <a href="/en/concepts/">concepts</a>; to apply the knowledge, continue to the related <a href="/en/guides/">practical guides</a>.</p>
+    <p>Within each map, follow the links between pages and use the frequently asked questions to shape the next investigation. The goal is to shorten the path between finding information and understanding its impact on a product.</p>
+    <p>This reading also reveals gaps: a topic with many news items but few explanations may need a new guide, while a recurring question can become a definition or a durable reference.</p>
   </section>
 
   <section class="container" style="padding-bottom: 4rem;">

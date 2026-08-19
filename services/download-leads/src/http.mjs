@@ -34,6 +34,14 @@ function sendHtml(response, status, body, headers = {}) {
   response.end(body);
 }
 
+function sendRedirect(response, location) {
+  response.writeHead(301, {
+    location,
+    'cache-control': 'public, max-age=300',
+  });
+  response.end();
+}
+
 async function readBody(request, limit) {
   const chunks = [];
   let total = 0;
@@ -82,10 +90,16 @@ function remoteIp(request) {
 
 function fallbackPage({ config, material, lang = 'pt-BR', error = '' }) {
   const english = lang === 'en';
-  const title = english ? 'Get the free resource' : 'Receba o material gratuito';
-  const description = english
-    ? 'Enter your email and the download will start immediately.'
-    : 'Informe seu e-mail e o download começará imediatamente.';
+  const title = material.labels[lang] ?? material.labels[material.language];
+  const description = material.description[lang] ?? material.description[material.language];
+  const canonical = new URL(`/downloads/${material.filename}`, config.allowedOrigin).toString();
+  const relatedUrl = material.relatedUrl[lang] ?? material.relatedUrl[material.language];
+  const resourceIntro = english
+    ? 'This protected resource complements the related editorial guide with a practical structure for review, planning, or execution.'
+    : 'Este material protegido complementa o guia editorial relacionado com uma estrutura prática para revisão, planejamento ou execução.';
+  const resourceUse = english
+    ? 'Adapt the fields to your context, record the evidence behind each decision, and revisit the document when the product, risk, or operating model changes.'
+    : 'Adapte os campos ao seu contexto, registre a evidência por trás de cada decisão e revise o documento quando o produto, o risco ou a operação mudar.';
   const button = english ? 'Download the resource' : 'Baixar o material';
   const privacyHref = english ? '/en/privacy/' : '/privacidade/';
   const privacy = english
@@ -94,8 +108,8 @@ function fallbackPage({ config, material, lang = 'pt-BR', error = '' }) {
   const label = material.labels[lang] ?? material.labels['pt-BR'];
   const errorHtml = error ? `<div role="alert"><strong>${escapeHtml(error)}</strong></div>` : '';
   return `<!doctype html>
-<html lang="${english ? 'en' : 'pt-BR'}"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width"><title>${escapeHtml(title)}</title></head>
-<body><main><h1>${escapeHtml(title)}</h1><p>${escapeHtml(description)}</p><h2>${escapeHtml(label)}</h2>${errorHtml}
+<html lang="${english ? 'en' : 'pt-BR'}"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width"><title>${escapeHtml(title)} — Produto com IA</title><meta name="description" content="${escapeHtml(description)}"><meta name="robots" content="noindex, nofollow, noarchive"><link rel="canonical" href="${escapeHtml(canonical)}"></head>
+<body><main><h1>${escapeHtml(title)}</h1><p>${escapeHtml(description)}</p><p>${escapeHtml(resourceIntro)}</p><p>${escapeHtml(resourceUse)}</p><p><a href="${escapeHtml(relatedUrl)}">${english ? 'Read the related guide' : 'Leia o guia relacionado'}</a></p><h2>${escapeHtml(label)}</h2>${errorHtml}
 <form method="post" action="/api/download-leads/register-form">
 <label for="email">E-mail</label><input id="email" name="email" type="email" autocomplete="email" required>
 <label><input name="marketingOptIn" type="checkbox" value="true"> ${english ? 'I want to receive Produto com IA updates' : 'Quero receber novidades do Produto com IA'}</label>
@@ -135,15 +149,21 @@ export function createLeadHandler({ config, catalog, workflow, rateLimiter }) {
         return sendJson(response, 200, { status: 'ok' });
       }
 
+      if (request.method === 'GET' && url.pathname === '/downloads/') {
+        return sendRedirect(response, url.searchParams.get('lang') === 'en' ? '/en/guides/' : '/guias/');
+      }
+
       if (request.method === 'GET' && url.pathname.startsWith('/downloads/')) {
         const filename = decodeURIComponent(url.pathname.slice('/downloads/'.length));
         const material = catalog.byFilename.get(filename);
         if (!material) throw new LeadFlowError('material_not_found', 404, 'Material not found');
+        if (url.searchParams.has('lang')) return sendRedirect(response, `/downloads/${encodeURIComponent(material.filename)}`);
+        const lang = material.language;
         return sendHtml(response, 200, fallbackPage({
           config,
           material,
-          lang: url.searchParams.get('lang') === 'en' ? 'en' : 'pt-BR',
-        }));
+          lang,
+        }), { 'x-robots-tag': 'noindex, nofollow, noarchive' });
       }
 
       if (request.method === 'GET' && url.pathname.startsWith('/api/download-leads/file/')) {
@@ -211,7 +231,7 @@ export function createLeadHandler({ config, catalog, workflow, rateLimiter }) {
           material,
           lang: parsedBody?.lang === 'en' ? 'en' : 'pt-BR',
           error: error instanceof LeadFlowError ? error.message : 'Serviço temporariamente indisponível',
-        }));
+        }), { 'x-robots-tag': 'noindex, nofollow, noarchive' });
       }
       return sendJson(response, status, errorPayload(error, requestId));
     }
