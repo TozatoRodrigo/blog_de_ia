@@ -1,7 +1,7 @@
 ---
 title: "Seven launches in one week: the AI model became an interchangeable part"
 date: "2026-08-01"
-seoSlug: "2026-08-01-modelo-ia-peca-trocavel"
+seoSlug: "interchangeable-ai-model"
 excerpt: "Seven relevant models launched in roughly one week. For AI products, the answer is not to choose one vendor forever: design workflows, evaluations and governance so the model becomes an interchangeable part."
 tags: ["inteligencia-artificial", "modelos-de-ia", "produto", "governanca-de-ia"]
 featured: true

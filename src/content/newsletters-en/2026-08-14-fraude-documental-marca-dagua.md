@@ -1,7 +1,7 @@
 ---
 title: "AI watermarks are easy to remove: the real problem with document fraud"
 date: "2026-08-14"
-seoSlug: "2026-08-14-fraude-documental-marca-dagua"
+seoSlug: "ai-document-fraud-watermarks"
 excerpt: "Watermarks in AI-generated text can be removed through rewriting and paraphrasing. In credit, document-fraud defenses need transactional signals, multiple data sources, biometrics, and structured traceability."
 tags: ["inteligencia-artificial", "fintech", "governanca-de-ia", "seguranca-de-ia", "produto"]
 featured: true

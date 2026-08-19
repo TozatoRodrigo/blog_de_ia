@@ -1,7 +1,7 @@
 ---
 title: "Wall Street is putting US$500 billion into Nvidia's AI infrastructure"
 date: "2026-08-12"
-seoSlug: "2026-08-12-capital-infraestrutura-ia-nvidia"
+seoSlug: "nvidia-ai-infrastructure-capital"
 excerpt: "Nvidia has closed agreements with six Wall Street giants to mobilize more than US$500 billion for data centers and AI chips. The product signal is direct: credit and capital structure are already part of the compute strategy."
 tags: ["inteligencia-artificial", "fintech", "produto", "finops-de-ia"]
 featured: true

@@ -1,7 +1,7 @@
 ---
 title: "Nvidia cuts its OpenAI guarantee from US$250B to under US$120B"
 date: "2026-08-18"
-seoSlug: "2026-08-18-garantia-openai-infraestrutura-ia"
+seoSlug: "openai-infrastructure-guarantee"
 excerpt: "Nvidia's guarantee renegotiation for OpenAI's data center shows how financing, credit risk and AI infrastructure also shape the price, availability and timing of new models."
 tags: ["inteligencia-artificial", "finops-de-ia", "fintech", "produto", "modelos-de-ia"]
 featured: true

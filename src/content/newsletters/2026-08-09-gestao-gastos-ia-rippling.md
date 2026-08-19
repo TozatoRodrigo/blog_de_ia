@@ -1,7 +1,7 @@
 ---
 title: "Rippling cortou gasto com IA de 40% para 15% do orçamento de P&D"
 date: "2026-08-09"
-seoSlug: "2026-08-09-gestao-gastos-ia-rippling"
+seoSlug: "gestao-gastos-ia-rippling"
 excerpt: "A Rippling reduziu o gasto com IA de 40% para 15% do orçamento de P&D ao rastrear tokens por funcionário e time. O caso mostra por que custo, retorno e limites precisam entrar na gestão de produtos com IA."
 tags: ["inteligencia-artificial", "produto", "finops-de-ia", "fintech"]
 featured: true

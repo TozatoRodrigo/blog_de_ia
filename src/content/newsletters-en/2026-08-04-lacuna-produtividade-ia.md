@@ -1,7 +1,7 @@
 ---
 title: "AI feels faster. The end-to-end metric disagrees."
 date: "2026-08-04"
-seoSlug: "2026-08-04-lacuna-produtividade-ia"
+seoSlug: "ai-productivity-gap"
 excerpt: "The feeling of speed with AI is real, but it does not prove delivered value. To turn AI productivity into results, product teams need to measure the full workflow, including review, rework and integration."
 tags: ["inteligencia-artificial", "produto", "agentes-de-ia", "fintech"]
 featured: true

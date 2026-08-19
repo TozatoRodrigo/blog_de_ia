@@ -1,7 +1,7 @@
 ---
 title: "Gemini 3.6 Flash: queda de 65% no custo de IA muda a conta do roadmap"
 date: "2026-08-10"
-seoSlug: "2026-08-10-gemini-flash-custo-roadmap"
+seoSlug: "gemini-flash-custo-roadmap"
 excerpt: "O Gemini 3.6 Flash reduziu em até 65% o custo de tokens em tarefas agentic longas e em 17% os tokens de saída no geral. A queda reabre casos de uso e muda o cálculo do roadmap."
 tags: ["inteligencia-artificial", "produto", "finops-de-ia", "precificacao-de-ia", "fintech"]
 featured: true

@@ -1,7 +1,7 @@
 ---
 title: "Cursor esconde o custo de uso e a base pagante reage na hora"
 date: "2026-08-02"
-seoSlug: "2026-08-02-transparencia-custo-ia"
+seoSlug: "transparencia-custo-ia"
 excerpt: "Quando um produto de IA cobra por consumo, o usuário não compra só a ferramenta: compra previsibilidade. O caso do Cursor mostra por que transparência de custo precisa entrar no roadmap."
 tags: ["inteligencia-artificial", "produto", "fintech", "precificacao-de-ia"]
 featured: true

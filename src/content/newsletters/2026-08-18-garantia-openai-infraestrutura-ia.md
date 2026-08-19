@@ -1,7 +1,7 @@
 ---
 title: "Nvidia reduz garantia à OpenAI de US$ 250 bi para menos de US$ 120 bi"
 date: "2026-08-18"
-seoSlug: "2026-08-18-garantia-openai-infraestrutura-ia"
+seoSlug: "garantia-openai-infraestrutura-ia"
 excerpt: "A renegociação da garantia da Nvidia para o data center da OpenAI mostra como financiamento, risco de crédito e infraestrutura de IA também moldam preço, disponibilidade e prazo de novos modelos."
 tags: ["inteligencia-artificial", "finops-de-ia", "fintech", "produto", "modelos-de-ia"]
 featured: true

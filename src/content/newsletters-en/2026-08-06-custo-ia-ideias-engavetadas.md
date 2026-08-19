@@ -1,7 +1,7 @@
 ---
 title: "80% cheaper tokens: the backlog of shelved ideas can move again"
 date: "2026-08-06"
-seoSlug: "2026-08-06-custo-ia-ideias-engavetadas"
+seoSlug: "ai-cost-backlog"
 excerpt: "With GPT-5.6 Luna's input price down 80% and open models competing on cost, previously unviable AI use cases can return to the roadmap. For product teams, lower inference cost changes the math—and shifts value toward workflows, data and business rules."
 tags: ["inteligencia-artificial", "produto", "fintech", "finops-de-ia"]
 featured: true

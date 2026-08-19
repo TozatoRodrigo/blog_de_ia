@@ -1,7 +1,7 @@
 ---
 title: "Sete lançamentos em uma semana: o modelo de IA virou peça trocável"
 date: "2026-08-01"
-seoSlug: "2026-08-01-modelo-ia-peca-trocavel"
+seoSlug: "modelo-ia-peca-trocavel"
 excerpt: "Sete modelos relevantes foram lançados em cerca de uma semana. Para produtos de IA, a resposta não é escolher um fornecedor para sempre: é desenhar fluxos, avaliações e governança para tornar o modelo uma peça trocável."
 tags: ["inteligencia-artificial", "modelos-de-ia", "produto", "governanca-de-ia"]
 featured: true

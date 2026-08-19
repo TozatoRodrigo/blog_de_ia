@@ -1,7 +1,7 @@
 ---
 title: "Agente de IA com carteira e limite: o que isso abre em crédito"
 date: "2026-08-05"
-seoSlug: "2026-08-05-agente-ia-carteira-limite"
+seoSlug: "agente-ia-carteira-limite"
 excerpt: "Carteiras programáveis para agentes de IA colocam limite de gasto, fornecedores aprovados e tetos por transação no desenho do produto. Em crédito, isso abre espaço para consumo automatizado, conciliação em escala e governança definida antes da operação."
 tags: ["inteligencia-artificial", "agentes-de-ia", "governanca-de-ia", "fintech", "produto"]
 featured: true

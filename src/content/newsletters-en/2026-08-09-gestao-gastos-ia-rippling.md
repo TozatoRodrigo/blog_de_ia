@@ -1,7 +1,7 @@
 ---
 title: "Rippling cut AI spend from 40% to 15% of its R&D budget"
 date: "2026-08-09"
-seoSlug: "2026-08-09-gestao-gastos-ia-rippling"
+seoSlug: "rippling-ai-spend"
 excerpt: "Rippling reduced AI spend from 40% to 15% of its R&D budget by tracking token usage by employee and team. The case shows why cost, return and limits need to be part of AI product management."
 tags: ["inteligencia-artificial", "produto", "finops-de-ia", "fintech"]
 featured: true

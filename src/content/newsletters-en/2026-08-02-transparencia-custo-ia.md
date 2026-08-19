@@ -1,7 +1,7 @@
 ---
 title: "Cursor hides usage costs and paying customers react immediately"
 date: "2026-08-02"
-seoSlug: "2026-08-02-transparencia-custo-ia"
+seoSlug: "ai-cost-transparency"
 excerpt: "When an AI product charges by consumption, users buy more than the tool: they buy predictability. The Cursor case shows why cost transparency belongs on the product roadmap."
 tags: ["inteligencia-artificial", "produto", "fintech", "precificacao-de-ia"]
 featured: true

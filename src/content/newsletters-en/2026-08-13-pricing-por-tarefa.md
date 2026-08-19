@@ -1,7 +1,7 @@
 ---
 title: "43% of SaaS already charges per task, not per seat: what changes for you"
 date: "2026-08-13"
-seoSlug: "2026-08-13-pricing-por-tarefa"
+seoSlug: "task-based-ai-pricing"
 excerpt: "In 2026, 43% of SaaS companies already use some form of hybrid pricing. The shift from seats to tasks puts cost per model call, delivered value and monetization inside product decisions."
 tags: ["inteligencia-artificial", "precificacao-de-ia", "fintech", "produto"]
 featured: true

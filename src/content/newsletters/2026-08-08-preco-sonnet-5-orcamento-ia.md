@@ -1,7 +1,7 @@
 ---
 title: "Sonnet 5 sobe 50% em setembro: como isso muda seu orçamento de IA"
 date: "2026-08-08"
-seoSlug: "2026-08-08-preco-sonnet-5-orcamento-ia"
+seoSlug: "preco-sonnet-5-orcamento-ia"
 excerpt: "O preço do Claude Sonnet 5 sobe 50% a partir de 31 de agosto, levando um workload de US$2.000 para US$3.000 por mês. Para produtos de IA, o caso reforça a necessidade de simular custos, proteger margem e manter uma estratégia de múltiplos modelos."
 tags: ["inteligencia-artificial", "produto", "finops-de-ia", "precificacao-de-ia", "fintech"]
 featured: true

@@ -1,7 +1,7 @@
 ---
 title: "Stripe strikes a US$7B OpenRouter deal: model orchestration becomes the product"
 date: "2026-08-17"
-seoSlug: "2026-08-17-orquestracao-modelos-ia"
+seoSlug: "model-orchestration-product"
 excerpt: "Stripe reached an agreement to acquire OpenRouter for more than US$7 billion. The move shows that the layer routing models, costs and observability has become strategic infrastructure and a central product decision."
 tags: ["inteligencia-artificial", "modelos-de-ia", "finops-de-ia", "fintech", "produto"]
 featured: true

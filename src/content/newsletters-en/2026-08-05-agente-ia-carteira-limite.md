@@ -1,7 +1,7 @@
 ---
 title: "An AI agent with a wallet and a spending limit: what it opens up in credit"
 date: "2026-08-05"
-seoSlug: "2026-08-05-agente-ia-carteira-limite"
+seoSlug: "ai-agent-portfolio-limit"
 excerpt: "Programmable wallets for AI agents put spending limits, approved suppliers and per-transaction caps into the product design. In credit, this opens space for automated consumption, reconciliation at scale and governance defined before an agent operates."
 tags: ["inteligencia-artificial", "agentes-de-ia", "governanca-de-ia", "fintech", "produto"]
 featured: true

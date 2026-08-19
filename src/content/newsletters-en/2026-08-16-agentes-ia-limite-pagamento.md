@@ -1,7 +1,7 @@
 ---
 title: "Gemini Spark shows where an AI agent should stop"
 date: "2026-08-16"
-seoSlug: "2026-08-16-agentes-ia-limite-pagamento"
+seoSlug: "ai-agent-payment-boundary"
 excerpt: "Gemini Spark operates Chrome with saved accounts and passwords, but returns control to the user before any payment. That boundary is a useful reference for designing AI agents in credit, where autonomy and accountability need to move together."
 tags: ["inteligencia-artificial", "agentes-de-ia", "automacao", "fintech", "governanca-de-ia", "seguranca-de-ia"]
 featured: true

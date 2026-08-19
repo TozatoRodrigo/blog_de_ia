@@ -52,3 +52,10 @@ test('newsletter SEO slugs must be unique within a collection', () => {
     /duplicate-newsletter-seo-slug/,
   );
 });
+
+test('newsletter SEO slugs reject dated public identifiers', () => {
+  assert.throws(
+    () => assertUniqueNewsletterSlugs([{ data: { seoSlug: '2026-08-18-example' } }]),
+    /dated-newsletter-seo-slug/,
+  );
+});
