@@ -36,10 +36,21 @@ const missingFiles = requiredFiles.filter((file) => !existsSync(path.join(DIST, 
 const privateAssetsLeaked = existsSync(path.join(DIST, 'downloads'));
 const allFiles = await walk(DIST);
 const htmlFiles = allFiles.filter((file) => file.endsWith('.html'));
+const editorialIndexMinimums = new Map([
+  ['/conceitos/', 180], ['/correcoes/', 180], ['/guias/', 180], ['/topicos/', 180],
+  ['/en/concepts/', 180], ['/en/corrections/', 180], ['/en/guides/', 180], ['/en/topics/', 180],
+]);
 const pages = [];
 const errors = missingFiles.map((file) => `${file}: missing-required-file`);
 if (privateAssetsLeaked) errors.push('downloads: private-assets-leaked');
 const warnings = [];
+
+if (existsSync(path.join(DIST, 'robots.txt'))) {
+  const robots = await readFile(path.join(DIST, 'robots.txt'), 'utf8');
+  for (const rule of ['Disallow: /downloads/', 'Disallow: /api/download-leads/']) {
+    if (!robots.includes(rule)) errors.push(`robots.txt: missing-${rule}`);
+  }
+}
 
 for (const file of htmlFiles) {
   const html = await readFile(file, 'utf8');
@@ -48,12 +59,13 @@ for (const file of htmlFiles) {
   const noindex = /noindex/i.test($('meta[name="robots"]').attr('content') || '');
   const pathname = new URL(expectedUrl).pathname;
   const isConcept = pathname.startsWith('/conceitos/') || pathname.startsWith('/en/concepts/');
+  const editorialMinimum = editorialIndexMinimums.get(pathname);
   const result = auditHtml({
     html,
     expectedUrl,
     requireCanonical: !noindex,
     requireHreflang: !noindex,
-    minWords: isConcept ? 200 : 0,
+    minWords: editorialMinimum || (isConcept ? 200 : 0),
   });
   errors.push(...result.errors.map((error) => `${expectedUrl}: ${error}`));
   if (!noindex) warnings.push(...result.warnings.map((warning) => `${expectedUrl}: ${warning}`));
@@ -104,6 +116,20 @@ const orphaned = [...inbound.entries()]
   .map(([url]) => url);
 
 errors.push(...orphaned.map((url) => `${url}: orphan-page`));
+
+for (const file of ['sitemap-0.xml', 'rss.xml', 'llms.txt', 'llms-full.txt']) {
+  if (!existsSync(path.join(DIST, file))) continue;
+  const content = await readFile(path.join(DIST, file), 'utf8');
+  if (/\/(?:en\/)?newsletter\/\d{4}-\d{2}-\d{2}-/.test(content)) {
+    errors.push(`${file}: dated-newsletter-url-exposed`);
+  }
+}
+
+for (const page of pages) {
+  if (/\/(?:en\/)?newsletter\/\d{4}-\d{2}-\d{2}-/.test(new URL(page.expectedUrl).pathname)) {
+    errors.push(`${page.expectedUrl}: dated-newsletter-page-exposed`);
+  }
+}
 
 console.log(`SEO audit: ${pages.length} HTML pages, ${errors.length} errors, ${warnings.length} warnings.`);
 for (const warning of warnings) console.log(`WARN ${warning}`);

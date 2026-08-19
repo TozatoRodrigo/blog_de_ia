@@ -77,6 +77,8 @@ export function auditHtml({
   const words = $('main').text().trim().split(/\s+/).filter(Boolean).length;
   if (minWords > 0 && words < minWords) errors.push(`content-under-${minWords}`);
   if ($('a[href*="linkedin.com"]').length > 0) errors.push('crawler-blocked-anchor-linkedin');
+  if ($('a[href^="mailto:"]').length > 0) errors.push('static-mailto-anchor');
+  if ($('a[href*="/cdn-cgi/"]').length > 0) errors.push('cloudflare-email-wrapper-anchor');
 
   return {
     errors,

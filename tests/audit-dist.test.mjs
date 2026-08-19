@@ -106,3 +106,14 @@ test('duplicateValues groups only repeated non-empty values', () => {
     [{ value: 'Repeated title', urls: ['/a/', '/c/'] }],
   );
 });
+
+test('auditHtml rejects static contact wrappers', () => {
+  const html = validHtml.replace('<body>', '<body><a href="mailto:editor@example.com">Contact</a><a href="/cdn-cgi/l/email-protection">Contact</a>');
+  const result = auditHtml({
+    html,
+    expectedUrl: 'https://produtocomia.com.br/guias/gestao-de-produtos-com-ia/',
+  });
+
+  assert.ok(result.errors.includes('static-mailto-anchor'));
+  assert.ok(result.errors.includes('cloudflare-email-wrapper-anchor'));
+});
