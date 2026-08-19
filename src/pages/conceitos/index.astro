@@ -14,6 +14,12 @@ const categories = [...new Set(concepts.map((c) => t(c.category, lang)))].sort()
     <div class="section-header"><div><span class="mono" style="color: var(--accent);">[ {ui('concepts.glossary', lang)} ]</span><h1>{ui('concepts.title', lang)}</h1></div><span class="mono" style="color: var(--fg-muted);">{concepts.length} {ui('concepts.terms', lang)}</span></div>
     <p style="font-size: var(--step-1); color: var(--fg-soft); max-width: 60ch;">{ui('concepts.description', lang)}</p>
   </section>
+  <section class="container article-body" style="padding-bottom: 3rem; max-width: 860px;">
+    <h2>Como usar este glossário de IA</h2>
+    <p>Este glossário traduz termos que aparecem em discussões de produto, engenharia e operações de inteligência artificial. Cada definição começa pelo significado direto e avança para o contexto necessário para tomar uma decisão: quando o conceito é útil, quais limites devem ser observados e que tipo de evidência ajuda a avaliar uma implementação.</p>
+    <p>Use a página para alinhar linguagem entre produto, dados, segurança e negócio. Em vez de tratar um termo como promessa, procure a relação entre capacidade, custo, risco e resultado. Conceitos como RAG, tool calling, avaliação e inferência têm implicações diferentes para arquitetura, experiência do usuário e governança.</p>
+    <p>As entradas são atualizadas quando novas fontes mudam a explicação ou quando um exemplo operacional ajuda a evitar interpretações equivocadas. Para uma visão aplicada, combine este glossário com os <a href="/guias/">guias de IA</a> e com os <a href="/topicos/">mapas de tópicos</a>.</p>
+  </section>
   {categories.map((category) => {
     const categoryConcepts = concepts.filter((c) => t(c.category, lang) === category);
     return (

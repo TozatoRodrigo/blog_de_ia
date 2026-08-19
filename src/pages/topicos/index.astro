@@ -16,6 +16,14 @@ const jsonLd = { '@context': 'https://schema.org', '@type': 'CollectionPage', na
     </div>
     <p style="font-size: var(--step-1); color: var(--fg-soft); max-width: 60ch;">{ui('topics.description', lang)}</p>
   </section>
+  <section class="container article-body" style="padding-bottom: 3rem; max-width: 860px;">
+    <h2>Como navegar pelos tópicos</h2>
+    <p>Os tópicos funcionam como mapas de cobertura do Produto com IA. Cada página reúne conceitos, newsletters, guias e perguntas frequentes sobre um problema recorrente de produto ou tecnologia, permitindo começar por uma dúvida específica e seguir para uma explicação mais completa.</p>
+    <p>Use os tópicos para encontrar padrões entre notícias que, isoladamente, parecem desconectadas. A adoção de IA depende de estratégia e mudança operacional; agentes dependem de avaliação e supervisão; custos dependem de arquitetura, volume e valor entregue. Essa organização ajuda a separar tendência, ferramenta e decisão.</p>
+    <p>As contagens exibidas em cada card indicam o tamanho atual da cobertura. Quando precisar de uma definição rápida, consulte os <a href="/conceitos/">conceitos</a>; quando precisar aplicar o conhecimento, avance para os <a href="/guias/">guias práticos</a> relacionados.</p>
+    <p>Em cada mapa, observe as conexões entre as páginas e use as perguntas frequentes para formular a próxima investigação. O objetivo é reduzir o tempo entre encontrar uma informação e entender o impacto dela no produto.</p>
+    <p>Essa leitura também ajuda a identificar lacunas: um tema com muitas notícias e poucas explicações pode pedir um novo guia, enquanto uma dúvida recorrente pode virar uma definição ou uma pergunta de referência.</p>
+  </section>
   <section class="container" style="padding-bottom: 4rem;">
     <div class="grid grid-3">
       {topics.map((topic, i) => (

@@ -11,6 +11,11 @@ const guideById = new Map(guides.map((guide) => [guide.id, guide]));
     <span class="mono" style="color:var(--accent)">[ BIBLIOTECA ]</span>
     <h1>Guias de IA para Product Managers</h1>
     <p style="max-width:68ch;color:var(--fg-soft)">Referências verificadas e conectadas para entender agentes, governar risco e melhorar decisões de produto.</p>
+    <div class="article-body" style="max-width:68ch;margin-top:2rem">
+      <p>Esta biblioteca organiza guias que ajudam a sair da curiosidade sobre inteligência artificial e chegar a decisões verificáveis. Os materiais combinam explicações, critérios de avaliação, exemplos de operação e perguntas que uma equipe de produto pode levar para uma reunião de descoberta, priorização ou revisão de risco.</p>
+      <p>Comece pelo núcleo que corresponde ao seu problema. O cluster de agentes trata arquitetura, avaliação e operação; governança cobre inventário, classificação de risco e controles; produto conecta adoção, estratégia, pesquisa e resultados. Os guias principais funcionam como pontos de entrada e apontam para materiais mais específicos.</p>
+      <p>As páginas são mantidas como referências vivas: mostram datas de atualização, fontes relacionadas e, quando disponível, materiais práticos para download. Use a navegação por cluster para comparar abordagens e retorne às fontes antes de transformar uma recomendação em política ou requisito de produção.</p>
+    </div>
     {guideClusters.map((cluster) => {
       const clusterGuides = cluster.items.map((item) => guideById.get(item.pt)).filter(Boolean);
       return <section data-guide-cluster={cluster.id} style="margin-top:3.5rem">

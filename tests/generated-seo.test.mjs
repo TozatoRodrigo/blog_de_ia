@@ -142,3 +142,22 @@ test('contact links stay on owned routes and avoid Cloudflare email wrappers', a
   }
   assert.deepEqual(violations, []);
 });
+
+test('editorial index pages provide enough context beyond navigation and cards', async () => {
+  const pages = [
+    'conceitos/index.html',
+    'correcoes/index.html',
+    'en/concepts/index.html',
+    'en/corrections/index.html',
+    'guias/index.html',
+    'en/guides/index.html',
+    'topicos/index.html',
+    'en/topics/index.html',
+  ];
+  for (const pathname of pages) {
+    const $ = await loadPage(pathname);
+    $('.topic-card, script, style, nav, footer, header').remove();
+    const words = $('main').text().replace(/\s+/g, ' ').trim().split(/\s+/).filter(Boolean);
+    assert.ok(words.length >= 180, `${pathname}: ${words.length} editorial words`);
+  }
+});

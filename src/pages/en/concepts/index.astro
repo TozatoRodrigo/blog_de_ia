@@ -39,6 +39,14 @@ const categories = [...new Set(concepts.map((c) => t(c.category, 'en')))].sort()
     </p>
   </section>
 
+  <section class="container article-body" style="padding-bottom: 3rem; max-width: 860px;">
+    <h2>How to use this AI glossary</h2>
+    <p>This glossary translates terms that appear in product, engineering, and artificial-intelligence operations. Each definition starts with a direct meaning and adds the context needed for a decision: when the concept is useful, which limits matter, and what evidence helps evaluate an implementation.</p>
+    <p>Use the page to align language across product, data, security, and business teams. Treat a term as a working model rather than a promise, and look for the relationship between capability, cost, risk, and outcome. RAG, tool calling, evaluation, and inference each carry different implications for architecture, user experience, and governance.</p>
+    <p>Entries are updated when new sources change an explanation or when an operational example helps prevent a common misunderstanding. For applied guidance, combine this glossary with the <a href="/en/guides/">AI guides</a> and the <a href="/en/topics/">topic maps</a>.</p>
+    <p>When a term affects a roadmap or a control, use its entry as a shared starting point, then document the local definition, assumptions, and evidence your team will use in practice.</p>
+  </section>
+
   {categories.map((category) => {
     const categoryConcepts = concepts.filter((c) => t(c.category, 'en') === category);
     return (
