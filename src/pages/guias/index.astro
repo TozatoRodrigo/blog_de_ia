@@ -2,11 +2,16 @@
 import { getCollection } from 'astro:content';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import { guideClusters } from '../../data/guideClusters';
+import { itemListSchema } from '../../utils/schema';
 
 const guides = await getCollection('guides', ({ data }) => !data.draft);
 const guideById = new Map(guides.map((guide) => [guide.id, guide]));
+const jsonLd = itemListSchema({
+  name: 'Guias de IA para Product Managers', url: '/guias/', lang: 'pt-BR',
+  items: guides.map((guide) => ({ name: guide.data.title, description: guide.data.description, url: `/guias/${guide.id}/` })),
+});
 ---
-<BaseLayout title="Guias de IA para Product Managers" description="Guias práticos sobre agentes de IA, governança e gestão de produto para transformar IA em decisões melhores." lang="pt-BR" alternateUrl="/en/guides/">
+<BaseLayout title="Guias de IA para Product Managers" description="Guias práticos sobre agentes de IA, governança e gestão de produto para transformar IA em decisões melhores." jsonLd={jsonLd} lang="pt-BR" alternateUrl="/en/guides/">
   <section class="container" style="padding-top:4rem;padding-bottom:4rem">
     <span class="mono" style="color:var(--accent)">[ BIBLIOTECA ]</span>
     <h1>Guias de IA para Product Managers</h1>

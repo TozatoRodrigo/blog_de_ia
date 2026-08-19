@@ -161,3 +161,19 @@ test('editorial index pages provide enough context beyond navigation and cards',
     assert.ok(words.length >= 180, `${pathname}: ${words.length} editorial words`);
   }
 });
+
+test('collection pages expose structured lists and glossary terms for discovery', async () => {
+  const cases = [
+    ['conceitos/index.html', 'DefinedTermSet'],
+    ['en/concepts/index.html', 'DefinedTermSet'],
+    ['topicos/index.html', 'ItemList'],
+    ['en/topics/index.html', 'ItemList'],
+    ['guias/index.html', 'ItemList'],
+    ['en/guides/index.html', 'ItemList'],
+  ];
+  for (const [pathname, type] of cases) {
+    const $ = await loadPage(pathname);
+    const schemas = $('script[type="application/ld+json"]').toArray().map((element) => $(element).text());
+    assert.ok(schemas.some((schema) => schema.includes(`"@type":"${type}"`)), `${pathname}: missing ${type}`);
+  }
+});

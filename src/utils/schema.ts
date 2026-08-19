@@ -60,6 +60,46 @@ export function breadcrumbSchema(items: Array<[string, string]>) {
   };
 }
 
+export function itemListSchema(input: {
+  name: string;
+  url: string;
+  lang: Lang;
+  items: Array<{ name: string; url: string; description?: string }>;
+}) {
+  return {
+    '@context': 'https://schema.org', '@type': 'ItemList',
+    name: input.name, url: absoluteUrl(input.url),
+    inLanguage: input.lang === 'en' ? 'en' : 'pt-BR',
+    numberOfItems: input.items.length,
+    itemListOrder: 'https://schema.org/ItemListOrderAscending',
+    itemListElement: input.items.map((item, index) => ({
+      '@type': 'ListItem', position: index + 1,
+      name: item.name, description: item.description,
+      item: { '@type': 'Thing', name: item.name, url: absoluteUrl(item.url) },
+    })),
+  };
+}
+
+export function definedTermSetSchema(input: {
+  name: string;
+  description: string;
+  url: string;
+  lang: Lang;
+  terms: Array<{ name: string; description: string; url: string }>;
+}) {
+  const setUrl = absoluteUrl(input.url);
+  return {
+    '@context': 'https://schema.org', '@type': 'DefinedTermSet',
+    name: input.name, description: input.description, url: setUrl,
+    inLanguage: input.lang === 'en' ? 'en' : 'pt-BR',
+    hasDefinedTerm: input.terms.map((term) => ({
+      '@type': 'DefinedTerm', name: term.name, description: term.description,
+      url: absoluteUrl(term.url), inDefinedTermSet: setUrl,
+      inLanguage: input.lang === 'en' ? 'en' : 'pt-BR',
+    })),
+  };
+}
+
 export function faqPageSchema(items: Array<{ question: string; answer: string }>) {
   return {
     '@context': 'https://schema.org', '@type': 'FAQPage',

@@ -3,9 +3,18 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
 import { concepts } from '../../data/concepts';
 import { t } from '../../i18n/lang';
 import { ui } from '../../i18n/ui';
+import { definedTermSetSchema } from '../../utils/schema';
 
 const lang = 'pt-BR' as const;
-const jsonLd = { '@context': 'https://schema.org', '@type': 'CollectionPage', name: `${ui('concepts.title', lang)} — Produto com IA`, description: ui('concepts.description', lang), url: 'https://produtocomia.com.br/conceitos' };
+const jsonLd = [
+  { '@context': 'https://schema.org', '@type': 'CollectionPage', name: `${ui('concepts.title', lang)} — Produto com IA`, description: ui('concepts.description', lang), url: 'https://produtocomia.com.br/conceitos' },
+  definedTermSetSchema({
+    name: ui('concepts.title', lang), description: ui('concepts.description', lang), url: '/conceitos/', lang,
+    terms: concepts.map((concept) => ({
+      name: t(concept.term, lang), description: t(concept.longDescription, lang), url: `/conceitos/${t(concept.slug, lang)}/`,
+    })),
+  }),
+];
 const categories = [...new Set(concepts.map((c) => t(c.category, lang)))].sort();
 ---
 

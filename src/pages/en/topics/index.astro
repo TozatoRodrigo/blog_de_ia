@@ -4,6 +4,7 @@ import { topics } from '../../../data/topics';
 import { SITE } from '../../../config';
 import { t, ta } from '../../../i18n/lang';
 import { ui } from '../../../i18n/ui';
+import { itemListSchema } from '../../../utils/schema';
 
 const lang = 'en' as const;
 
@@ -15,12 +16,19 @@ const jsonLd = {
   url: `${SITE.url}/en/topics`,
   inLanguage: 'en',
 };
+const enrichedJsonLd = [
+  jsonLd,
+  itemListSchema({
+    name: ui('topics.title', lang), url: '/en/topics/', lang,
+    items: topics.map((topic) => ({ name: t(topic.name, lang), description: t(topic.shortDescription, lang), url: `/en/topics/${t(topic.slug, lang)}/` })),
+  }),
+];
 ---
 
 <BaseLayout
   title={ui('topics.title', lang)}
   description={ui('topics.description', lang)}
-  jsonLd={jsonLd}
+  jsonLd={enrichedJsonLd}
   lang={lang}
   alternateUrl="/topicos"
 >

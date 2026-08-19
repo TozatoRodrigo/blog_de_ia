@@ -3,9 +3,16 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
 import { topics } from '../../data/topics';
 import { t, ta } from '../../i18n/lang';
 import { ui } from '../../i18n/ui';
+import { itemListSchema } from '../../utils/schema';
 
 const lang = 'pt-BR' as const;
-const jsonLd = { '@context': 'https://schema.org', '@type': 'CollectionPage', name: `${ui('topics.title', lang)} — Produto com IA`, description: ui('topics.description', lang), url: 'https://produtocomia.com.br/topicos' };
+const jsonLd = [
+  { '@context': 'https://schema.org', '@type': 'CollectionPage', name: `${ui('topics.title', lang)} — Produto com IA`, description: ui('topics.description', lang), url: 'https://produtocomia.com.br/topicos' },
+  itemListSchema({
+    name: ui('topics.title', lang), url: '/topicos/', lang,
+    items: topics.map((topic) => ({ name: t(topic.name, lang), description: t(topic.shortDescription, lang), url: `/topicos/${t(topic.slug, lang)}/` })),
+  }),
+];
 ---
 
 <BaseLayout title={ui('topics.title', lang)} description={ui('topics.description', lang)} jsonLd={jsonLd} lang={lang} alternateUrl="/en/topics">
