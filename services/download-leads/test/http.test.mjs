@@ -12,8 +12,14 @@ import { createLeadWorkflow } from '../src/workflow.mjs';
 const material = Object.freeze({
   id: 'ai-risk-matrix',
   filename: 'ai-risk-matrix.csv',
+  language: 'en',
   contentType: 'text/csv; charset=utf-8',
   labels: Object.freeze({ 'pt-BR': 'Matriz de risco de IA', en: 'AI risk matrix' }),
+  description: Object.freeze({
+    'pt-BR': 'Matriz para classificar riscos de IA por impacto, evidência, controle e responsável.',
+    en: 'Matrix for classifying AI risks by impact, evidence, control, and owner.',
+  }),
+  relatedUrl: Object.freeze({ 'pt-BR': '/guias/matriz-risco-ia/', en: '/en/guides/ai-risk-matrix/' }),
 });
 
 async function setup() {
@@ -189,12 +195,36 @@ test('renders a localized no-JavaScript fallback for direct download links', asy
     const response = await fetch(`${app.baseUrl}/downloads/${material.filename}?lang=en`);
     assert.equal(response.status, 200);
     assert.match(response.headers.get('content-type'), /text\/html/);
+    assert.equal(response.headers.get('x-robots-tag'), 'noindex, nofollow, noarchive');
     const html = await response.text();
-    assert.match(html, /Get the free resource/);
+    assert.match(html, /<title>AI risk matrix/);
+    assert.match(html, /<meta name="description" content="[^"]+"/);
+    assert.match(html, /<meta name="robots" content="noindex, nofollow, noarchive"/);
+    assert.match(html, /<link rel="canonical" href="https:\/\/produtocomia\.com\.br\/downloads\/ai-risk-matrix\.csv"/);
+    assert.match(html, /Download the resource/);
     assert.match(html, /type="email"/);
     assert.match(html, /\/en\/privacy\//);
     assert.match(html, /challenges\.cloudflare\.com\/turnstile/);
     assert.doesNotMatch(html, /EXAMPLE,low/);
+  } finally {
+    await app.close();
+  }
+});
+
+test('redirects the download root and localized query URLs to clean paths', async () => {
+  const app = await setup();
+  try {
+    const root = await fetch(`${app.baseUrl}/downloads/`, { redirect: 'manual' });
+    assert.equal(root.status, 301);
+    assert.equal(root.headers.get('location'), '/guias/');
+
+    const englishRoot = await fetch(`${app.baseUrl}/downloads/?lang=en`, { redirect: 'manual' });
+    assert.equal(englishRoot.status, 301);
+    assert.equal(englishRoot.headers.get('location'), '/en/guides/');
+
+    const clean = await fetch(`${app.baseUrl}/downloads/${material.filename}?lang=en`, { redirect: 'manual' });
+    assert.equal(clean.status, 301);
+    assert.equal(clean.headers.get('location'), `/downloads/${material.filename}`);
   } finally {
     await app.close();
   }
@@ -253,7 +283,7 @@ test('keeps the no-JavaScript form localized after a validation error', async ()
     });
     assert.equal(response.status, 400);
     const html = await response.text();
-    assert.match(html, /Get the free resource/);
+    assert.match(html, /Download the resource/);
     assert.match(html, /Enter a valid email/);
     assert.match(html, /name="materialId" value="ai-risk-matrix"/);
   } finally {

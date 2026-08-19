@@ -15,7 +15,10 @@ test('composes the service without starting network listeners during import', as
     id: 'resource',
     filename: 'resource.csv',
     contentType: 'text/csv; charset=utf-8',
+    language: 'pt-BR',
     labels: { 'pt-BR': 'Recurso', en: 'Resource' },
+    description: { 'pt-BR': 'Descrição do recurso.', en: 'Resource description.' },
+    relatedUrl: { 'pt-BR': '/guias/', en: '/en/guides/' },
   }]));
 
   const app = await createApplication({

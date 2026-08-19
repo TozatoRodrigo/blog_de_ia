@@ -9,15 +9,27 @@ function validateItem(item, index) {
   if (!/^(application|text)\//.test(item.contentType ?? '')) {
     throw new Error(`catalog item ${index} has an invalid content type`);
   }
+  if (!['pt-BR', 'en'].includes(item.language)) {
+    throw new Error(`catalog item ${index} requires a valid language`);
+  }
   if (!item.labels?.['pt-BR'] || !item.labels?.en) {
     throw new Error(`catalog item ${index} requires pt-BR and en labels`);
+  }
+  if (!item.description?.['pt-BR'] || !item.description?.en) {
+    throw new Error(`catalog item ${index} requires pt-BR and en descriptions`);
+  }
+  if (!/^\/[^?]+\/$/.test(item.relatedUrl?.['pt-BR'] ?? '') || !/^\/en\/[^?]+\/$/.test(item.relatedUrl?.en ?? '')) {
+    throw new Error(`catalog item ${index} requires localized related URLs`);
   }
 
   return Object.freeze({
     id: item.id,
     filename: item.filename,
+    language: item.language,
     contentType: item.contentType,
     labels: Object.freeze({ 'pt-BR': item.labels['pt-BR'], en: item.labels.en }),
+    description: Object.freeze({ 'pt-BR': item.description['pt-BR'], en: item.description.en }),
+    relatedUrl: Object.freeze({ 'pt-BR': item.relatedUrl['pt-BR'], en: item.relatedUrl.en }),
   });
 }
 

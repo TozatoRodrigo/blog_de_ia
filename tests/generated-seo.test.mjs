@@ -118,3 +118,16 @@ test('every indexable page has unique bounded metadata and no LinkedIn anchor', 
   assert.ok(indexable.every((row) => row.description.length >= 70 && row.description.length <= 160));
   assert.ok(rows.every((row) => row.linkedinAnchors === 0));
 });
+
+test('internal download links never expose language query parameters', async () => {
+  const files = await walkHtml(new URL('../dist/', import.meta.url));
+  const queryLinks = [];
+  for (const file of files) {
+    const $ = cheerio.load(await readFile(file, 'utf8'));
+    $('a[href^="/downloads/"]').each((_, element) => {
+      const href = $(element).attr('href') || '';
+      if (href.includes('?')) queryLinks.push(`${file.pathname}: ${href}`);
+    });
+  }
+  assert.deepEqual(queryLinks, []);
+});
