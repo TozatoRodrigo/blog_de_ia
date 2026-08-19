@@ -69,7 +69,7 @@ test('privacy pages disclose the complete lead lifecycle in both languages', asy
     assert.match($('main h1').text(), new RegExp(heading));
     assert.equal($('link[rel="canonical"]').attr('href'), `https://produtocomia.com.br${canonicalPath}`);
     assert.ok($('link[rel="alternate"][hreflang]').filter((_, element) => $(element).attr('href') === `https://produtocomia.com.br${alternatePath}`).length > 0);
-    assert.match(text, /rodrigo\.tozato@icloud\.com/);
+    assert.equal($('[data-contact-email]').length, 2);
     assert.match(text, /Resend/);
     assert.match(text, /Cloudflare Turnstile/);
     assert.match(text, /730/);
@@ -91,4 +91,20 @@ test('footer and styles expose privacy, accessible dialog and reduced motion sup
   assert.match(css, /:focus-visible/);
   assert.match(css, /@media\s*\(prefers-reduced-motion:\s*reduce\)/);
   assert.match(css, /@media\s*\(max-width:\s*640px\)[\s\S]*?\.download-gate/);
+});
+
+test('footer credits Strivium Tech in both languages', async () => {
+  const pt = await loadPage('index.html');
+  const en = await loadPage('en/index.html');
+  const creditUrl = 'https://www.striviumtech.com.br';
+
+  assert.equal(pt('.site-footer__credit').text().trim(), 'Construído por Strivium Tech');
+  assert.equal(en('.site-footer__credit').text().trim(), 'Built by Strivium Tech');
+
+  for (const $ of [pt, en]) {
+    const creditLink = $('.site-footer__credit a');
+    assert.equal(creditLink.attr('href'), creditUrl);
+    assert.equal(creditLink.attr('target'), '_blank');
+    assert.equal(creditLink.attr('rel'), 'noopener noreferrer');
+  }
 });
