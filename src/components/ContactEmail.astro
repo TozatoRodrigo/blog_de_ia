@@ -1,0 +1,18 @@
+---
+import { SITE } from '../config';
+
+interface Props {
+  class?: string;
+}
+
+const { class: className = '' } = Astro.props;
+const [user, domain] = SITE.email.split('@');
+---
+
+<span
+  class={className}
+  data-contact-email
+  data-contact-user={user}
+  data-contact-domain={domain}
+  aria-label="E-mail do editor"
+>E-mail do editor</span>

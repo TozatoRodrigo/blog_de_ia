@@ -131,3 +131,14 @@ test('internal download links never expose language query parameters', async () 
   }
   assert.deepEqual(queryLinks, []);
 });
+
+test('contact links stay on owned routes and avoid Cloudflare email wrappers', async () => {
+  const files = await walkHtml(new URL('../dist/', import.meta.url));
+  const violations = [];
+  for (const file of files) {
+    const $ = cheerio.load(await readFile(file, 'utf8'));
+    if ($('a[href^="mailto:"]').length > 0) violations.push(`${file.pathname}: mailto`);
+    if ($('a[href*="/cdn-cgi/"]').length > 0) violations.push(`${file.pathname}: Cloudflare email wrapper`);
+  }
+  assert.deepEqual(violations, []);
+});
