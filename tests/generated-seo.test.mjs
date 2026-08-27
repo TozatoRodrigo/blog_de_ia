@@ -114,7 +114,8 @@ test('Spec Kit guides expose bilingual SEO metadata and HowTo/FAQ schemas', asyn
     assert.equal($('link[rel="canonical"]').attr('href'), canonical);
     assert.ok(schemas.some((schema) => /"@type"\s*:\s*"HowTo"/.test(schema)));
     assert.ok(schemas.some((schema) => /"@type"\s*:\s*"FAQPage"/.test(schema)));
-    assert.match($('main').text(), /Product Manager|Tech Lead/i);
+    assert.match($('main').text(), /Product Manager/i);
+    assert.match($('main').text(), /Tech Lead/i);
     assert.equal($('html').attr('lang'), language);
   }
 });

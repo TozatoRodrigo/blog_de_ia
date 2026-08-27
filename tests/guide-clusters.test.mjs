@@ -39,6 +39,7 @@ test('Spec Kit guide is registered in the product cluster with reciprocal pairin
     current: 'spec-kit-spec-driven-development',
     alternate: 'spec-kit-desenvolvimento-orientado-especificacoes',
   });
+  assert.equal(clusterForGuide('spec-kit-spec-driven-development', 'en')?.id, 'product');
 });
 
 test('every cluster entry has reciprocal Markdown content', async () => {
