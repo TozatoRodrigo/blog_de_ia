@@ -1,7 +1,7 @@
 ---
 title: "Spec Kit na prática: tutorial de SDD para Product Managers e Tech Leads"
 seoTitle: "Spec Kit: tutorial de SDD para PMs e Tech Leads"
-description: "Aprenda a usar o GitHub Spec Kit para transformar uma ideia em especificação, plano, tarefas e código verificável com Product Manager, Tech Lead e agentes de IA."
+description: "Aprenda a usar o GitHub Spec Kit em SDD para transformar uma ideia em especificação, plano, tarefas e código verificável com PM, Tech Lead e agentes de IA."
 datePublished: "2026-08-27"
 dateModified: "2026-08-27"
 tags: ["Spec Kit", "Spec-Driven Development", "SDD", "Product Management", "Tech Leadership", "Cursor", "Codex", "Claude Code"]
@@ -39,15 +39,15 @@ howToSteps:
   - name: "Plan"
     text: "Converta a especificação aprovada em uma abordagem técnica, incluindo arquitetura, stack, interfaces, dados, riscos e testes."
   - name: "Checklist"
-    text: "Transforme os requisitos em uma lista de verificação que permita avaliar se a implementação cobre o comportamento esperado."
+    text: "Revise qualidade, completude e rastreabilidade dos requisitos, separando cobertura planejada de evidência de teste."
   - name: "Tasks"
     text: "Quebre o plano em tarefas pequenas, ordenadas por dependência e associadas aos artefatos que precisam mudar."
   - name: "Analyze"
     text: "Faça uma leitura de consistência entre constituição, especificação, plano, checklist e tarefas antes de escrever código."
   - name: "Implement"
-    text: "Execute as tarefas com o agente de código, usando os artefatos aprovados como contexto e a checklist como gate de requisitos."
+    text: "Execute as tarefas aprovadas e registre separadamente os resultados de validação produzidos durante a implementação."
   - name: "Converge"
-    text: "Compare o estado implementado com os artefatos, registre divergências e crie follow-ups quando a entrega ainda não convergir."
+    text: "Compare código e artefatos, registre divergências e abra encaminhamentos quando a entrega ainda não convergir."
 faq:
   - question: "O que é o GitHub Spec Kit?"
     answer: "É um toolkit open source do GitHub para trabalhar com Spec-Driven Development. Ele organiza o desenvolvimento em artefatos como constituição, especificação, plano, checklist e tarefas, que orientam um agente de código sem transferir a decisão para a IA."
@@ -63,8 +63,8 @@ faq:
     answer: "O Product Manager é dono do problema, do usuário, do resultado esperado, das prioridades, dos limites de escopo e da aprovação das decisões de produto. O agente pode ajudar a explorar e redigir, mas não transforma hipótese em evidência."
   - question: "SDD substitui discovery, TDD ou Product Management?"
     answer: "Não. SDD estrutura intenção e execução; não automatiza discovery, não substitui TDD ou outros testes e não substitui Product Management. As práticas podem se complementar dentro do mesmo ciclo."
-  - question: "Como evitar spec drift no ciclo completo?"
-    answer: "Use analyze antes da implementação e converge depois dela para comparar código, especificação, plano, checklist e tarefas. Registre mudanças, peça aprovação para decisões novas e abra follow-ups quando o código ou os artefatos não convergirem."
+  - question: "Como evitar o desvio da especificação (spec drift) no ciclo completo?"
+    answer: "Use analyze antes da implementação e converge depois dela para comparar código, especificação, plano, checklist e tarefas. Registre mudanças, peça aprovação para decisões novas e abra encaminhamentos quando o código ou os artefatos não convergirem."
 draft: false
 ---
 
@@ -99,7 +99,7 @@ O fluxo funciona melhor quando cada participante tem uma responsabilidade clara:
 | Especificação | Aprova comportamento, escopo e critérios | Questiona ambiguidade, segurança, dados e operação | Redige alternativas e perguntas |
 | Plano | Confirma que a solução ainda atende o resultado | Decide abordagem técnica e dependências | Explora o repositório e propõe plano |
 | Execução | Valida decisões que alteram produto | Revisa mudanças e evidências de execução | Implementa tarefas e atualiza artefatos |
-| Convergência | Aceita ou rejeita divergências de comportamento | Aceita ou rejeita divergências técnicas | Compara código com os artefatos e abre follow-ups |
+| Convergência | Aceita ou rejeita divergências de comportamento | Aceita ou rejeita divergências técnicas | Compara código com os artefatos e abre encaminhamentos (follow-ups) |
 
 O agente não é um terceiro aprovador. Ele é um acelerador com capacidade de leitura, escrita e execução, conforme a integração e as permissões adotadas pelo time. A aprovação continua sendo humana.
 
@@ -128,17 +128,17 @@ Dentro da pasta do projeto, inicialize a integração escolhida:
 specify init . --integration <key>
 ```
 
-Substitua `<key>` por uma das chaves documentadas para este tutorial:
+Substitua `<key>` por uma das chaves documentadas para este tutorial. Estes são os três comandos prontos; escolha e execute apenas o correspondente ao agente que sua dupla adotou:
 
-```text
-cursor-agent
-codex
-claude
+```bash
+specify init . --integration cursor-agent
+specify init . --integration codex
+specify init . --integration claude
 ```
 
 As chaves selecionam a integração do agente; não são uma promessa de que os três produtos tenham a mesma interface, permissões ou modelo de execução. Consulte a [referência oficial de integrações](https://github.github.com/spec-kit/reference/integrations.html) para o estado atual. Em um projeto novo, o quick start também mostra a inicialização em uma pasta nomeada, como `specify init taskify`; aqui usamos `.` para trabalhar no repositório atual.
 
-Depois disso, o agente escolhido pode conduzir as fases pelo mecanismo de instruções que ele suporta. Alguns agentes usam comandos ou skills gerados pelo Spec Kit; outros podem receber os prompts abaixo em sua interface. O importante é preservar os artefatos e as aprovações, não decorar uma sintaxe específica do agente.
+Depois disso, o agente escolhido pode conduzir as fases pelo mecanismo de instruções que ele suporta. A integração do Spec Kit e os arquivos opcionais de contexto do projeto são camadas diferentes. Conforme a integração, as skills do Spec Kit podem ficar disponíveis em diretórios como `.cursor/skills/`, `.agents/skills/` ou `.claude/skills/`; verifique o que a CLI gerou para o agente selecionado. Alguns agentes usam comandos ou skills do Spec Kit; outros podem receber os prompts abaixo em sua interface. O importante é preservar os artefatos e as aprovações, não decorar uma sintaxe específica do agente.
 
 ## As nove fases do SDD na prática
 
@@ -220,23 +220,23 @@ Com base somente na especificação e nas decisões aprovadas da lista de favori
 
 **Correção quando incompleto.** Peça inspeção de áreas específicas do repositório, exija alternativas para decisões irreversíveis e devolva ao specify qualquer conflito de comportamento. Stack escolhida sem evidência deve ser rebaixada a hipótese ou justificada pelo Tech Lead.
 
-### 5. Checklist: testar os requisitos
+### 5. Checklist: revisar os requisitos
 
-**Objetivo.** Criar uma checklist de requisitos que funcione como um teste de cobertura da especificação. Ela verifica se o trabalho está cobrindo o que foi pedido; não substitui a suíte automatizada.
+**Objetivo.** Fazer uma revisão de qualidade, completude e rastreabilidade dos requisitos. A checklist verifica se cada requisito aprovado está representado e se pode ser acompanhado até uma tarefa ou forma de validação; ela não é um teste de implementação nem uma prova de que o código foi executado.
 
 **Dono humano principal.** Ambos.
 
 **Prompt copiável.**
 
 ```text
-Converta a especificação de favoritos em uma checklist de requisitos verificáveis. Cubra o caminho feliz, estados vazios, marcação e desmarcação, persistência, autorização, artigo indisponível, erros, acessibilidade, responsividade, privacidade, observabilidade e fora de escopo. Para cada item, aponte a seção da especificação que o sustenta. Marque lacunas, contradições e itens que dependem de teste automatizado ou validação humana. Não marque nenhum item como concluído sem evidência de execução.
+Converta a especificação de favoritos em uma checklist de revisão de qualidade, completude e rastreabilidade. Cubra o caminho feliz, estados vazios, marcação e desmarcação, persistência, autorização, artigo indisponível, erros, acessibilidade, responsividade, privacidade, observabilidade e fora de escopo. Para cada item, aponte a seção da especificação que o sustenta, a tarefa relacionada e a forma de validação esperada. Marque lacunas, contradições e itens que exigem teste automatizado ou revisão humana, sem registrar resultado de execução nesta fase.
 ```
 
-**Artefato esperado.** Checklist rastreável, com itens verificáveis e indicação do tipo de evidência necessário.
+**Artefato esperado.** Checklist de revisão com requisitos completos, rastreáveis e sem contradições, distinguindo cobertura prevista de evidência de teste a ser produzida depois.
 
 **Pergunta de aprovação.** “Cada critério importante tem uma forma clara de verificação, e a checklist não introduziu requisito que o PM não aprovou?”
 
-**Correção quando incompleto.** Relacione o item à especificação ou remova-o. Quando um requisito não é observável, reescreva-o como comportamento ou resultado verificável. Quando a verificação é visual ou de negócio, deixe claro que depende de revisão humana.
+**Correção quando incompleto.** Relacione cada item à especificação, tarefa ou remova-o. Quando um requisito não é observável, reescreva-o como comportamento ou resultado verificável. Quando a validação é visual ou de negócio, deixe claro que depende de revisão humana e não a trate como realizada antes da execução.
 
 ### 6. Tasks: ordenar a execução
 
@@ -250,7 +250,7 @@ Converta a especificação de favoritos em uma checklist de requisitos verificá
 Quebre o plano aprovado da lista de favoritos em tarefas pequenas e ordenadas por dependência. Inclua mudanças de interface, domínio, persistência, autorização, estados de erro, testes e documentação quando aplicável. Para cada tarefa, informe objetivo, pré-requisitos, arquivos ou áreas prováveis, requisito coberto e evidência esperada. Não crie tarefas para funcionalidades fora de escopo. Se encontrar uma decisão nova, pare e sinalize para PM e Tech Lead em vez de assumi-la.
 ```
 
-**Artefato esperado.** Lista de tarefas dependency-ordered, com rastreabilidade para requisitos e plano.
+**Artefato esperado.** Lista de tarefas ordenada por dependências, com rastreabilidade para requisitos e plano.
 
 **Pergunta de aprovação.** “Outra pessoa consegue executar cada tarefa sem descobrir uma decisão de produto escondida no meio da implementação?”
 
@@ -286,7 +286,7 @@ Faça uma análise somente de leitura dos artefatos de favoritos. Procure confli
 Implemente somente as tarefas aprovadas da lista de favoritos, na ordem de dependência. Antes de cada mudança, consulte a especificação, o plano e a tarefa correspondente. Preserve padrões existentes do repositório. Não invente comportamento para lacunas: pare e sinalize a decisão. Ao final de cada tarefa, registre arquivos alterados, comandos executados, resultados observados, testes não executados e itens da checklist cobertos. Diferencie fatos de execução, hipóteses e decisões que ainda precisam de aprovação. Não declare sucesso sem evidência.
 ```
 
-**Artefato esperado.** Código e testes/documentação previstos, junto de evidências de execução e checklist atualizada sem falsos positivos.
+**Artefato esperado.** Código e testes/documentação previstos, junto de um registro separado dos resultados de validação realmente produzidos. A checklist da fase anterior indica cobertura e rastreabilidade; não funciona como prova de execução.
 
 **Pergunta de aprovação.** “A implementação entregue corresponde à especificação e temos evidência suficiente para revisar comportamento, qualidade e risco?”
 
@@ -294,21 +294,21 @@ Implemente somente as tarefas aprovadas da lista de favoritos, na ordem de depen
 
 ### 9. Converge: verificar e fechar o ciclo
 
-**Objetivo.** Comparar o código e as evidências com especificação, plano, checklist e tasks. Converge identifica divergências que não apareceram antes e cria follow-ups quando a entrega ainda não está alinhada.
+**Objetivo.** Comparar o código e as evidências com especificação, plano, checklist e tasks. Converge identifica divergências que não apareceram antes e cria encaminhamentos quando a entrega ainda não está alinhada.
 
 **Dono humano principal.** Ambos: o Tech Lead avalia a convergência técnica; o PM avalia comportamento e resultado de produto.
 
 **Prompt copiável.**
 
 ```text
-Compare o estado atual do código da lista de favoritos com a constitution, a especificação, as decisões de clarify, o plano, a checklist e as tarefas. Classifique cada requisito como coberto, parcialmente coberto, não coberto ou não verificável, citando a evidência disponível. Procure spec drift, comportamento fora de escopo, documentação desatualizada, testes ausentes e divergências técnicas. Proponha follow-ups ordenados por risco. Não encerre como concluído se houver divergência relevante ou evidência faltante.
+Compare o estado atual do código da lista de favoritos com a constitution, a especificação, as decisões de clarify, o plano, a checklist e as tarefas. Classifique cada requisito como coberto, parcialmente coberto, não coberto ou não verificável, citando a evidência disponível. Procure desvio entre especificação e código, comportamento fora de escopo, documentação desatualizada, testes ausentes e divergências técnicas. Proponha encaminhamentos ordenados por risco. Não encerre como concluído se houver divergência relevante ou evidência faltante.
 ```
 
-**Artefato esperado.** Matriz de convergência, checklist final honesta, decisões de aceite e follow-ups versionados quando necessário.
+**Artefato esperado.** Matriz de convergência, checklist final honesta, decisões de aceite e encaminhamentos versionados quando necessário.
 
 **Pergunta de aprovação.** “PM e Tech Lead aceitam a relação entre intenção, código e evidência, ou existe alguma divergência que deve voltar ao fluxo?”
 
-**Correção quando incompleto.** Abra follow-up para código, teste ou documentação; reabra specify quando o produto mudou; reabra plan quando a solução técnica mudou. Em seguida, repita analyze e converge no escopo afetado.
+**Correção quando incompleto.** Abra um encaminhamento para código, teste ou documentação; reabra specify quando o produto mudou; reabra plan quando a solução técnica mudou. Em seguida, repita analyze e converge no escopo afetado.
 
 ## Exemplo completo: lista de favoritos para artigos
 
@@ -343,19 +343,28 @@ Para evitar que um agente preencha lacunas, cada artefato pode usar quatro rótu
 | **Decisão** | A primeira versão terá apenas artigos, sem pastas ou compartilhamento — aprovação do PM. |
 | **Evidência de execução** | Um teste, comando ou revisão visual produziu um resultado observável — registrar o que realmente ocorreu. |
 
-Esse vocabulário é útil tanto para revisão humana quanto para busca e compreensão por sistemas de IA: o texto deixa explícito o status de cada afirmação, em vez de misturar intenção com resultado.
+Esse vocabulário melhora clareza e rastreabilidade: o texto deixa explícito o status de cada afirmação, em vez de misturar intenção com resultado. Isso pode facilitar a leitura por pessoas e sistemas, mas não oferece garantia de ranking, citação ou presença em respostas generativas.
+
+## Como tornar o conteúdo claro e citável
+
+Para conteúdo técnico que precisa ser encontrado e compreendido, siga uma estrutura verificável. O [Google Search Central](https://developers.google.com/search/docs/appearance/ai-features) orienta manter fundamentos de SEO, texto visível, links rastreáveis e dados estruturados coerentes com a página; não há uma marcação especial que garanta presença em recursos de IA.
+
+- **Dê a resposta direta primeiro:** defina Spec Kit e SDD em linguagem que possa ser entendida sem contexto adicional.
+- **Use fontes primárias:** ligue para a documentação oficial e informe quando um comportamento depende da versão atual da ferramenta.
+- **Mostre exemplos verificáveis:** comandos copiáveis, critérios de aceitação e distinção entre fato, hipótese, decisão e evidência.
+- **Seja explícito sobre limites:** clareza e fontes ajudam a avaliação, mas não garantem ranking, citação nem inclusão em uma resposta generativa.
 
 ## Cursor, Codex e Claude Code no mesmo método
 
-O Spec Kit documenta integrações por chave, como `cursor-agent`, `codex` e `claude`. A integração conecta os artefatos ao agente; ela não muda a responsabilidade do time. O [Cursor](https://docs.cursor.com/context/rules-for-ai) também oferece regras versionadas em `.cursor/rules/`; o [Codex CLI](https://help.openai.com/en/articles/11096431) pode trabalhar localmente no repositório com leitura, edição e execução conforme o ambiente; e o [Claude Code](https://docs.anthropic.com/en/docs/claude-code/getting-started) é um agente de código operado a partir do projeto.
+O Spec Kit documenta integrações por chave, como `cursor-agent`, `codex` e `claude`. A integração instala ou disponibiliza as instruções e skills do Spec Kit no mecanismo esperado pelo agente; ela não é a mesma coisa que um arquivo geral de contexto do projeto e não muda a responsabilidade do time. O [Cursor](https://docs.cursor.com/context/rules-for-ai) também oferece regras versionadas em `.cursor/rules/`; o [Codex CLI](https://help.openai.com/en/articles/11096431) pode trabalhar localmente no repositório com leitura, edição e execução conforme o ambiente; e o [Claude Code](https://docs.anthropic.com/en/docs/claude-code/getting-started) é um agente de código operado a partir do projeto.
 
-Arquivos de contexto ajudam a explicar convenções, comandos e limites do repositório. Eles não substituem requisitos aprovados, critérios de aceitação nem evidência:
+Arquivos opcionais de contexto ajudam a explicar convenções, comandos e limites do repositório, mas são uma camada separada da integração do Spec Kit. O `specify init` não necessariamente cria `.cursor/rules/`, `AGENTS.md` ou `CLAUDE.md`, e esses arquivos não ativam o Spec Kit por si só. Eles também não substituem requisitos aprovados, critérios de aceitação nem evidência:
 
 | Integração | Inicialização | Contexto complementar | Uso recomendado no fluxo |
 | --- | --- | --- | --- |
 | Cursor | `specify init . --integration cursor-agent` | `.cursor/rules/` | Regras de projeto, padrões de edição e contexto que o agente deve considerar. |
 | Codex | `specify init . --integration codex` | `AGENTS.md` | Instruções de trabalho do repositório, comandos seguros e convenções de revisão. |
-| Claude Code | `specify init . --integration claude` | `CLAUDE.md` | Memória e convenções do projeto para sessões do Claude Code. |
+| Claude Code | `specify init . --integration claude` | `CLAUDE.md` | Instruções persistentes e convenções do projeto para o Claude Code. |
 
 Não trate `.cursor/rules/`, `AGENTS.md` ou `CLAUDE.md` como a fonte primária da decisão de produto. Uma regra pode dizer “como trabalhar neste repositório”; a especificação deve dizer “o que esta mudança precisa fazer e por quê”. Se houver conflito, pause e faça a decisão voltar ao PM e ao Tech Lead.
 
@@ -365,7 +374,7 @@ Essas abordagens compartilham a intenção de dar mais estrutura ao trabalho com
 
 | Abordagem | Estrutura destacada nas docs oficiais | Pode encaixar melhor quando |
 | --- | --- | --- |
-| [Spec Kit](https://github.github.com/spec-kit/) | SDD com refinamento de `constitution`, `specify`, `clarify`, `plan`, `checklist`, `tasks`, `analyze`, `implement` e `converge`. Integra agentes diferentes. | A dupla PM + Tech Lead quer uma trilha explícita de intenção até implementação, com artefatos versionados e gates humanos. |
+| [Spec Kit](https://github.github.com/spec-kit/) | SDD com refinamento de `constitution`, `specify`, `clarify`, `plan`, `checklist`, `tasks`, `analyze`, `implement` e `converge`. Integra agentes diferentes. | A dupla PM + Tech Lead quer uma trilha explícita de intenção até implementação, com artefatos versionados e pontos de aprovação humana. |
 | [Kiro Specs](https://kiro.dev/docs/specs/) | Specs organizadas em requisitos, design e tarefas; a documentação também diferencia Feature, Bug e Quick Spec. | O time quer uma experiência integrada de IDE/web e um formato de spec que se adapte a tipos de mudança. |
 | [OpenSpec](https://openspec.dev/docs/schemas/spec-driven) | Um schema de mudança que separa proposta, specs, design e tasks; o quickstart apresenta Explore, Propose, Review, Apply e Archive. | A equipe prefere tratar cada mudança como proposta revisável, aplicar depois da revisão e arquivar o histórico da alteração. |
 | [BMAD](https://docs.bmad-method.org/reference/workflow-map/) | Método modular com agentes, módulos e workflows de planejamento, arquitetura, histórias e implementação. | O trabalho exige uma metodologia mais ampla de papéis e workflows, não apenas um pipeline de artefatos SDD para uma mudança. |
