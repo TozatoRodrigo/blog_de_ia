@@ -1,7 +1,7 @@
 ---
 title: "Spec Kit in Practice: an SDD Tutorial for Product Managers and Tech Leads"
 seoTitle: "Spec Kit: an SDD Tutorial for PMs and Tech Leads"
-description: "Learn how to use GitHub Spec Kit with SDD to turn a product idea into a specification, plan, tasks, and verifiable code with PMs, Tech Leads, and AI agents."
+description: "Learn how to use GitHub Spec Kit to turn a product idea into a specification, plan, tasks and verifiable code with a Product Manager, Tech Lead and AI coding agents."
 datePublished: "2026-08-27"
 dateModified: "2026-08-27"
 tags: ["Spec Kit", "Spec-Driven Development", "SDD", "Product Management", "Tech Leadership", "Cursor", "Codex", "Claude Code"]
