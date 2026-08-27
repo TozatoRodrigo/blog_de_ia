@@ -26,6 +26,21 @@ test('cluster lookup and language pairing are reciprocal', () => {
   });
 });
 
+test('Spec Kit guide is registered in the product cluster with reciprocal pairing', () => {
+  assert.equal(
+    clusterForGuide('spec-kit-desenvolvimento-orientado-especificacoes', 'pt-BR')?.id,
+    'product',
+  );
+  assert.deepEqual(guidePair('spec-kit-desenvolvimento-orientado-especificacoes', 'pt-BR'), {
+    current: 'spec-kit-desenvolvimento-orientado-especificacoes',
+    alternate: 'spec-kit-spec-driven-development',
+  });
+  assert.deepEqual(guidePair('spec-kit-spec-driven-development', 'en'), {
+    current: 'spec-kit-spec-driven-development',
+    alternate: 'spec-kit-desenvolvimento-orientado-especificacoes',
+  });
+});
+
 test('every cluster entry has reciprocal Markdown content', async () => {
   for (const cluster of guideClusters) {
     for (const item of cluster.items) {

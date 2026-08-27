@@ -89,6 +89,36 @@ test('pillar guides expose reciprocal metadata, schemas and spokes', async () =>
   }
 });
 
+test('Spec Kit guides expose bilingual SEO metadata and HowTo/FAQ schemas', async () => {
+  const cases = [
+    [
+      'guias/spec-kit-desenvolvimento-orientado-especificacoes/index.html',
+      'pt-BR',
+      'https://produtocomia.com.br/guias/spec-kit-desenvolvimento-orientado-especificacoes/',
+    ],
+    [
+      'en/guides/spec-kit-spec-driven-development/index.html',
+      'en',
+      'https://produtocomia.com.br/en/guides/spec-kit-spec-driven-development/',
+    ],
+  ];
+
+  for (const [pathname, language, canonical] of cases) {
+    const $ = await loadPage(pathname);
+    const schemas = $('script[type="application/ld+json"]')
+      .toArray()
+      .map((element) => $(element).text());
+
+    assert.match($('title').text(), /Spec Kit/i);
+    assert.ok(($('meta[name="description"]').attr('content') || '').length >= 70);
+    assert.equal($('link[rel="canonical"]').attr('href'), canonical);
+    assert.ok(schemas.some((schema) => /"@type"\s*:\s*"HowTo"/.test(schema)));
+    assert.ok(schemas.some((schema) => /"@type"\s*:\s*"FAQPage"/.test(schema)));
+    assert.match($('main').text(), /Product Manager|Tech Lead/i);
+    assert.equal($('html').attr('lang'), language);
+  }
+});
+
 test('LLM discovery files include pillar guides and the expanded corpus', async () => {
   const [summary, full] = await Promise.all([
     readFile(new URL('../dist/llms.txt', import.meta.url), 'utf8'),
