@@ -47,6 +47,7 @@ export const guideClusters = [
     items: [
       { pt: 'gestao-de-produto', en: 'product-management' },
       { pt: 'gestao-de-produtos-com-ia', en: 'ai-product-management' },
+      { pt: 'spec-kit-desenvolvimento-orientado-especificacoes', en: 'spec-kit-spec-driven-development' },
       { pt: 'inteligencia-artificial-para-product-managers', en: 'artificial-intelligence-for-product-managers' },
       { pt: 'estado-ia-gestao-de-produto-2026', en: 'state-of-ai-in-product-management-2026' },
     ],
