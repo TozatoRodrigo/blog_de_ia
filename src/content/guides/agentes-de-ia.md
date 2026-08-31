@@ -111,6 +111,8 @@ O [guia de governança de IA](/guias/governanca-de-ia/) ajuda a conectar esses c
 
 Depois do lançamento, o [guia de operação de agentes de IA](/guias/operacao-de-agentes-de-ia/) organiza observabilidade, SLOs, custos, incidentes e mudanças reversíveis. Ele inclui uma [pesquisa documental reproduzível](/guias/pesquisa-operacao-agentes-de-ia/) e uma checklist protegida para transformar os controles em evidência de operação.
 
+Antes de promover uma mudança de modelo, instrução ou ferramenta, use o [guia de avaliação de agentes de IA](/guias/avaliacao-agentes-de-ia/) para separar resultado, trajetória, segurança e operação. A [pesquisa sobre controles de avaliação](/guias/pesquisa-avaliacao-agentes-de-ia/) mostra a origem documental dos critérios e o checklist protegido transforma a decisão em evidência por caso.
+
 ## Quando não usar
 
 Não use um agente quando o processo é totalmente previsível, não existe métrica de sucesso, os dados não podem ser acessados com segurança, a ação não pode ser revertida ou a organização não consegue monitorar o sistema. Nesses casos, regras, busca, formulários ou assistência sem execução podem entregar mais valor com menos risco.

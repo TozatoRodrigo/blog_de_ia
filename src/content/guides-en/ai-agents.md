@@ -86,4 +86,6 @@ Connect these controls to the [AI governance guide](/en/guides/ai-governance/). 
 
 After launch, the [AI agent operations guide](/en/guides/ai-agent-operations/) organizes observability, SLOs, costs, incidents and reversible changes. It includes [reproducible documentation research](/en/guides/research-ai-agent-operations/) and a protected checklist that turns the controls into operational evidence.
 
+Before promoting a model, instruction or tool change, use the [AI agent evaluation guide](/en/guides/evaluate-ai-agents/) to separate outcome, trajectory, safety and operations. The [research on evaluation controls](/en/guides/research-ai-agent-evaluation/) shows the documentary basis for those criteria, and the protected checklist turns the decision into case-level evidence.
+
 Do not use an agent when the process is fully predictable, success cannot be measured, data access cannot be secured or the action cannot be monitored and reversed. The right agent is not the most autonomous one; it is the system that completes a useful task with evidence, known cost and proportionate limits.

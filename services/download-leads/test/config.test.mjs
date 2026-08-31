@@ -48,7 +48,7 @@ test('loadConfig rejects insecure production origins and invalid modes', () => {
 
 test('loadCatalog resolves only declared ids and filenames', async () => {
   const catalog = await loadCatalog(valid.DOWNLOAD_CATALOG_PATH);
-  assert.equal(catalog.items.length, 16);
+  assert.equal(catalog.items.length, 18);
   assert.equal(catalog.byId.get('ai-risk-matrix').filename, 'ai-risk-matrix.csv');
   assert.equal(catalog.byFilename.get('../.env'), undefined);
   assert.equal(Object.isFrozen(catalog.items[0]), true);
