@@ -47,7 +47,10 @@ const warnings = [];
 
 if (existsSync(path.join(DIST, 'robots.txt'))) {
   const robots = await readFile(path.join(DIST, 'robots.txt'), 'utf8');
-  for (const rule of ['Disallow: /downloads/', 'Disallow: /api/download-leads/']) {
+  if (/^Disallow:\s*\/downloads\//m.test(robots)) {
+    errors.push('robots.txt: downloads-blocked');
+  }
+  for (const rule of ['Disallow: /api/download-leads/']) {
     if (!robots.includes(rule)) errors.push(`robots.txt: missing-${rule}`);
   }
 }
