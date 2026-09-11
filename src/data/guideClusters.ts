@@ -20,6 +20,9 @@ export const guideClusters = [
       { pt: 'pesquisa-operacao-agentes-de-ia', en: 'research-ai-agent-operations' },
       { pt: 'resposta-incidentes-agentes-de-ia', en: 'ai-agent-incident-response' },
       { pt: 'pesquisa-resposta-incidentes-agentes-de-ia', en: 'research-ai-agent-incident-response' },
+      { pt: 'custo-agentes-de-ia', en: 'ai-agent-cost-management' },
+      { pt: 'pesquisa-custo-agentes-de-ia', en: 'research-ai-agent-cost-management' },
+      { pt: 'template-orcamento-custo-agente-ia', en: 'ai-agent-cost-budget-template' },
     ],
   },
   {

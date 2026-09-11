@@ -3,7 +3,7 @@ title: "How to operate AI agents in production: observability, SLOs and incident
 seoTitle: "AI agent operations in production: a practical guide"
 description: "Learn how to operate AI agents with observability, proportionate SLOs, cost controls, incident response and reversible changes."
 datePublished: "2026-08-10"
-dateModified: "2026-08-17"
+dateModified: "2026-09-10"
 tags: ["AI agents", "observability", "operations", "SRE", "product management"]
 alternateSlug: "operacao-de-agentes-de-ia"
 cluster: agents
@@ -135,6 +135,8 @@ Tokens are one cost component, not the outcome. A cheap agent that fails and sen
 - execution time and retries;
 - evaluation, trace storage and human-review cost;
 - distribution by customer, flow, version and escalation reason.
+
+For a deeper treatment of cost per task, layered budgets and invoice reconciliation, use the [AI agent cost management guide](/en/guides/ai-agent-cost-management/), the [research on official cost controls](/en/guides/research-ai-agent-cost-management/) and the [protected budget ledger](/downloads/ai-agent-cost-budget.csv).
 
 Set limits before execution: maximum steps, time, action value, calls per tool and period budget. When a limit is reached, the safe behavior may be to stop, ask for confirmation or escalate. Avoid automatic retries that repeat a non-idempotent action.
 

@@ -3,7 +3,7 @@ title: "Como operar agentes de IA em produção: observabilidade, SLOs e inciden
 seoTitle: "Operação de agentes de IA em produção: guia prático"
 description: "Aprenda a operar agentes de IA com observabilidade, SLOs proporcionais, controle de custos, resposta a incidentes e mudanças reversíveis."
 datePublished: "2026-08-10"
-dateModified: "2026-08-17"
+dateModified: "2026-09-10"
 tags: ["agentes de IA", "observabilidade", "operações", "SRE", "gestão de produto"]
 alternateSlug: "ai-agent-operations"
 cluster: agents
@@ -135,6 +135,8 @@ Tokens são um componente do custo, não o resultado. Um agente barato que falha
 - tempo de execução e retries;
 - custo de avaliação, armazenamento de traces e revisão humana;
 - distribuição por cliente, fluxo, versão e motivo de escalonamento.
+
+Para aprofundar custo por tarefa, orçamento em camadas e reconciliação com a fatura, use o [guia de custo de agentes de IA](/guias/custo-agentes-de-ia/), a [pesquisa sobre controles oficiais de custo](/guias/pesquisa-custo-agentes-de-ia/) e o [ledger protegido de orçamento](/downloads/orcamento-custo-agente-ia.csv).
 
 Imponha limites antes da execução: máximo de passos, tempo, valor de ação, chamadas por ferramenta e orçamento por período. Quando um limite for atingido, o comportamento seguro pode ser parar, pedir confirmação ou escalar. Evite retries automáticos que repetem uma ação não idempotente.
 

@@ -10,6 +10,7 @@ const resources = [
   'questionario-ia-gestao-de-produto.md', 'ai-product-management-survey.md',
   'estado-ia-gestao-de-produto-2026.pdf', 'state-of-ai-in-product-management-2026.pdf',
   'checklist-operacao-agente-de-ia.csv', 'ai-agent-operations-checklist.csv',
+  'orcamento-custo-agente-ia.csv', 'ai-agent-cost-budget.csv',
 ];
 
 test('all private resources are present and non-empty', async () => {
