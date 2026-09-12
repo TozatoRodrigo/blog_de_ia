@@ -1,0 +1,238 @@
+---
+/**
+ * ArenaCTA — seção editorial de apresentação da Arena PM.
+ * Estilo brutalista invertido (assinatura do Produto com IA), voz editorial,
+ * prova de valor explícita e um único CTA. Sem urgência, sem repetição.
+ */
+const { lang = 'pt-BR' } = Astro.props as { lang?: 'pt-BR' | 'en' };
+
+const copy = {
+  'pt-BR': {
+    eyebrow: '[ ARENA PM · TREINO PRÁTICO ]',
+    title1: 'Leia o radar é só metade.',
+    title2: 'A outra metade é a decisão.',
+    body: 'A Arena PM é o simulador do Produto com IA: você assume o comando de cenários reais — um agente estourando o budget, um copiloto de crédito travando o release, um incidente irreversível — e vê o impacto de cada escolha na telemetria, ao vivo. É o treinamento de voo de quem quer trabalhar com produto na era da IA.',
+    stats: [
+      { n: '5', l: 'CASOS REAIS' },
+      { n: '~15 MIN', l: 'POR CASO' },
+      { n: 'R$ 0', l: 'CUSTO' },
+      { n: '0', l: 'CADASTROS' },
+    ],
+    casesTitle: 'O QUE VOCÊ VAI ENFRENTAR',
+    cases: [
+      { num: 'C.01', tag: 'FINOPS', title: 'O agente de suporte que estourou o budget' },
+      { num: 'C.02', tag: 'EVALS', title: 'O copiloto de crédito travado no gate de lançamento' },
+      { num: 'C.03', tag: 'GOVERNANÇA', title: 'Agente com efeito externo irreversível' },
+      { num: 'C.04', tag: 'SDD', title: 'Da PRD vaga ao Spec Kit com coding agents' },
+      { num: 'C.05', tag: 'ANTI-HYPE', title: 'Agent washing: IA em tudo, valor em nada?' },
+    ],
+    casesFoot: 'BASEADO NA METODOLOGIA DO RADAR DIÁRIO',
+    cta: 'ENTRAR NA ARENA →',
+    note: 'Gratuito · sem cadastro · seu progresso fica no seu navegador',
+  },
+  en: {
+    eyebrow: '[ PM ARENA · HANDS-ON TRAINING ]',
+    title1: 'Reading the radar is half the job.',
+    title2: 'The other half is the decision.',
+    body: 'The PM Arena is the Produto com IA simulator: you take command of real scenarios — an agent blowing through its budget, a credit copilot stuck at the release gate, an irreversible real-world incident — and watch each choice play out in live telemetry. It is flight training for anyone building products in the AI era.',
+    stats: [
+      { n: '5', l: 'REAL CASES' },
+      { n: '~15 MIN', l: 'PER CASE' },
+      { n: 'R$ 0', l: 'COST' },
+      { n: '0', l: 'SIGN-UPS' },
+    ],
+    casesTitle: 'WHAT YOU WILL FACE',
+    cases: [
+      { num: 'C.01', tag: 'FINOPS', title: 'The support agent that blew the budget' },
+      { num: 'C.02', tag: 'EVALS', title: 'The credit copilot stuck at the release gate' },
+      { num: 'C.03', tag: 'GOVERNANCE', title: 'An agent with irreversible real-world effects' },
+      { num: 'C.04', tag: 'SDD', title: 'From vague PRD to Spec Kit with coding agents' },
+      { num: 'C.05', tag: 'ANTI-HYPE', title: 'Agent washing: AI everywhere, value nowhere?' },
+    ],
+    casesFoot: 'BUILT ON THE DAILY RADAR METHODOLOGY',
+    cta: 'ENTER THE ARENA →',
+    note: 'Free · no sign-up · your progress stays in your browser',
+  },
+} as const;
+
+const c = copy[lang];
+const arenaHref = lang === 'pt-BR' ? '/arena/' : '/arena/';
+---
+
+<section class="arena-cta" aria-label={lang === 'pt-BR' ? 'Arena PM — simulador prático' : 'PM Arena — hands-on simulator'}>
+  <div class="container">
+    <div class="arena-cta__card">
+      <span class="arena-cta__x arena-cta__x--tl"></span>
+      <span class="arena-cta__x arena-cta__x--tr"></span>
+      <span class="arena-cta__x arena-cta__x--bl"></span>
+      <span class="arena-cta__x arena-cta__x--br"></span>
+
+      <div class="arena-cta__grid">
+        {/* Coluna editorial: voz do site, prova de valor, um único CTA */}
+        <div class="arena-cta__lead">
+          <span class="mono arena-cta__eyebrow">{c.eyebrow}</span>
+          <h2 class="arena-cta__title">{c.title1}<br />{c.title2}</h2>
+          <p class="arena-cta__body">{c.body}</p>
+
+          <div class="arena-cta__stats">
+            {c.stats.map((s) => (
+              <div class="arena-cta__stat">
+                <strong>{s.n}</strong>
+                <span>{s.l}</span>
+              </div>
+            ))}
+          </div>
+
+          <div class="arena-cta__actions">
+            <a href={arenaHref} class="arena-cta__btn">{c.cta}</a>
+            <span class="arena-cta__note">{c.note}</span>
+          </div>
+        </div>
+
+        {/* Coluna de conteúdo: os cases reais — transparência, não mistério */}
+        <div class="arena-cta__cases">
+          <span class="mono arena-cta__cases-title">[ {c.casesTitle} ]</span>
+          <ul>
+            {c.cases.map((k) => (
+              <li>
+                <a href={arenaHref}>
+                  <span class="arena-cta__num">{k.num}</span>
+                  <span class="arena-cta__tag">{k.tag}</span>
+                  <span class="arena-cta__case-title">{k.title}</span>
+                </a>
+              </li>
+            ))}
+          </ul>
+          <span class="mono arena-cta__cases-foot">{c.casesFoot}</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  .arena-cta {
+    background: var(--fg);
+    color: var(--fg-invert);
+    padding: 4rem 0;
+  }
+  .arena-cta__card {
+    border: 2px solid var(--fg-invert);
+    position: relative;
+    padding: clamp(1.5rem, 4vw, 3rem);
+    background: var(--fg);
+  }
+  /* crosshairs em papel sobre o preto */
+  .arena-cta__x { position: absolute; width: 24px; height: 24px; pointer-events: none; }
+  .arena-cta__x::before, .arena-cta__x::after { content: ''; position: absolute; background: var(--fg-invert); opacity: .6; }
+  .arena-cta__x::before { height: 1px; top: 50%; left: 0; right: 0; }
+  .arena-cta__x::after { width: 1px; top: 0; bottom: 0; left: 50%; }
+  .arena-cta__x--tl { top: 10px; left: 10px; }
+  .arena-cta__x--tr { top: 10px; right: 10px; }
+  .arena-cta__x--bl { bottom: 10px; left: 10px; }
+  .arena-cta__x--br { bottom: 10px; right: 10px; }
+
+  .arena-cta__grid {
+    display: grid;
+    grid-template-columns: 1.25fr 1fr;
+    gap: clamp(2rem, 4vw, 3.5rem);
+    position: relative;
+    z-index: 2;
+  }
+  @media (max-width: 900px) {
+    .arena-cta__grid { grid-template-columns: 1fr; gap: 2.5rem; }
+  }
+
+  .arena-cta__eyebrow { color: var(--accent); display: inline-block; margin-bottom: 1.25rem; }
+  .arena-cta__title {
+    color: var(--fg-invert);
+    font-size: var(--step-3);
+    line-height: .95;
+    margin-bottom: 1.25rem;
+    max-width: 18ch;
+  }
+  .arena-cta__body {
+    color: color-mix(in srgb, var(--fg-invert) 75%, transparent);
+    font-size: var(--step-0);
+    line-height: 1.6;
+    max-width: 52ch;
+    margin-bottom: 2rem;
+  }
+
+  .arena-cta__stats {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1.5rem 2.5rem;
+    margin-bottom: 2rem;
+    font-family: var(--font-mono);
+    text-transform: uppercase;
+    letter-spacing: .08em;
+  }
+  .arena-cta__stat strong {
+    display: block;
+    font-family: var(--font-display);
+    font-size: 1.75rem;
+    line-height: 1;
+    margin-bottom: .35rem;
+  }
+  .arena-cta__stat span { color: color-mix(in srgb, var(--fg-invert) 55%, transparent); font-size: .6875rem; }
+
+  .arena-cta__actions { display: flex; align-items: center; gap: 1.25rem; flex-wrap: wrap; }
+  .arena-cta__btn {
+    font-family: var(--font-mono);
+    text-transform: uppercase;
+    letter-spacing: .08em;
+    font-size: .875rem;
+    font-weight: 700;
+    background: var(--accent);
+    color: var(--fg-invert);
+    border: 2px solid var(--accent);
+    padding: 1rem 1.75rem;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    min-height: 48px;
+    transition: all var(--dur) var(--ease);
+  }
+  .arena-cta__btn:hover { background: var(--fg-invert); color: var(--fg); border-color: var(--fg-invert); }
+  .arena-cta__note {
+    font-family: var(--font-mono);
+    text-transform: uppercase;
+    letter-spacing: .08em;
+    color: color-mix(in srgb, var(--fg-invert) 45%, transparent);
+    font-size: .6875rem;
+    max-width: 24ch;
+    line-height: 1.6;
+  }
+
+  .arena-cta__cases-title { color: var(--accent); display: block; margin-bottom: 1rem; }
+  .arena-cta__cases ul { list-style: none; margin: 0; padding: 0; }
+  .arena-cta__cases li + li, .arena-cta__cases li { border-top: 1px solid color-mix(in srgb, var(--fg-invert) 18%, transparent); }
+  .arena-cta__cases li:last-child { border-bottom: 1px solid color-mix(in srgb, var(--fg-invert) 18%, transparent); }
+  .arena-cta__cases a {
+    display: grid;
+    grid-template-columns: auto auto 1fr;
+    align-items: baseline;
+    gap: .75rem;
+    padding: .8rem .25rem;
+    text-decoration: none;
+    color: var(--fg-invert);
+    transition: all var(--dur) var(--ease);
+  }
+  .arena-cta__cases a:hover { color: var(--fg-invert); background: color-mix(in srgb, var(--fg-invert) 8%, transparent); padding-left: .5rem; }
+  .arena-cta__num { font-family: var(--font-mono); font-size: .6875rem; color: color-mix(in srgb, var(--fg-invert) 50%, transparent); letter-spacing: .1em; }
+  .arena-cta__tag { font-family: var(--font-mono); font-size: .625rem; letter-spacing: .1em; color: var(--accent); border: 1px solid color-mix(in srgb, var(--accent) 60%, transparent); padding: .15em .5em; white-space: nowrap; }
+  .arena-cta__case-title { font-family: var(--font-display); font-size: .875rem; line-height: 1.25; text-transform: none; letter-spacing: 0; }
+  .arena-cta__cases-foot {
+    display: block;
+    margin-top: 1rem;
+    color: color-mix(in srgb, var(--fg-invert) 40%, transparent);
+    font-size: .625rem;
+  }
+  @media (max-width: 480px) {
+    .arena-cta__title { font-size: var(--step-2); }
+    .arena-cta__stat strong { font-size: 1.375rem; }
+    .arena-cta__cases a { grid-template-columns: auto 1fr; }
+    .arena-cta__case-title { grid-column: 1 / -1; }
+  }
+</style>

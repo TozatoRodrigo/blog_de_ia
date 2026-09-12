@@ -5,6 +5,7 @@ type Dict = Record<string, { 'pt-BR': string; 'en': string }>;
 export const UI: Dict = {
   // Header / Nav
   'nav.home': { 'pt-BR': 'Início', 'en': 'Home' },
+  'nav.arena': { 'pt-BR': 'Arena PM', 'en': 'PM Arena' },
   'nav.newsletter': { 'pt-BR': 'Newsletter', 'en': 'Newsletter' },
   'nav.guides': { 'pt-BR': 'Guias', 'en': 'Guides' },
   'nav.topics': { 'pt-BR': 'Tópicos', 'en': 'Topics' },
@@ -25,6 +26,7 @@ export const UI: Dict = {
   },
   'hero.cta1': { 'pt-BR': 'VER EDIÇÕES', 'en': 'VIEW EDITIONS' },
   'hero.cta2': { 'pt-BR': 'EXPLORAR TÓPICOS', 'en': 'EXPLORE TOPICS' },
+  'hero.ctaArena': { 'pt-BR': 'ARENA PM: SIMULADOR INTERATIVO', 'en': 'PM ARENA: INTERACTIVE SIMULATOR' },
   'hero.editions': { 'pt-BR': 'EDIÇÕES PUBLICADAS', 'en': 'EDITIONS PUBLISHED' },
   'hero.topics': { 'pt-BR': 'TÓPICOS COBERTOS', 'en': 'TOPICS COVERED' },
   'hero.concepts': { 'pt-BR': 'CONCEITOS', 'en': 'CONCEPTS' },

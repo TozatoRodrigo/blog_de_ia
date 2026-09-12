@@ -1,0 +1,103 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+    -webkit-font-smoothing: antialiased;
+  }
+  body {
+    @apply bg-paper text-ink font-sans antialiased min-h-screen overflow-x-hidden;
+  }
+  /* Film grain noise overlay — assinatura do Produto com IA */
+  body::before {
+    content: "";
+    pointer-events: none;
+    z-index: 9999;
+    opacity: 0.025;
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' /%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)' /%3E%3C/svg%3E");
+  }
+  ::selection {
+    @apply bg-accent text-paper;
+  }
+  h1, h2, h3, h4 {
+    font-family: 'Archivo Black', Inter, system-ui, sans-serif;
+    letter-spacing: -0.02em;
+    text-transform: uppercase;
+    line-height: 0.95;
+  }
+}
+
+@layer components {
+  /* Faixa de aviso — assinatura do Produto com IA */
+  .warning-stripe {
+    background: repeating-linear-gradient(
+      45deg,
+      #e61919,
+      #e61919 10px,
+      #0a0a0a 10px,
+      #0a0a0a 20px
+    );
+    width: 100%;
+    height: 8px;
+  }
+
+  /* Crosshairs de registro de impressão */
+  .crosshair {
+    pointer-events: none;
+    position: absolute;
+    width: 24px;
+    height: 24px;
+    z-index: 1;
+  }
+  .crosshair::before,
+  .crosshair::after {
+    content: "";
+    background: #0a0a0a;
+    position: absolute;
+  }
+  .crosshair::before {
+    height: 1px;
+    top: 50%;
+    left: 0;
+    right: 0;
+    transform: translateY(-50%);
+  }
+  .crosshair::after {
+    width: 1px;
+    top: 0;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+  }
+  .crosshair--tl { top: 12px; left: 12px; }
+  .crosshair--tr { top: 12px; right: 12px; }
+  .crosshair--bl { bottom: 12px; left: 12px; }
+  .crosshair--br { bottom: 12px; right: 12px; }
+}
+
+/* Scrollbar — estilo oficial */
+::-webkit-scrollbar {
+  width: 12px;
+  height: 12px;
+}
+::-webkit-scrollbar-track {
+  background: #eae8e3;
+}
+::-webkit-scrollbar-thumb {
+  background: #0a0a0a;
+  border: 2px solid #eae8e3;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #e61919;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}

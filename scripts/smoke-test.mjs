@@ -10,6 +10,7 @@ const checks = [
   ['/rss.xml', 200, '<rss'], ['/robots.txt', 200, 'GPTBot'], ['/llms.txt', 200, '# Produto com IA'],
   ['/llms-full.txt', 200, 'corpus editorial'],
   ['/rota-que-nao-existe-seo-check', 404, '404'],
+  ['/arena/', 200, 'Case Arena'],
 ];
 
 let failures = 0;

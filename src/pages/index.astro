@@ -2,6 +2,7 @@
 import { getCollection } from 'astro:content';
 import BaseLayout from '../layouts/BaseLayout.astro';
 import NewsletterCard from '../components/NewsletterCard.astro';
+import ArenaCTA from '../components/ArenaCTA.astro';
 import { topics } from '../data/topics';
 import { concepts } from '../data/concepts';
 import { formatDate, formatDateISO } from '../utils/format';
@@ -39,6 +40,7 @@ const jsonLd = [
       <div class="hero-buttons" style="display: flex; gap: 1rem; flex-wrap: wrap; margin-bottom: 2.5rem;">
         <a href="/newsletter" class="btn btn--accent btn--lg">{ui('hero.cta1', lang)} →</a>
         <a href="/topicos" class="btn btn--lg">{ui('hero.cta2', lang)}</a>
+        <a href="/arena/" class="btn btn--lg">▸ {ui('hero.ctaArena', lang)}</a>
       </div>
       <div class="hero__meta">
         <div><strong>{newsletters.length}</strong><span>{ui('hero.editions', lang)}</span></div>
@@ -75,6 +77,8 @@ const jsonLd = [
   </section>
 
   <div class="warning-stripe"></div>
+
+  <ArenaCTA lang="pt-BR" />
 
   <section class="container" style="padding-top: 4rem; padding-bottom: 4rem;">
     <div class="section-header"><div><span class="mono" style="color: var(--accent);">[ {ui('section.coverage', lang)} ]</span><h2>{ui('section.topicsTitle', lang)}</h2></div><a href="/topicos" class="mono" style="color: var(--fg-muted);">{ui('section.viewAll', lang)} →</a></div>

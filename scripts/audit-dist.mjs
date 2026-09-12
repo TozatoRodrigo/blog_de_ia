@@ -35,7 +35,7 @@ const requiredFiles = [
 const missingFiles = requiredFiles.filter((file) => !existsSync(path.join(DIST, file)));
 const privateAssetsLeaked = existsSync(path.join(DIST, 'downloads'));
 const allFiles = await walk(DIST);
-const htmlFiles = allFiles.filter((file) => file.endsWith('.html'));
+const htmlFiles = allFiles.filter((file) => file.endsWith('.html') && !file.includes('/arena/'));
 const editorialIndexMinimums = new Map([
   ['/conceitos/', 180], ['/correcoes/', 180], ['/guias/', 180], ['/topicos/', 180],
   ['/en/concepts/', 180], ['/en/corrections/', 180], ['/en/guides/', 180], ['/en/topics/', 180],
