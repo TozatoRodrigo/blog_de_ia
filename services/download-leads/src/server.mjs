@@ -14,7 +14,7 @@ import {
 import { createRateLimiter } from './security.mjs';
 import { createLeadWorkflow } from './workflow.mjs';
 
-export async function createApplication({ env = process.env, fetchImpl = fetch } = {}) {
+export async function createApplication({ env = process.env, fetchImpl = fetch, logger = console } = {}) {
   const config = loadConfig(env);
   const catalog = await loadCatalog(config.downloadCatalogPath);
   const db = createLeadDatabase({ path: config.databasePath });
@@ -39,27 +39,50 @@ export async function createApplication({ env = process.env, fetchImpl = fetch }
   });
   const server = createServer(createLeadHandler({ config, catalog, workflow, rateLimiter }));
   const timers = new Set();
+  const activeNotificationRuns = new Set();
   let closed = false;
 
-  async function runNotifications() {
-    const [downloads, contributions] = await Promise.all([
-      runNotificationBatch({ db, notifier, catalog, limit: 20 }),
-      runContributionNotificationBatch({
-        db,
-        notifier,
-        limit: 20,
-        maxAttempts: config.contributionNotificationMaxAttempts,
-      }),
-    ]);
-    return {
-      sent: downloads.sent + contributions.sent,
-      failed: downloads.failed + contributions.failed,
-    };
+  function reportNotificationError(phase, error) {
+    try {
+      logger?.error?.(`Notification batch failed during ${phase}`, error);
+    } catch {
+      // Logging must not turn a handled batch failure into an unhandled rejection.
+    }
+  }
+
+  function runNotifications() {
+    const run = (async () => {
+      const [downloads, contributions] = await Promise.all([
+        runNotificationBatch({ db, notifier, catalog, limit: 20 }),
+        runContributionNotificationBatch({
+          db,
+          notifier,
+          limit: 20,
+          maxAttempts: config.contributionNotificationMaxAttempts,
+        }),
+      ]);
+      return {
+        sent: downloads.sent + contributions.sent,
+        failed: downloads.failed + contributions.failed,
+      };
+    })();
+    activeNotificationRuns.add(run);
+    run.then(
+      () => activeNotificationRuns.delete(run),
+      () => activeNotificationRuns.delete(run),
+    );
+    return run;
   }
 
   async function start() {
     await workflow.health();
-    await runNotifications();
+    try {
+      await runNotifications();
+    } catch (error) {
+      reportNotificationError('startup', error);
+      throw error;
+    }
+    if (closed) throw new Error('Application is closed');
     await new Promise((resolveStart, reject) => {
       server.once('error', reject);
       server.listen(config.port, '0.0.0.0', () => {
@@ -69,7 +92,9 @@ export async function createApplication({ env = process.env, fetchImpl = fetch }
     });
 
     const notificationTimer = setInterval(() => {
-      runNotifications().catch(() => {});
+      void runNotifications().catch((error) => {
+        reportNotificationError('timer', error);
+      });
     }, 60_000);
     notificationTimer.unref();
     timers.add(notificationTimer);
@@ -95,6 +120,9 @@ export async function createApplication({ env = process.env, fetchImpl = fetch }
       await new Promise((resolveClose, reject) => {
         server.close((error) => error ? reject(error) : resolveClose());
       });
+    }
+    while (activeNotificationRuns.size > 0) {
+      await Promise.allSettled([...activeNotificationRuns]);
     }
     db.close();
   }

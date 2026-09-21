@@ -204,6 +204,46 @@ test('sends a complete idempotent editorial contribution notification', async ()
   assert.match(request.payload.html, /&lt;Texto completo da contribuição\.&gt;/);
 });
 
+test('keeps control characters out of editorial subjects without losing body content', async () => {
+  let payload;
+  const notifier = createNotifier({
+    apiKey: 're_test',
+    from: 'Produto com IA <leads@leads.produtocomia.com.br>',
+    to: 'rodrigo.tozato@icloud.com',
+    mode: 'resend',
+    fetchImpl: async (_url, options) => {
+      payload = JSON.parse(options.body);
+      return new Response(JSON.stringify({ id: 'editorial-safe-subject-id' }), { status: 200 });
+    },
+  });
+  const submission = {
+    id: 'submission-safe-subject',
+    name: '<Pessoa\u007Fautora\n>',
+    email: 'autora@example.com',
+    role: 'Product Manager',
+    siteUrl: '',
+    title: 'Uma\u0000 contribuição\r\nútil\t',
+    excerpt: 'Resumo editorial da contribuição.',
+    content: 'Texto completo da contribuição.',
+    links: '',
+    bio: 'Bio curta da pessoa autora.',
+    language: 'pt-BR',
+    sourcePath: '/contribua/',
+    privacyVersion: '2026-09-21',
+    createdAt: '2026-09-21T15:00:00.000Z',
+  };
+
+  await notifier.sendContributionNotification({ submission });
+
+  assert.doesNotMatch(payload.subject, /[\u0000-\u001F\u007F]/);
+  assert.match(payload.subject, /Uma contribuição útil/);
+  assert.match(payload.subject, /Pessoa autora/);
+  assert.ok(payload.text.includes(submission.title));
+  assert.ok(payload.text.includes(submission.name));
+  assert.match(payload.html, /&lt;Pessoa\u007Fautora\n&gt;/);
+  assert.match(payload.html, /Uma\u0000 contribuição\r\nútil\t/);
+});
+
 test('processes editorial notification batches and preserves failed submissions for retry', async () => {
   const db = createLeadDatabase({
     path: ':memory:',

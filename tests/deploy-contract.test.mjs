@@ -78,3 +78,10 @@ test('Nginx permanently redirects legacy newsletters before static routing', () 
   assert.match(nginx, /return 301 \$newsletter_redirect/);
   assert.doesNotMatch(nginx, /\$uri\/index\.html/);
 });
+
+test('Nginx allows the editorial contribution body while keeping downloads bounded', () => {
+  const apiLocation = nginx.match(/location \/api\/download-leads\/\s*{([\s\S]*?)\n\s*}/)?.[1] ?? '';
+  const downloadsLocation = nginx.match(/location \^~ \/downloads\/\s*{([\s\S]*?)\n\s*}/)?.[1] ?? '';
+  assert.match(apiLocation, /client_max_body_size 128k;/);
+  assert.match(downloadsLocation, /client_max_body_size 16k;/);
+});

@@ -13,6 +13,13 @@ function valueOrDash(value) {
   return value === undefined || value === null || value === '' ? '—' : String(value);
 }
 
+function subjectValue(value) {
+  return String(value)
+    .replace(/[\u0000-\u001F\u007F]/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
 function formatSãoPaulo(isoDate) {
   return new Intl.DateTimeFormat('pt-BR', {
     timeZone: 'America/Sao_Paulo',
@@ -126,7 +133,7 @@ export function createNotifier({ apiKey, from, to, mode = 'resend', fetchImpl = 
           body: JSON.stringify({
             from,
             to: [to],
-            subject: `Nova contribuição editorial: ${submission.title} — ${submission.name}`,
+            subject: `Nova contribuição editorial: ${subjectValue(submission.title)} — ${subjectValue(submission.name)}`,
             text: content.text,
             html: content.html,
           }),
