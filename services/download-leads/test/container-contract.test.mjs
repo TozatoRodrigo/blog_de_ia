@@ -35,6 +35,7 @@ test('compose isolates data, files, secrets and container privileges', async () 
 test('nginx proxies protected paths with bounded requests and Turnstile CSP', async () => {
   const nginx = await text('deploy/nginx.conf');
   assert.match(nginx, /location \/api\/download-leads\/\s*{[\s\S]*?proxy_pass http:\/\/download-leads:8787/);
+  assert.match(nginx, /location = \/api\/contributions\/submit\s*{[\s\S]*?proxy_pass http:\/\/download-leads:8787/);
   const downloadsLocation = nginx.match(/location \^~ \/downloads\/\s*{([\s\S]*?)\n\s*}/)?.[1] ?? '';
   assert.match(downloadsLocation, /proxy_pass http:\/\/download-leads:8787/);
   assert.doesNotMatch(downloadsLocation, /try_files/);
@@ -52,6 +53,7 @@ test('environment example documents production variables without working secrets
     'DATABASE_PATH', 'DOWNLOADS_DIR', 'DOWNLOAD_CATALOG_PATH', 'ALLOWED_ORIGIN',
     'COOKIE_SECRET', 'TURNSTILE_SITE_KEY', 'TURNSTILE_SECRET_KEY', 'RESEND_API_KEY',
     'RESEND_FROM', 'LEAD_NOTIFICATION_TO', 'NOTIFICATION_MODE', 'PRIVACY_VERSION',
+    'CONTRIBUTION_PRIVACY_VERSION',
     'RETENTION_DAYS', 'SESSION_DAYS', 'AUTHORIZATION_SECONDS', 'MAX_BODY_BYTES',
   ]) {
     assert.match(env, new RegExp(`^${name}=.+$`, 'm'));

@@ -279,6 +279,7 @@ export function createLeadHandler({ config, catalog, workflow, rateLimiter, cont
         return sendJson(response, 200, {
           turnstileSiteKey: config.turnstileSiteKey,
           privacyVersion: config.privacyVersion,
+          contributionPrivacyVersion: config.contributionPrivacyVersion,
         });
       }
 

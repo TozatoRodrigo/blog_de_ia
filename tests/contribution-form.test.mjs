@@ -20,10 +20,16 @@ test('Portuguese contribution page renders a complete accessible progressive for
   assert.equal(form.length, 1);
   assert.equal(form.find('input[name="lang"]').attr('value'), 'pt-BR');
   assert.equal(form.find('input[name="sourcePath"]').attr('value'), '/contribua/');
-  assert.equal(form.find('input[name="privacyVersion"]').attr('value'), '2026-07-22');
+  assert.equal(form.find('input[name="privacyVersion"]').attr('value'), '2026-09-21');
   assert.equal(form.find('[data-action="contribution_submit"]').length, 1);
   assert.equal(form.find('input[name="company"]').length, 1);
   assert.equal(form.find('input[name="consent"][required]').length, 1);
+  assert.equal($('.contribution-form [data-contribution-success]').attr('tabindex'), '-1');
+  assert.equal($('.contribution-form [data-contribution-success]').attr('role'), 'status');
+  assert.equal($('.contribution-form [data-contribution-success]').attr('aria-live'), 'polite');
+  assert.equal(form.find('[data-contribution-status]').attr('tabindex'), '-1');
+  assert.equal(form.find('[data-contribution-status]').attr('role'), 'alert');
+  assert.equal(form.find('[data-contribution-status]').attr('aria-live'), 'assertive');
   for (const field of fields) {
     const input = form.find(`[name="${field}"]`);
     assert.equal(input.length, 1, `missing ${field}`);
@@ -32,6 +38,13 @@ test('Portuguese contribution page renders a complete accessible progressive for
   assert.match($('main').text(), /não .*publicada automaticamente/i);
   assert.equal(form.find('a[href="/privacidade/"]').length, 1);
   assert.equal($('.contribution-form [data-contact-email]').length, 1);
+});
+
+test('enhanced contribution form uses its dedicated public privacy version', async () => {
+  const source = await readFile(new URL('../src/components/ContributionForm.astro', import.meta.url), 'utf8');
+  assert.match(source, /config\.contributionPrivacyVersion/);
+  assert.doesNotMatch(source, /privacyInput\.value = config\.privacyVersion/);
+  assert.ok(source.indexOf('await prepare();') < source.indexOf('new FormData(form)'));
 });
 
 test('English contribution page preserves its localized submission contract', async () => {

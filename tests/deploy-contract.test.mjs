@@ -79,6 +79,20 @@ test('Nginx permanently redirects legacy newsletters before static routing', () 
   assert.doesNotMatch(nginx, /\$uri\/index\.html/);
 });
 
+test('Nginx proxies contribution submissions to the lead service with the API contract', () => {
+  const contributionLocation = nginx.match(/location = \/api\/contributions\/submit\s*{([\s\S]*?)\n\s*}/)?.[1] ?? '';
+  assert.match(contributionLocation, /client_max_body_size 128k;/);
+  assert.match(contributionLocation, /proxy_set_header Host \$host;/);
+  assert.match(contributionLocation, /proxy_set_header X-Real-IP \$remote_addr;/);
+  assert.match(contributionLocation, /proxy_set_header X-Forwarded-Proto \$http_x_forwarded_proto;/);
+  assert.match(contributionLocation, /proxy_set_header CF-Connecting-IP \$http_cf_connecting_ip;/);
+  assert.match(contributionLocation, /proxy_connect_timeout 10s;/);
+  assert.match(contributionLocation, /proxy_read_timeout 10s;/);
+  assert.match(contributionLocation, /proxy_pass http:\/\/download-leads:8787;/);
+  assert.match(nginx, /location \/api\/download-leads\/\s*{[\s\S]*?client_max_body_size 128k;/);
+  assert.match(nginx, /location \^~ \/downloads\/\s*{[\s\S]*?client_max_body_size 16k;/);
+});
+
 test('Nginx allows the editorial contribution body while keeping downloads bounded', () => {
   const apiLocation = nginx.match(/location \/api\/download-leads\/\s*{([\s\S]*?)\n\s*}/)?.[1] ?? '';
   const downloadsLocation = nginx.match(/location \^~ \/downloads\/\s*{([\s\S]*?)\n\s*}/)?.[1] ?? '';

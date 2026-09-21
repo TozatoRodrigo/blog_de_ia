@@ -34,7 +34,7 @@ const configResponse = await fetch(`${origin}/api/download-leads/config`);
 const config = await configResponse.json().catch(() => ({}));
 const configKeys = Object.keys(config).sort();
 if (configResponse.status !== 200
-  || JSON.stringify(configKeys) !== JSON.stringify(['privacyVersion', 'turnstileSiteKey'])
+  || JSON.stringify(configKeys) !== JSON.stringify(['contributionPrivacyVersion', 'privacyVersion', 'turnstileSiteKey'])
   || 'turnstileSecretKey' in config
   || 'TURNSTILE_SECRET_KEY' in config) {
   console.error('FAIL /api/download-leads/config exposed an invalid contract'); failures += 1;

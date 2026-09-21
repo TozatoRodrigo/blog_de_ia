@@ -54,3 +54,17 @@ test('contribution indexes link to usable localized intake pages', async () => {
   assert.match((await loadPage('contribua/index.html'))('main').text(), /e-mail/i);
   assert.match((await loadPage('en/contribute/index.html'))('main').text(), /send/i);
 });
+
+test('generated contribution forms keep success and error announcements focusable and live', async () => {
+  for (const pathname of ['contribua/index.html', 'en/contribute/index.html']) {
+    const $ = await loadPage(pathname);
+    const success = $('[data-contribution-success]');
+    const status = $('[data-contribution-status]');
+    assert.equal(success.attr('tabindex'), '-1', `${pathname} success should be focusable`);
+    assert.equal(success.attr('role'), 'status');
+    assert.equal(success.attr('aria-live'), 'polite');
+    assert.equal(status.attr('tabindex'), '-1', `${pathname} error should be focusable`);
+    assert.equal(status.attr('role'), 'alert');
+    assert.equal(status.attr('aria-live'), 'assertive');
+  }
+});

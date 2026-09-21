@@ -8,7 +8,7 @@ const { lang = 'pt-BR', submitted = false } = Astro.props;
 const english = lang === 'en';
 const sourcePath = english ? '/en/contribute/' : '/contribua/';
 const privacyPath = english ? '/en/privacy/' : '/privacidade/';
-const privacyVersion = '2026-07-22';
+const contributionPrivacyVersion = '2026-09-21';
 ---
 
 <section class="contribution-form" aria-labelledby="contribution-form-title" data-contribution-form-root data-lang={lang}>
@@ -39,9 +39,9 @@ const privacyVersion = '2026-07-22';
 
     <label class="contribution-form__consent" for="contribution-consent"><input id="contribution-consent" name="consent" type="checkbox" value="on" required /><span>{english ? 'I confirm that I am the author or have permission to submit this material, and authorize editorial review.' : 'Confirmo que sou autor ou tenho autorização para enviar este material e autorizo a avaliação editorial.'}</span></label>
     <div class="contribution-form__honeypot" aria-hidden="true"><label for="contribution-company">Company</label><input id="contribution-company" name="company" type="text" tabindex="-1" autocomplete="off" /></div>
-    <input type="hidden" name="lang" value={lang} /><input type="hidden" name="sourcePath" value={sourcePath} /><input type="hidden" name="privacyVersion" value={privacyVersion} data-privacy-version />
+    <input type="hidden" name="lang" value={lang} /><input type="hidden" name="sourcePath" value={sourcePath} /><input type="hidden" name="privacyVersion" value={contributionPrivacyVersion} data-privacy-version />
     <div class="cf-turnstile contribution-form__turnstile" data-turnstile data-action="contribution_submit" data-appearance="interaction-only"></div>
-    <p class="contribution-form__status" data-contribution-status role="alert" aria-live="assertive"></p>
+    <p class="contribution-form__status" data-contribution-status tabindex="-1" role="alert" aria-live="assertive"></p>
     <button class="btn btn--primary contribution-form__submit" type="submit">{english ? 'SEND FOR REVIEW →' : 'ENVIAR PARA AVALIAÇÃO →'}</button>
     <p class="contribution-form__privacy">{english ? 'We use these details to evaluate the contribution and contact you about it.' : 'Usamos estes dados para avaliar a contribuição e falar com você sobre ela.'}{' '}<a href={privacyPath}>{english ? 'Read the privacy policy' : 'Leia a política de privacidade'}</a>.</p>
   </form>
@@ -87,7 +87,7 @@ const privacyVersion = '2026-07-22';
     const configResponse = await fetch('/api/download-leads/config', { headers: { accept: 'application/json' } });
     if (!configResponse.ok) throw new Error('Configuration unavailable');
     const config = await configResponse.json();
-    if (privacyInput && typeof config.privacyVersion === 'string') privacyInput.value = config.privacyVersion;
+    if (privacyInput && typeof config.contributionPrivacyVersion === 'string') privacyInput.value = config.contributionPrivacyVersion;
     const turnstile = await loadTurnstile();
     if (!turnstileWidgetId && turnstileContainer) {
       turnstileContainer.dataset.sitekey = config.turnstileSiteKey;
@@ -97,11 +97,12 @@ const privacyVersion = '2026-07-22';
   prepare().catch(() => { if (status) status.textContent = copy('Não foi possível carregar a verificação. Tente novamente.', 'Could not load verification. Please try again.'); });
   form?.addEventListener('submit', async (event) => {
     event.preventDefault(); if (!form) return;
-    const submit = form.querySelector<HTMLButtonElement>('button[type="submit"]'); const fields = new FormData(form);
+    const submit = form.querySelector<HTMLButtonElement>('button[type="submit"]');
     if (submit) submit.disabled = true; if (status) status.textContent = copy('Enviando para avaliação…', 'Sending for review…');
     try {
-      if (!privacyInput?.value || !turnstileWidgetId) await prepare();
+      await prepare();
       if (!turnstileToken) throw new Error(copy('Conclua a verificação e tente novamente.', 'Complete the verification and try again.'));
+      const fields = new FormData(form);
       const body = Object.fromEntries(fields.entries()); body.turnstileToken = turnstileToken;
       const response = await fetch('/api/contributions/submit', { method: 'POST', credentials: 'same-origin', headers: { 'content-type': 'application/json', accept: 'application/json' }, body: JSON.stringify(body) });
       const payload = await response.json().catch(() => ({}));

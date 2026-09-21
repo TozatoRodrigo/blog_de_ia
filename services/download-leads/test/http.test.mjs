@@ -38,7 +38,7 @@ async function setup() {
     turnstileSecretKey: 'turnstile-secret',
     turnstileSiteKey: '1x00000000000000000000AA',
     privacyVersion: '2026-07-22',
-    contributionPrivacyVersion: '2026-07-22',
+    contributionPrivacyVersion: '2026-09-21',
     contributionMaxBodyBytes: 96 * 1024,
   });
   const catalog = Object.freeze({
@@ -122,7 +122,7 @@ const validContribution = Object.freeze({
   links: 'https://example.com/referencia',
   bio: 'Bio curta da pessoa autora.',
   lang: 'pt-BR',
-  privacyVersion: '2026-07-22',
+  privacyVersion: '2026-09-21',
   turnstileToken: 'valid-contribution-turnstile',
   company: '',
   sourcePath: '/contribua/',
@@ -137,12 +137,28 @@ test('exposes only public client configuration and a real health check', async (
     assert.deepEqual(await configResponse.json(), {
       turnstileSiteKey: '1x00000000000000000000AA',
       privacyVersion: '2026-07-22',
+      contributionPrivacyVersion: '2026-09-21',
     });
     assert.equal(configResponse.headers.get('cache-control'), 'no-store');
 
     const health = await fetch(`${app.baseUrl}/api/download-leads/health`);
     assert.equal(health.status, 200);
     assert.deepEqual(await health.json(), { status: 'ok' });
+  } finally {
+    await app.close();
+  }
+});
+
+test('keeps download and contribution privacy versions separate across public config and submissions', async () => {
+  const app = await setup();
+  try {
+    const download = await fetch(`${app.baseUrl}/api/download-leads/register`, jsonRequest(validRegistration));
+    assert.equal(download.status, 201);
+
+    const contribution = await fetch(`${app.baseUrl}/api/contributions/submit`, jsonRequest(validContribution));
+    assert.equal(contribution.status, 201);
+    assert.equal(app.db.pendingNotifications(10).length, 1);
+    assert.equal(app.db.pendingContributionNotifications(10).length, 1);
   } finally {
     await app.close();
   }
