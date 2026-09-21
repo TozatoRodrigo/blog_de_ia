@@ -86,4 +86,6 @@ test('operations runbook covers activation, privacy requests and recovery', asyn
   assert.match(runbook, /Email Address Obfuscation/);
   assert.match(runbook, /cdn-cgi\/l\/email-protection/);
   assert.match(runbook, /node scripts\/smoke-test\.mjs/);
+  assert.match(runbook, /deleteEditorialSubmissionsByEmail/);
+  assert.match(runbook, /requeueContributionNotification/);
 });

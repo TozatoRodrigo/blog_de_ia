@@ -68,6 +68,7 @@ export async function createApplication({ env = process.env, fetchImpl = fetch, 
           notifier,
           limit: 20,
           maxAttempts: config.contributionNotificationMaxAttempts,
+          logger,
         }),
       ].map((batch) => batch.catch((error) => {
         if (!hasRejection) {

@@ -69,7 +69,8 @@ test('privacy pages disclose the complete lead lifecycle in both languages', asy
     assert.match($('main h1').text(), new RegExp(heading));
     assert.equal($('link[rel="canonical"]').attr('href'), `https://produtocomia.com.br${canonicalPath}`);
     assert.ok($('link[rel="alternate"][hreflang]').filter((_, element) => $(element).attr('href') === `https://produtocomia.com.br${alternatePath}`).length > 0);
-    assert.equal($('[data-contact-email]').length, 2);
+    assert.equal($('a[href="mailto:rodrigo.tozato@icloud.com"]').length, 2);
+    assert.equal($('[data-contact-email]').length, 0);
     assert.match(text, /Resend/);
     assert.match(text, /Cloudflare Turnstile/);
     assert.match(text, /730/);

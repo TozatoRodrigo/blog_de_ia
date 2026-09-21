@@ -106,7 +106,7 @@ export function createContributionWorkflow({
       }
 
       if (!isHoneypotClear(input.company)) throw invalidSubmission();
-      if (!consentAccepted(input.consent)) throw invalidSubmission();
+      if (!consentAccepted(input.consent)) throw invalidSubmission('Invalid submission', 'consent');
 
       const limit = rateLimiter.check(input.remoteIp);
       if (!limit.allowed) throw rateLimited(limit.retryAfter);

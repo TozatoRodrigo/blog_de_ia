@@ -55,6 +55,22 @@ test('contribution indexes link to usable localized intake pages', async () => {
   assert.match((await loadPage('en/contribute/index.html'))('main').text(), /send/i);
 });
 
+test('generated contribution and privacy pages expose static contact mailto links', async () => {
+  for (const pathname of [
+    'contribua/index.html',
+    'en/contribute/index.html',
+    'privacidade/index.html',
+    'en/privacy/index.html',
+  ]) {
+    const html = await (await import('node:fs/promises')).readFile(join(dist.pathname, pathname), 'utf8');
+    assert.match(html, /href="mailto:rodrigo\.tozato@icloud\.com"/);
+    if (pathname.includes('privacy')) {
+      assert.doesNotMatch(html.match(/<main[\s\S]*?<\/main>/)?.[0] ?? '', /data-contact-email/);
+    }
+    assert.doesNotMatch(html, /\/cdn-cgi\/l\/email-protection/);
+  }
+});
+
 test('generated contribution forms keep success and error announcements focusable and live', async () => {
   for (const pathname of ['contribua/index.html', 'en/contribute/index.html']) {
     const $ = await loadPage(pathname);

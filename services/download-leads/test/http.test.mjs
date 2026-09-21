@@ -363,11 +363,15 @@ test('contribution endpoint rejects unsafe JSON requests without echoing submitt
     delete missingConsent.consent;
     const missingConsentResponse = await fetch(`${app.baseUrl}/api/contributions/submit`, jsonRequest(missingConsent));
     assert.equal(missingConsentResponse.status, 400);
-    assert.equal((await missingConsentResponse.json()).error, 'invalid_submission');
+    assert.deepEqual(await missingConsentResponse.json(), {
+      error: 'invalid_submission',
+      field: 'consent',
+      message: 'Confira a autorização de autoria e tente novamente.',
+    });
 
     const falseConsent = await fetch(`${app.baseUrl}/api/contributions/submit`, jsonRequest({ ...validContribution, consent: false }));
     assert.equal(falseConsent.status, 400);
-    assert.equal((await falseConsent.json()).error, 'invalid_submission');
+    assert.equal((await falseConsent.json()).field, 'consent');
 
     const forgedConsent = await fetch(`${app.baseUrl}/api/contributions/submit`, jsonRequest({ ...validContribution, consent: 'accepted' }));
     assert.equal(forgedConsent.status, 400);
@@ -428,7 +432,7 @@ test('contribution form rejects missing and false consent', async () => {
       body: missingConsent,
     });
     assert.equal(missingResponse.status, 400);
-    assert.match(await missingResponse.text(), /Confira os campos obrigatórios e tente novamente/);
+    assert.match(await missingResponse.text(), /Confira a autorização de autoria e tente novamente/);
 
     const falseConsent = await fetch(`${app.baseUrl}/api/contributions/submit`, {
       method: 'POST',
@@ -440,7 +444,7 @@ test('contribution form rejects missing and false consent', async () => {
       body: new URLSearchParams({ ...validContribution, consent: 'false' }),
     });
     assert.equal(falseConsent.status, 400);
-    assert.match(await falseConsent.text(), /Confira os campos obrigatórios/);
+    assert.match(await falseConsent.text(), /Confira a autorização de autoria/);
     assert.deepEqual(app.db.pendingContributionNotifications(10), []);
   } finally {
     await app.close();
@@ -555,6 +559,8 @@ test('contribution form errors render escaped localized fallback HTML', async ()
     assert.equal(response.headers.get('x-robots-tag'), 'noindex, nofollow, noarchive');
     const html = await response.text();
     assert.match(html, /Enter a valid email/);
+    assert.match(html, /id="contribution-email"[^>]*aria-invalid="true"[^>]*aria-describedby="contribution-email-error"/);
+    assert.match(html, /<p id="contribution-email-error"[^>]*data-field-error="email"[^>]*>Enter a valid email\.<\/p>/);
     assert.match(html, /&lt;script&gt;alert\(&quot;article&quot;\)&lt;\/script&gt;/);
     assert.doesNotMatch(html, /<script>alert/);
     assert.match(html, /\/en\/privacy\//);
@@ -562,6 +568,52 @@ test('contribution form errors render escaped localized fallback HTML', async ()
     assert.match(html, /<a data-contact-direct="true" href="mailto:rodrigo\.tozato@icloud\.com">Contact the editor<\/a>/);
     assert.match(html, /<noscript>[\s\S]*JavaScript is required to complete Cloudflare Turnstile/);
     assert.match(html, /cannot verify the submission/);
+  } finally {
+    await app.close();
+  }
+});
+
+test('contribution fallback associates localized errors with site, links, content, and consent fields', async () => {
+  const app = await setup();
+  try {
+    const cases = [
+      ['siteUrl', 'javascript:alert("site")', 'Use valid links beginning with http or https.'],
+      ['links', 'ftp://bad.example', 'Use valid links beginning with http or https.'],
+      ['content', ' ', 'Add the full contribution text.'],
+    ];
+    for (const [field, value, message] of cases) {
+      const response = await fetch(`${app.baseUrl}/api/contributions/submit`, {
+        method: 'POST',
+        headers: {
+          origin: 'https://produtocomia.com.br',
+          'content-type': 'application/x-www-form-urlencoded',
+        },
+        body: new URLSearchParams({ ...validContribution, lang: 'en', [field]: value }),
+      });
+      assert.equal(response.status, 400);
+      const html = await response.text();
+      const inputId = field === 'siteUrl' ? 'contribution-site' : `contribution-${field}`;
+      assert.match(html, new RegExp(`id="${inputId}"[^>]*aria-invalid="true"[^>]*aria-describedby="${inputId}-error"`));
+      const escapedMessage = message.replace(/[.*+?^${}()|[\\]\\]/g, '\\$&');
+      assert.match(html, new RegExp(`<p id="${inputId}-error"[^>]*data-field-error="${field}"[^>]*>${escapedMessage}<\\/p>`));
+      assert.doesNotMatch(html, /<script>alert/);
+    }
+
+    const consent = new URLSearchParams(validContribution);
+    consent.delete('consent');
+    consent.set('lang', 'en');
+    const consentResponse = await fetch(`${app.baseUrl}/api/contributions/submit`, {
+      method: 'POST',
+      headers: {
+        origin: 'https://produtocomia.com.br',
+        'content-type': 'application/x-www-form-urlencoded',
+      },
+      body: consent,
+    });
+    assert.equal(consentResponse.status, 400);
+    const consentHtml = await consentResponse.text();
+    assert.match(consentHtml, /id="contribution-consent"[^>]*aria-invalid="true"[^>]*aria-describedby="contribution-consent-error"/);
+    assert.match(consentHtml, /data-field-error="consent"[^>]*>Confirm authorship authorization and try again\.<\/p>/);
   } finally {
     await app.close();
   }

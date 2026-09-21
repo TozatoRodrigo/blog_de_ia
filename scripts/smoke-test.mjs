@@ -28,8 +28,8 @@ for (const [path, expectedStatus, expectedText] of checks) {
 const contactChecks = [
   ['/contribua/', ['data-contact-direct="true"', 'href="mailto:', 'href="/sobre#contato"', 'href="/privacidade/"']],
   ['/en/contribute/', ['data-contact-direct="true"', 'href="mailto:', 'href="/en/about#contact"', 'href="/en/privacy/"']],
-  ['/privacidade/', ['data-contact-email', 'href="/sobre#contato"']],
-  ['/en/privacy/', ['data-contact-email', 'href="/en/about#contact"']],
+  ['/privacidade/', ['data-contact-direct="true"', 'href="mailto:', 'href="/sobre#contato"']],
+  ['/en/privacy/', ['data-contact-direct="true"', 'href="mailto:', 'href="/en/about#contact"']],
 ];
 for (const [path, required] of contactChecks) {
   const response = await fetch(`${origin}${path}`);

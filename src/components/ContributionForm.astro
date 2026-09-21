@@ -40,6 +40,7 @@ const contributionPrivacyVersion = '2026-09-21';
     </div>
 
     <label class="contribution-form__consent" for="contribution-consent"><input id="contribution-consent" name="consent" type="checkbox" value="on" required /><span>{english ? 'I confirm that I am the author or have permission to submit this material, and authorize editorial review.' : 'Confirmo que sou autor ou tenho autorização para enviar este material e autorizo a avaliação editorial.'}</span></label>
+    <p id="contribution-consent-error" class="contribution-form__field-error" data-field-error="consent" role="alert" hidden></p>
     <div class="contribution-form__honeypot" aria-hidden="true"><label for="contribution-company">Company</label><input id="contribution-company" name="company" type="text" tabindex="-1" autocomplete="off" /></div>
     <input type="hidden" name="lang" value={lang} /><input type="hidden" name="sourcePath" value={sourcePath} /><input type="hidden" name="privacyVersion" value={contributionPrivacyVersion} data-privacy-version />
     <div class="cf-turnstile contribution-form__turnstile" data-turnstile data-action="contribution_submit" data-appearance="interaction-only"></div>
@@ -69,6 +70,7 @@ const contributionPrivacyVersion = '2026-09-21';
   function copy(pt: string, en: string) { return lang === 'en' ? en : pt; }
   function errorMessage(code: string, field = '') {
     if (code === 'invalid_submission' && field === 'content') return copy('Informe o texto completo da contribuição.', 'Add the full contribution text.');
+    if (code === 'invalid_submission' && field === 'consent') return copy('Confira a autorização de autoria e tente novamente.', 'Confirm authorship authorization and try again.');
     if (code === 'invalid_submission' && field) return copy('Confira este campo e tente novamente.', 'Check this field and try again.');
     const messages: Record<string, [string, string]> = {
       invalid_submission: ['Confira os campos obrigatórios e tente novamente.', 'Check the required fields and try again.'], invalid_email: ['Digite um e-mail válido.', 'Enter a valid email.'], invalid_url: ['Use apenas links válidos começando com http ou https.', 'Use valid links beginning with http or https.'], body_too_large: ['O texto enviado é grande demais. Reduza o conteúdo e tente novamente.', 'The submitted text is too large. Shorten it and try again.'], privacy_version_mismatch: ['Atualize a página para aceitar a versão atual da política de privacidade.', 'Reload the page to accept the current privacy policy version.'], turnstile_failed: ['Não foi possível validar a verificação. Tente novamente.', 'The verification could not be completed. Please try again.'], rate_limited: ['Aguarde alguns minutos ou fale diretamente com o editor.', 'Please wait a few minutes or contact the editor directly.'],

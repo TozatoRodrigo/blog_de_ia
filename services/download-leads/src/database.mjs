@@ -1,5 +1,6 @@
 import { randomUUID as nodeRandomUUID } from 'node:crypto';
 import { DatabaseSync } from 'node:sqlite';
+import { normalizeEmail } from './security.mjs';
 
 const SCHEMA = `
 CREATE TABLE IF NOT EXISTS leads (
@@ -216,8 +217,16 @@ export function createLeadDatabase({ path, clock = () => new Date(), randomUUID 
       SET notification_state = 'failed', notification_attempts = notification_attempts + 1,
           notification_last_error = ?, updated_at = ?
       WHERE id = ? AND notification_state IN ('pending', 'failed') AND notification_attempts < ?
+      RETURNING *
     `),
     deleteLead: database.prepare('DELETE FROM leads WHERE email = ?'),
+    deleteEditorialSubmissionsByEmail: database.prepare('DELETE FROM editorial_submissions WHERE email = ?'),
+    requeueContributionNotification: database.prepare(`
+      UPDATE editorial_submissions
+      SET notification_state = 'pending', notification_attempts = 0,
+          notification_last_error = NULL, notification_sent_at = NULL, updated_at = ?
+      WHERE id = ? AND notification_state = 'failed'
+    `),
     purgeSessions: database.prepare('DELETE FROM sessions WHERE expires_at <= ?'),
     purgeAuthorizations: database.prepare('DELETE FROM download_authorizations WHERE expires_at <= ?'),
     purgeLeads: database.prepare('DELETE FROM leads WHERE updated_at < ?'),
@@ -391,16 +400,24 @@ export function createLeadDatabase({ path, clock = () => new Date(), randomUUID 
       errorCode,
       maxAttempts = DEFAULT_CONTRIBUTION_NOTIFICATION_MAX_ATTEMPTS,
     ) {
-      statements.contributionNotificationFailed.run(
+      return editorialSubmissionFromRow(statements.contributionNotificationFailed.get(
         String(errorCode).slice(0, 120),
         nowIso(),
         submissionId,
         maxAttempts,
-      );
+      ));
     },
 
     deleteLeadByEmail(email) {
       return Number(statements.deleteLead.run(email).changes) > 0;
+    },
+
+    deleteEditorialSubmissionsByEmail(email) {
+      return Number(statements.deleteEditorialSubmissionsByEmail.run(normalizeEmail(email)).changes);
+    },
+
+    requeueContributionNotification(submissionId) {
+      return Number(statements.requeueContributionNotification.run(nowIso(), submissionId).changes) > 0;
     },
 
     purgeExpired() {

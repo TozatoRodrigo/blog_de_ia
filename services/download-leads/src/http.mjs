@@ -206,19 +206,47 @@ const CONTRIBUTION_ERROR_MESSAGES = Object.freeze({
   },
 });
 
+const CONTRIBUTION_FIELDS = new Set([
+  'name', 'email', 'role', 'siteUrl', 'title', 'excerpt', 'content', 'links', 'bio', 'consent',
+]);
+
+const CONTRIBUTION_FIELD_MESSAGES = Object.freeze({
+  invalid_submission: Object.freeze({
+    name: { 'pt-BR': 'Informe seu nome.', en: 'Enter your name.' },
+    email: { 'pt-BR': 'Digite um e-mail válido.', en: 'Enter a valid email.' },
+    siteUrl: { 'pt-BR': 'Confira o site informado e tente novamente.', en: 'Check the website and try again.' },
+    title: { 'pt-BR': 'Informe o título da contribuição.', en: 'Enter the contribution title.' },
+    excerpt: { 'pt-BR': 'Informe um resumo curto.', en: 'Add a short summary.' },
+    content: { 'pt-BR': 'Informe o texto completo da contribuição.', en: 'Add the full contribution text.' },
+    links: { 'pt-BR': 'Confira os links e tente novamente.', en: 'Check the credited links and try again.' },
+    bio: { 'pt-BR': 'Informe uma bio curta.', en: 'Add a short bio.' },
+    consent: { 'pt-BR': 'Confira a autorização de autoria e tente novamente.', en: 'Confirm authorship authorization and try again.' },
+  }),
+  invalid_email: Object.freeze({
+    email: { 'pt-BR': 'Digite um e-mail válido.', en: 'Enter a valid email.' },
+  }),
+  invalid_url: Object.freeze({
+    siteUrl: { 'pt-BR': 'Use um site válido começando com http ou https.', en: 'Use valid links beginning with http or https.' },
+    links: { 'pt-BR': 'Use links válidos começando com http ou https.', en: 'Use valid links beginning with http or https.' },
+  }),
+});
+
 function contributionLanguage(body) {
   return body?.lang === 'en' || body?.language === 'en' ? 'en' : 'pt-BR';
 }
 
 function contributionMessage(error, lang) {
   const code = error instanceof LeadFlowError ? error.code : 'internal_error';
+  const field = CONTRIBUTION_FIELDS.has(error?.field) ? error.field : '';
+  const fieldMessage = CONTRIBUTION_FIELD_MESSAGES[code]?.[field]?.[lang];
+  if (fieldMessage) return fieldMessage;
   return CONTRIBUTION_ERROR_MESSAGES[code]?.[lang]
     ?? CONTRIBUTION_ERROR_MESSAGES.internal_error[lang];
 }
 
 function contributionErrorPayload(error, lang) {
   const code = error instanceof LeadFlowError ? error.code : 'internal_error';
-  const field = ['name', 'email', 'role', 'siteUrl', 'title', 'excerpt', 'content', 'links', 'bio'].includes(error?.field)
+  const field = CONTRIBUTION_FIELDS.has(error?.field)
     ? error.field
     : null;
   return { error: code, field, message: contributionMessage(error, lang) };
@@ -228,7 +256,7 @@ function contributionFieldValue(body, field) {
   return typeof body?.[field] === 'string' ? body[field] : '';
 }
 
-function contributionFallbackPage({ config, values = {}, lang = 'pt-BR', error = '' }) {
+function contributionFallbackPage({ config, values = {}, lang = 'pt-BR', error = null }) {
   const english = lang === 'en';
   const pagePath = english ? '/en/contribute/' : '/contribua/';
   const privacyHref = english ? '/en/privacy/' : '/privacidade/';
@@ -274,9 +302,20 @@ function contributionFallbackPage({ config, values = {}, lang = 'pt-BR', error =
       turnstile: 'Este formulário usa Cloudflare Turnstile para evitar abusos.',
       noScript: 'JavaScript é necessário para concluir o Cloudflare Turnstile; sem ele, este endpoint não pode verificar o envio.',
     };
-  const field = (name, label, type = 'text') => `<label for="contribution-${name}">${label}</label><input id="contribution-${name}" name="${name}" type="${type}" value="${escapeHtml(contributionFieldValue(values, name))}"${type === 'email' ? ' autocomplete="email"' : ''}>`;
-  const textarea = (name, label) => `<label for="contribution-${name}">${label}</label><textarea id="contribution-${name}" name="${name}">${escapeHtml(contributionFieldValue(values, name))}</textarea>`;
-  const errorHtml = error ? `<div role="alert"><strong>${escapeHtml(error)}</strong></div>` : '';
+  const errorField = CONTRIBUTION_FIELDS.has(error?.field) ? error.field : '';
+  const errorMessage = error ? contributionMessage(error, lang) : '';
+  const errorHtml = error ? `<div role="alert"><strong>${escapeHtml(errorMessage)}</strong></div>` : '';
+  const fieldId = (name) => name === 'siteUrl' ? 'contribution-site' : `contribution-${name}`;
+  const fieldError = (name) => {
+    const id = `${fieldId(name)}-error`;
+    const active = errorField === name;
+    return `<p id="${id}" data-field-error="${name}" role="alert"${active ? '' : ' hidden'}>${active ? escapeHtml(errorMessage) : ''}</p>`;
+  };
+  const fieldAttributes = (name) => errorField === name
+    ? ` aria-invalid="true" aria-describedby="${fieldId(name)}-error"`
+    : '';
+  const field = (name, label, type = 'text') => `<label for="${fieldId(name)}">${label}</label><input id="${fieldId(name)}" name="${name}" type="${type}" value="${escapeHtml(contributionFieldValue(values, name))}"${type === 'email' ? ' autocomplete="email"' : ''}${fieldAttributes(name)}>${fieldError(name)}`;
+  const textarea = (name, label) => `<label for="${fieldId(name)}">${label}</label><textarea id="${fieldId(name)}" name="${name}"${fieldAttributes(name)}>${escapeHtml(contributionFieldValue(values, name))}</textarea>${fieldError(name)}`;
   const hidden = (name, value) => `<input type="hidden" name="${name}" value="${escapeHtml(value)}">`;
   return `<!doctype html>
 <html lang="${english ? 'en' : 'pt-BR'}"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width"><title>${escapeHtml(copy.title)} — Produto com IA</title><meta name="robots" content="noindex, nofollow, noarchive"></head>
@@ -284,7 +323,7 @@ function contributionFallbackPage({ config, values = {}, lang = 'pt-BR', error =
 <noscript><p>${escapeHtml(copy.noScript)} <a data-contact-direct="true" href="mailto:${escapeHtml(config.notificationTo)}">${escapeHtml(copy.contactLink)}</a> · <a href="${contactHref}">${escapeHtml(copy.contactLink)}</a> · <a href="${privacyHref}">${escapeHtml(copy.privacyLink)}</a>.</p></noscript>
 <form method="post" action="/api/contributions/submit">
 ${field('name', copy.name)}${field('email', copy.email, 'email')}${field('role', copy.role)}${field('siteUrl', copy.siteUrl)}${field('title', copy.titleField)}${textarea('excerpt', copy.excerpt)}${textarea('content', copy.content)}${textarea('links', copy.links)}${textarea('bio', copy.bio)}
-<label><input name="consent" type="checkbox" value="on" required> ${escapeHtml(english ? 'I confirm that I am the author or have permission to submit this material.' : 'Confirmo que sou autor ou tenho autorização para enviar este material.')}</label>
+<label for="contribution-consent"><input id="contribution-consent" name="consent" type="checkbox" value="on" required${fieldAttributes('consent')}> ${escapeHtml(english ? 'I confirm that I am the author or have permission to submit this material.' : 'Confirmo que sou autor ou tenho autorização para enviar este material.')}</label>${fieldError('consent')}
 <div aria-hidden="true" style="position:absolute;left:-10000px"><label for="contribution-company">Company</label><input id="contribution-company" name="company" tabindex="-1" autocomplete="off"></div>
 ${hidden('lang', english ? 'en' : 'pt-BR')}${hidden('sourcePath', pagePath)}${hidden('privacyVersion', config.contributionPrivacyVersion || config.privacyVersion)}
 <div class="cf-turnstile" data-sitekey="${escapeHtml(config.turnstileSiteKey)}" data-action="contribution_submit" data-appearance="interaction-only"></div>
@@ -434,7 +473,7 @@ export function createLeadHandler({ config, catalog, workflow, rateLimiter, cont
             config,
             values: parsedBody,
             lang,
-            error: contributionMessage(error, lang),
+            error,
           }), { 'x-robots-tag': 'noindex, nofollow, noarchive', ...retryHeaders });
         }
         return sendJson(response, status, contributionErrorPayload(error, lang), retryHeaders);

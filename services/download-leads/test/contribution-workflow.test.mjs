@@ -98,15 +98,30 @@ test('normalizes email and rejects invalid email and URL values', async () => {
   const { db, workflow } = setup();
   await assert.rejects(
     () => workflow.submit({ ...validContribution, email: 'not-an-email' }),
-    (error) => error.code === 'invalid_email' && error.status === 400,
+    (error) => error.code === 'invalid_email' && error.field === 'email' && error.status === 400,
   );
   await assert.rejects(
     () => workflow.submit({ ...validContribution, siteUrl: 'javascript:alert(1)' }),
-    (error) => error.code === 'invalid_url' && error.status === 400,
+    (error) => error.code === 'invalid_url' && error.field === 'siteUrl' && error.status === 400,
   );
   await assert.rejects(
     () => workflow.submit({ ...validContribution, links: 'https://ok.example\nftp://bad.example' }),
-    (error) => error.code === 'invalid_url' && error.status === 400,
+    (error) => error.code === 'invalid_url' && error.field === 'links' && error.status === 400,
+  );
+  await assert.rejects(
+    () => workflow.submit({ ...validContribution, content: ' ' }),
+    (error) => error.code === 'invalid_submission' && error.field === 'content' && error.status === 400,
+  );
+  db.close();
+});
+
+test('attaches the consent field key without exposing submitted values', async () => {
+  const { db, workflow } = setup();
+  await assert.rejects(
+    () => workflow.submit({ ...validContribution, consent: false }),
+    (error) => error.code === 'invalid_submission'
+      && error.field === 'consent'
+      && !JSON.stringify(error).includes('autora@example.com'),
   );
   db.close();
 });

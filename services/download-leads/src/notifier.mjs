@@ -20,6 +20,11 @@ function subjectValue(value) {
     .trim();
 }
 
+function safeLogValue(value, maxLength) {
+  const normalized = subjectValue(value).slice(0, maxLength);
+  return normalized || 'unknown';
+}
+
 function formatSãoPaulo(isoDate) {
   return new Intl.DateTimeFormat('pt-BR', {
     timeZone: 'America/Sao_Paulo',
@@ -184,6 +189,7 @@ export async function runContributionNotificationBatch({
   notifier,
   limit = 20,
   maxAttempts = 8,
+  logger = console,
 }) {
   let sent = 0;
   let failed = 0;
@@ -194,11 +200,24 @@ export async function runContributionNotificationBatch({
       db.markContributionNotificationSent(submission.id);
       sent += 1;
     } catch (error) {
-      db.markContributionNotificationFailed(
+      const updated = db.markContributionNotificationFailed(
         submission.id,
         error?.code ?? 'notification_unknown',
         maxAttempts,
       );
+      if (updated?.notificationAttempts >= maxAttempts) {
+        try {
+          logger?.error?.('Editorial contribution notification exhausted retries', {
+            submissionId: safeLogValue(submission.id, 120),
+            title: safeLogValue(submission.title, 200),
+            status: safeLogValue(updated.status ?? submission.status, 40),
+            notificationState: updated.notificationState,
+            notificationAttempts: updated.notificationAttempts,
+          });
+        } catch {
+          // Logging must not turn a handled notification failure into an unhandled rejection.
+        }
+      }
       failed += 1;
     }
   }

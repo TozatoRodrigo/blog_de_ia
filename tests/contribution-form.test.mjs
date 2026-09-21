@@ -12,7 +12,7 @@ async function loadPage(pathname) {
   return cheerio.load(await readFile(file, 'utf8'));
 }
 
-const fields = ['name', 'email', 'role', 'siteUrl', 'title', 'excerpt', 'content', 'links', 'bio'];
+const fields = ['name', 'email', 'role', 'siteUrl', 'title', 'excerpt', 'content', 'links', 'bio', 'consent'];
 
 test('Portuguese contribution page renders a complete accessible progressive form', async () => {
   const $ = await loadPage('contribua/index.html');
@@ -80,8 +80,8 @@ test('generated contribution and privacy contact paths remain actionable after e
   const pages = [
     ['contribua/index.html', 'mailto:', '/sobre#contato'],
     ['en/contribute/index.html', 'mailto:', '/en/about#contact'],
-    ['privacidade/index.html', 'data-contact-email', '/sobre#contato'],
-    ['en/privacy/index.html', 'data-contact-email', '/en/about#contact'],
+    ['privacidade/index.html', 'mailto:', '/sobre#contato'],
+    ['en/privacy/index.html', 'mailto:', '/en/about#contact'],
   ];
   for (const [pathname, contactMarker, route] of pages) {
     const html = await readFile(join(dist.pathname, pathname), 'utf8');

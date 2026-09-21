@@ -23,7 +23,7 @@ Revogue uma chave antiga depois de confirmar que a nova envia corretamente. Chav
 
 ## Cloudflare e links de contato
 
-As páginas de contribuição mantêm deliberadamente um fallback estático `mailto:` dentro do bloco `<noscript>` e no fallback HTML do serviço. Ele é um caminho de contato acionável para quem não executa JavaScript; não o remova. As páginas de privacidade mantêm a rota interna de contato e montam o endereço no navegador.
+As páginas de contribuição e de privacidade mantêm deliberadamente links estáticos `mailto:`. O fallback estático `mailto:` da contribuição também aparece dentro do bloco `<noscript>` e no HTML de erro do serviço. Eles são caminhos de contato acionáveis para quem não executa JavaScript; não os remova.
 
 O **Email Address Obfuscation** do Cloudflare deve estar desativado para `/contribua/`, `/en/contribute/`, `/privacidade/` e `/en/privacy/`, ou deve ser verificado explicitamente após cada publicação. A transformação de um fallback válido em `/cdn-cgi/l/email-protection` quebra o contato e não é uma alternativa aceitável.
 
@@ -80,14 +80,25 @@ Transfira uma cópia apenas por canal protegido, cifre cópias fora do servidor 
 
 ## Excluir um lead
 
-Confirme o pedido usando o mesmo e-mail do cadastro. Revise o endereço normalizado antes de executar. A remoção abaixo usa o método de manutenção do serviço; as relações do banco apagam em cascata as sessões, os eventos e as autorizações vinculadas:
+Confirme o pedido usando o mesmo e-mail do cadastro. Revise o endereço normalizado antes de executar. A remoção abaixo usa os métodos de manutenção do serviço: `deleteLeadByEmail` apaga o lead e, em cascata, sessões, eventos e autorizações; `deleteEditorialSubmissionsByEmail` apaga todas as submissões editoriais privadas do mesmo e-mail. O purge de retenção é separado desta solicitação individual:
 
 ```sh
 cd /home/rodrigo/apps/radar-ia
-docker compose exec -T download-leads node --input-type=module -e 'import { createLeadDatabase } from "./src/database.mjs"; import { normalizeEmail } from "./src/security.mjs"; const email = normalizeEmail(process.argv[1]); const db = createLeadDatabase({ path: "/data/leads.sqlite" }); const deleted = db.deleteLeadByEmail(email); db.close(); process.stdout.write(deleted ? "deleted\n" : "not-found\n");' -- pessoa@example.com
+docker compose exec -T download-leads node --input-type=module -e 'import { createLeadDatabase } from "./src/database.mjs"; import { normalizeEmail } from "./src/security.mjs"; const email = normalizeEmail(process.argv[1]); const db = createLeadDatabase({ path: "/data/leads.sqlite" }); const leadDeleted = db.deleteLeadByEmail(email); const editorialDeleted = db.deleteEditorialSubmissionsByEmail(email); db.close(); process.stdout.write(JSON.stringify({ leads: leadDeleted ? 1 : 0, editorial: editorialDeleted }) + "\n");' -- pessoa@example.com
 ```
 
 Registre fora do banco de leads a data do atendimento e o resultado, sem manter dados além do necessário.
+
+## Recuperar notificações editoriais
+
+Quando uma notificação editorial atingir o limite de tentativas, o serviço mantém a submissão privada com `notification_state=failed` e grava um alerta operacional com o identificador, título limitado e status editorial. Depois de corrigir a causa, revise o registro e reencaminhe somente pelo método de manutenção abaixo; não existe endpoint público de recuperação:
+
+```sh
+cd /home/rodrigo/apps/radar-ia
+docker compose exec -T download-leads node --input-type=module -e 'import { createLeadDatabase } from "./src/database.mjs"; const db = createLeadDatabase({ path: "/data/leads.sqlite" }); const requeued = db.requeueContributionNotification(process.argv[1]); db.close(); process.stdout.write(requeued ? "requeued\n" : "not-found-or-not-failed\n");' -- submission-id
+```
+
+O requeue zera as tentativas da notificação, move apenas o registro editorial indicado para `pending` e deixa o texto, o contato e os demais dados privados no banco.
 
 ## Backup
 

@@ -188,6 +188,76 @@ test('deletes a lead and cascades sessions and events', () => {
   db.close();
 });
 
+test('deletes all editorial submissions for a normalized email without purging other records', () => {
+  const { db } = setup();
+  const first = db.createEditorialSubmission({
+    name: 'Pessoa autora',
+    email: 'autora@example.com',
+    title: 'Primeira contribuição',
+    excerpt: 'Resumo.',
+    content: 'Texto.',
+    bio: 'Bio.',
+    language: 'pt-BR',
+    sourcePath: '/contribua/',
+    privacyVersion: '2026-09-21',
+  });
+  const second = db.createEditorialSubmission({
+    name: 'Pessoa autora',
+    email: 'autora@example.com',
+    title: 'Segunda contribuição',
+    excerpt: 'Resumo.',
+    content: 'Texto.',
+    bio: 'Bio.',
+    language: 'en',
+    sourcePath: '/en/contribute/',
+    privacyVersion: '2026-09-21',
+  });
+  const other = db.createEditorialSubmission({
+    name: 'Outra pessoa',
+    email: 'outra@example.com',
+    title: 'Outra contribuição',
+    excerpt: 'Resumo.',
+    content: 'Texto.',
+    bio: 'Bio.',
+    language: 'pt-BR',
+    sourcePath: '/contribua/',
+    privacyVersion: '2026-09-21',
+  });
+
+  assert.equal(db.deleteEditorialSubmissionsByEmail(' AUTORA@EXAMPLE.COM '), 2);
+  assert.equal(db.findEditorialSubmissionById(first.id), undefined);
+  assert.equal(db.findEditorialSubmissionById(second.id), undefined);
+  assert.equal(db.findEditorialSubmissionById(other.id).email, 'outra@example.com');
+  assert.equal(db.deleteEditorialSubmissionsByEmail('missing@example.com'), 0);
+  db.close();
+});
+
+test('requeues a failed editorial notification for manual recovery', () => {
+  const { db } = setup();
+  const submission = db.createEditorialSubmission({
+    name: 'Pessoa autora',
+    email: 'autora@example.com',
+    title: 'Contribuição para recuperar',
+    excerpt: 'Resumo.',
+    content: 'Texto.',
+    bio: 'Bio.',
+    language: 'pt-BR',
+    sourcePath: '/contribua/',
+    privacyVersion: '2026-09-21',
+  });
+  db.markContributionNotificationFailed(submission.id, 'resend_http_503', 1);
+  assert.equal(db.failedContributionNotifications(10)[0].notificationAttempts, 1);
+
+  assert.equal(db.requeueContributionNotification(submission.id), true);
+  const queued = db.pendingContributionNotifications(10, 1)[0];
+  assert.equal(queued.id, submission.id);
+  assert.equal(queued.notificationState, 'pending');
+  assert.equal(queued.notificationAttempts, 0);
+  assert.equal(queued.notificationLastError, null);
+  assert.equal(db.requeueContributionNotification('missing'), false);
+  db.close();
+});
+
 test('creates a consistent online backup', async () => {
   const { db } = setup();
   seed(db);

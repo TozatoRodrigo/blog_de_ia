@@ -342,6 +342,7 @@ test('stops contribution retries at the configured limit and keeps failed state 
     privacyVersion: '2026-09-21',
   });
   let attempts = 0;
+  const logs = [];
   const notifier = {
     sendContributionNotification: async () => {
       attempts += 1;
@@ -350,7 +351,13 @@ test('stops contribution retries at the configured limit and keeps failed state 
   };
 
   for (let run = 0; run < 3; run += 1) {
-    await runContributionNotificationBatch({ db, notifier, limit: 20, maxAttempts: 2 });
+    await runContributionNotificationBatch({
+      db,
+      notifier,
+      limit: 20,
+      maxAttempts: 2,
+      logger: { error: (...args) => logs.push(args) },
+    });
   }
 
   assert.equal(attempts, 2);
@@ -360,6 +367,15 @@ test('stops contribution retries at the configured limit and keeps failed state 
   assert.equal(failed[0].id, submission.id);
   assert.equal(failed[0].notificationState, 'failed');
   assert.equal(failed[0].notificationAttempts, 2);
+  assert.equal(logs.length, 1);
+  assert.match(logs[0][0], /exhausted retries/i);
+  assert.deepEqual(logs[0][1], {
+    submissionId: submission.id,
+    title: 'Uma contribuição útil',
+    status: 'pending',
+    notificationState: 'failed',
+    notificationAttempts: 2,
+  });
   db.close();
 });
 
