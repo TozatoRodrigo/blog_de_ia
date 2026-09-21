@@ -103,6 +103,7 @@ export async function verifyTurnstile({
   remoteIp,
   secret,
   expectedHostname,
+  action = 'download_lead',
   testing = false,
   fetchImpl = fetch,
 }) {
@@ -129,7 +130,7 @@ export async function verifyTurnstile({
     }
     return result.success === true
       && result.hostname === expectedHostname
-      && result.action === 'download_lead';
+      && result.action === action;
   } catch {
     return false;
   } finally {

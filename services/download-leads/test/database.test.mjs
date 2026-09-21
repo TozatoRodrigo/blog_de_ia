@@ -111,6 +111,38 @@ test('tracks notification retries without losing the download event', () => {
   db.close();
 });
 
+test('stores editorial submissions separately and tracks notification state', () => {
+  const { db } = setup();
+  const submission = db.createEditorialSubmission({
+    name: 'Pessoa autora',
+    email: 'autora@example.com',
+    role: 'Product Manager',
+    siteUrl: 'https://example.com/',
+    title: 'Uma contribuição útil',
+    excerpt: 'Resumo editorial da contribuição.',
+    content: 'Texto completo da contribuição.',
+    links: 'https://example.com/referencia',
+    bio: 'Bio curta da pessoa autora.',
+    language: 'pt-BR',
+    sourcePath: '/contribua/',
+    privacyVersion: '2026-09-21',
+  });
+
+  assert.equal(submission.status, 'pending');
+  assert.equal(submission.notificationState, 'pending');
+  assert.equal(submission.notificationAttempts, 0);
+  assert.equal(db.pendingContributionNotifications(10)[0].id, submission.id);
+  assert.equal(db.pendingNotifications(10).length, 0);
+
+  db.markContributionNotificationFailed(submission.id, 'resend_http_503');
+  assert.equal(db.pendingContributionNotifications(10)[0].notificationAttempts, 1);
+  assert.equal(db.pendingContributionNotifications(10)[0].notificationLastError, 'resend_http_503');
+  db.markContributionNotificationSent(submission.id);
+  assert.deepEqual(db.pendingContributionNotifications(10), []);
+  assert.equal(db.purgeEditorialSubmissions('2026-07-22T11:59:00.000Z'), 0);
+  db.close();
+});
+
 test('updates lead activity when a returning visitor downloads again', () => {
   const { db, advance } = setup();
   const lead = db.upsertLead({

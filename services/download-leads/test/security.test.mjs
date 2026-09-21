@@ -107,6 +107,39 @@ test('verifies a complete Turnstile response server-side', async () => {
   assert.ok(request.body.idempotency_key);
 });
 
+test('verifies the requested Turnstile action while keeping downloads backward-compatible', async () => {
+  const fetchImpl = async (_url, options) => new Response(JSON.stringify({
+    success: true,
+    hostname: 'produtocomia.com.br',
+    action: options.headers['x-test-action'],
+  }), { status: 200 });
+  const base = {
+    token: 'token',
+    remoteIp: '203.0.113.10',
+    secret: 'secret',
+    expectedHostname: 'produtocomia.com.br',
+    fetchImpl,
+  };
+
+  const download = await verifyTurnstile({
+    ...base,
+    fetchImpl: (url, options) => fetchImpl(url, { ...options, headers: { ...options.headers, 'x-test-action': 'download_lead' } }),
+  });
+  const contribution = await verifyTurnstile({
+    ...base,
+    action: 'contribution_submit',
+    fetchImpl: (url, options) => fetchImpl(url, { ...options, headers: { ...options.headers, 'x-test-action': 'contribution_submit' } }),
+  });
+  const wrongAction = await verifyTurnstile({
+    ...base,
+    action: 'contribution_submit',
+    fetchImpl: (url, options) => fetchImpl(url, { ...options, headers: { ...options.headers, 'x-test-action': 'download_lead' } }),
+  });
+  assert.equal(download, true);
+  assert.equal(contribution, true);
+  assert.equal(wrongAction, false);
+});
+
 test('rejects malformed, failed, mismatched and unavailable Turnstile checks', async () => {
   const response = (body, status = 200) => async () => new Response(JSON.stringify(body), { status });
   const base = {

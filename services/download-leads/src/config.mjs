@@ -89,11 +89,18 @@ export function loadConfig(env = process.env) {
     notificationTo: email(env, 'LEAD_NOTIFICATION_TO'),
     notificationMode,
     privacyVersion,
+    contributionPrivacyVersion: env.CONTRIBUTION_PRIVACY_VERSION?.trim() || privacyVersion,
     retentionDays: positiveInteger(env, 'RETENTION_DAYS', 730),
     sessionDays: positiveInteger(env, 'SESSION_DAYS', 180),
     authorizationSeconds: positiveInteger(env, 'AUTHORIZATION_SECONDS', 300),
     maxBodyBytes: positiveInteger(env, 'MAX_BODY_BYTES', 16 * 1024),
+    contributionMaxBodyBytes: positiveInteger(env, 'CONTRIBUTION_MAX_BODY_BYTES', 96 * 1024),
+    contributionRateLimitAttempts: positiveInteger(env, 'CONTRIBUTION_RATE_LIMIT_ATTEMPTS', 5),
   };
+
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(config.contributionPrivacyVersion)) {
+    throw new Error('CONTRIBUTION_PRIVACY_VERSION must use YYYY-MM-DD');
+  }
 
   return Object.freeze(config);
 }

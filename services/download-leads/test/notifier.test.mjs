@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 import { createLeadDatabase } from '../src/database.mjs';
-import { createNotifier, runNotificationBatch } from '../src/notifier.mjs';
+import { createNotifier, runContributionNotificationBatch, runNotificationBatch } from '../src/notifier.mjs';
 
 const material = Object.freeze({
   id: 'ai-risk-matrix',
@@ -162,5 +162,73 @@ test('notification worker preserves failed events for retry', async () => {
   }), { sent: 0, failed: 1 });
   assert.equal(db.pendingNotifications(20)[0].id, storedEvent.id);
   assert.equal(db.pendingNotifications(20)[0].notificationAttempts, 1);
+  db.close();
+});
+
+test('sends a complete idempotent editorial contribution notification', async () => {
+  let request;
+  const notifier = createNotifier({
+    apiKey: 're_test',
+    from: 'Produto com IA <leads@leads.produtocomia.com.br>',
+    to: 'rodrigo.tozato@icloud.com',
+    mode: 'resend',
+    fetchImpl: async (url, options) => {
+      request = { url, options, payload: JSON.parse(options.body) };
+      return new Response(JSON.stringify({ id: 'editorial-email-id' }), { status: 200 });
+    },
+  });
+  const submission = {
+    id: 'submission-1',
+    name: '<Pessoa autora>',
+    email: 'autora@example.com',
+    role: 'Product Manager',
+    siteUrl: 'https://example.com/',
+    title: 'Uma contribuição útil',
+    excerpt: 'Resumo editorial da contribuição.',
+    content: '<Texto completo da contribuição.>',
+    links: 'https://example.com/referencia',
+    bio: 'Bio curta da pessoa autora.',
+    language: 'pt-BR',
+    sourcePath: '/contribua/',
+    privacyVersion: '2026-09-21',
+    createdAt: '2026-09-21T15:00:00.000Z',
+  };
+
+  const result = await notifier.sendContributionNotification({ submission });
+  assert.deepEqual(result, { id: 'editorial-email-id' });
+  assert.equal(request.options.headers['idempotency-key'], 'editorial-submission/submission-1');
+  assert.match(request.payload.subject, /Uma contribuição útil/);
+  assert.match(request.payload.subject, /Pessoa autora/);
+  for (const value of Object.values(submission)) assert.ok(request.payload.text.includes(String(value)));
+  assert.match(request.payload.html, /&lt;Pessoa autora&gt;/);
+  assert.match(request.payload.html, /&lt;Texto completo da contribuição\.&gt;/);
+});
+
+test('processes editorial notification batches and preserves failed submissions for retry', async () => {
+  const db = createLeadDatabase({
+    path: ':memory:',
+    randomUUID: (() => { let id = 0; return () => `editorial-${++id}`; })(),
+  });
+  const submission = db.createEditorialSubmission({
+    name: 'Pessoa autora',
+    email: 'autora@example.com',
+    role: 'Product Manager',
+    siteUrl: '',
+    title: 'Uma contribuição útil',
+    excerpt: 'Resumo editorial da contribuição.',
+    content: 'Texto completo da contribuição.',
+    links: '',
+    bio: 'Bio curta da pessoa autora.',
+    language: 'pt-BR',
+    sourcePath: '/contribua/',
+    privacyVersion: '2026-09-21',
+  });
+  const notifier = {
+    sendContributionNotification: async () => { throw Object.assign(new Error('failed'), { code: 'resend_http_503' }); },
+  };
+
+  assert.deepEqual(await runContributionNotificationBatch({ db, notifier, limit: 20 }), { sent: 0, failed: 1 });
+  assert.equal(db.pendingContributionNotifications(20)[0].id, submission.id);
+  assert.equal(db.pendingContributionNotifications(20)[0].notificationAttempts, 1);
   db.close();
 });

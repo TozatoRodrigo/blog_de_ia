@@ -37,9 +37,32 @@ CREATE TABLE IF NOT EXISTS download_authorizations (
   max_uses INTEGER NOT NULL DEFAULT 3,
   created_at TEXT NOT NULL
 );
+CREATE TABLE IF NOT EXISTS editorial_submissions (
+  id TEXT PRIMARY KEY,
+  name TEXT NOT NULL,
+  email TEXT NOT NULL,
+  role TEXT NOT NULL,
+  site_url TEXT NOT NULL,
+  title TEXT NOT NULL,
+  excerpt TEXT NOT NULL,
+  content TEXT NOT NULL,
+  links TEXT NOT NULL,
+  bio TEXT NOT NULL,
+  language TEXT NOT NULL,
+  source_path TEXT NOT NULL,
+  privacy_version TEXT NOT NULL,
+  status TEXT NOT NULL,
+  created_at TEXT NOT NULL,
+  updated_at TEXT NOT NULL,
+  notification_state TEXT NOT NULL DEFAULT 'pending',
+  notification_attempts INTEGER NOT NULL DEFAULT 0,
+  notification_last_error TEXT,
+  notification_sent_at TEXT
+);
 CREATE INDEX IF NOT EXISTS idx_sessions_expiry ON sessions(expires_at);
 CREATE INDEX IF NOT EXISTS idx_events_notification ON download_events(notification_state, created_at);
 CREATE INDEX IF NOT EXISTS idx_authorizations_expiry ON download_authorizations(expires_at);
+CREATE INDEX IF NOT EXISTS idx_editorial_notification ON editorial_submissions(notification_state, created_at);
 `;
 
 function leadFromRow(row) {
@@ -64,6 +87,32 @@ function eventFromRow(row) {
     lang: row.lang,
     campaign: row.campaign,
     createdAt: row.created_at,
+    notificationState: row.notification_state,
+    notificationAttempts: row.notification_attempts,
+    notificationLastError: row.notification_last_error,
+    notificationSentAt: row.notification_sent_at,
+  };
+}
+
+function editorialSubmissionFromRow(row) {
+  if (!row) return undefined;
+  return {
+    id: row.id,
+    name: row.name,
+    email: row.email,
+    role: row.role,
+    siteUrl: row.site_url,
+    title: row.title,
+    excerpt: row.excerpt,
+    content: row.content,
+    links: row.links,
+    bio: row.bio,
+    language: row.language,
+    sourcePath: row.source_path,
+    privacyVersion: row.privacy_version,
+    status: row.status,
+    createdAt: row.created_at,
+    updatedAt: row.updated_at,
     notificationState: row.notification_state,
     notificationAttempts: row.notification_attempts,
     notificationLastError: row.notification_last_error,
@@ -136,10 +185,35 @@ export function createLeadDatabase({ path, clock = () => new Date(), randomUUID 
           notification_last_error = ?
       WHERE id = ?
     `),
+    createEditorialSubmission: database.prepare(`
+      INSERT INTO editorial_submissions
+        (id, name, email, role, site_url, title, excerpt, content, links, bio, language,
+         source_path, privacy_version, status, created_at, updated_at)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      RETURNING *
+    `),
+    pendingContributionNotifications: database.prepare(`
+      SELECT * FROM editorial_submissions
+      WHERE notification_state IN ('pending', 'failed') AND notification_attempts < 8
+      ORDER BY created_at ASC LIMIT ?
+    `),
+    contributionNotificationSent: database.prepare(`
+      UPDATE editorial_submissions
+      SET notification_state = 'sent', notification_sent_at = ?, notification_last_error = NULL,
+          updated_at = ?
+      WHERE id = ?
+    `),
+    contributionNotificationFailed: database.prepare(`
+      UPDATE editorial_submissions
+      SET notification_state = 'failed', notification_attempts = notification_attempts + 1,
+          notification_last_error = ?, updated_at = ?
+      WHERE id = ?
+    `),
     deleteLead: database.prepare('DELETE FROM leads WHERE email = ?'),
     purgeSessions: database.prepare('DELETE FROM sessions WHERE expires_at <= ?'),
     purgeAuthorizations: database.prepare('DELETE FROM download_authorizations WHERE expires_at <= ?'),
     purgeLeads: database.prepare('DELETE FROM leads WHERE updated_at < ?'),
+    purgeEditorialSubmissions: database.prepare('DELETE FROM editorial_submissions WHERE created_at < ?'),
   };
 
   function nowIso() {
@@ -205,6 +279,45 @@ export function createLeadDatabase({ path, clock = () => new Date(), randomUUID 
       });
     },
 
+    createEditorialSubmission({
+      name,
+      email,
+      role = '',
+      siteUrl = '',
+      title,
+      excerpt,
+      content,
+      links = '',
+      bio,
+      language,
+      sourcePath,
+      privacyVersion,
+      status = 'pending',
+      createdAt,
+    }) {
+      const now = createdAt || nowIso();
+      return editorialSubmissionFromRow(
+        statements.createEditorialSubmission.get(
+          randomUUID(),
+          name,
+          email,
+          role,
+          siteUrl,
+          title,
+          excerpt,
+          content,
+          links,
+          bio,
+          language,
+          sourcePath,
+          privacyVersion,
+          status,
+          now,
+          now,
+        ),
+      );
+    },
+
     createDownloadAuthorization({ eventId, tokenHash, expiresAt, maxUses = 3 }) {
       const row = statements.createAuthorization.get(tokenHash, eventId, expiresAt, maxUses, nowIso());
       return {
@@ -245,6 +358,23 @@ export function createLeadDatabase({ path, clock = () => new Date(), randomUUID 
       statements.notificationFailed.run(String(errorCode).slice(0, 120), eventId);
     },
 
+    pendingContributionNotifications(limit = 20) {
+      return statements.pendingContributionNotifications.all(limit).map(editorialSubmissionFromRow);
+    },
+
+    markContributionNotificationSent(submissionId) {
+      const now = nowIso();
+      statements.contributionNotificationSent.run(now, now, submissionId);
+    },
+
+    markContributionNotificationFailed(submissionId, errorCode) {
+      statements.contributionNotificationFailed.run(
+        String(errorCode).slice(0, 120),
+        nowIso(),
+        submissionId,
+      );
+    },
+
     deleteLeadByEmail(email) {
       return Number(statements.deleteLead.run(email).changes) > 0;
     },
@@ -259,6 +389,10 @@ export function createLeadDatabase({ path, clock = () => new Date(), randomUUID 
 
     purgeOlderThan(isoDate) {
       return Number(statements.purgeLeads.run(isoDate).changes);
+    },
+
+    purgeEditorialSubmissions(isoDate) {
+      return Number(statements.purgeEditorialSubmissions.run(isoDate).changes);
     },
 
     backupTo(destination) {

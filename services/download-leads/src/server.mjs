@@ -4,8 +4,13 @@ import { resolve } from 'node:path';
 import { loadCatalog } from './catalog.mjs';
 import { loadConfig } from './config.mjs';
 import { createLeadDatabase } from './database.mjs';
+import { createContributionWorkflow } from './contribution-workflow.mjs';
 import { createLeadHandler } from './http.mjs';
-import { createNotifier, runNotificationBatch } from './notifier.mjs';
+import {
+  createNotifier,
+  runContributionNotificationBatch,
+  runNotificationBatch,
+} from './notifier.mjs';
 import { createRateLimiter } from './security.mjs';
 import { createLeadWorkflow } from './workflow.mjs';
 
@@ -21,13 +26,21 @@ export async function createApplication({ env = process.env, fetchImpl = fetch }
     fetchImpl,
   });
   const workflow = createLeadWorkflow({ config, catalog, db });
+  const contributionWorkflow = createContributionWorkflow({ config, db });
   const rateLimiter = createRateLimiter({ secret: config.cookieSecret });
   const server = createServer(createLeadHandler({ config, catalog, workflow, rateLimiter }));
   const timers = new Set();
   let closed = false;
 
   async function runNotifications() {
-    return runNotificationBatch({ db, notifier, catalog, limit: 20 });
+    const [downloads, contributions] = await Promise.all([
+      runNotificationBatch({ db, notifier, catalog, limit: 20 }),
+      runContributionNotificationBatch({ db, notifier, limit: 20 }),
+    ]);
+    return {
+      sent: downloads.sent + contributions.sent,
+      failed: downloads.failed + contributions.failed,
+    };
   }
 
   async function start() {
@@ -51,6 +64,7 @@ export async function createApplication({ env = process.env, fetchImpl = fetch }
       db.purgeExpired();
       const cutoff = new Date(Date.now() - config.retentionDays * 86_400_000).toISOString();
       db.purgeOlderThan(cutoff);
+      db.purgeEditorialSubmissions(cutoff);
     }, 86_400_000);
     cleanupTimer.unref();
     timers.add(cleanupTimer);
@@ -71,7 +85,18 @@ export async function createApplication({ env = process.env, fetchImpl = fetch }
     db.close();
   }
 
-  return Object.freeze({ config, catalog, db, notifier, workflow, server, runNotifications, start, close });
+  return Object.freeze({
+    config,
+    catalog,
+    db,
+    notifier,
+    workflow,
+    contributionWorkflow,
+    server,
+    runNotifications,
+    start,
+    close,
+  });
 }
 
 async function runMain() {
