@@ -23,6 +23,9 @@ test('download pages expose one accessible, localized lead gate', async () => {
     assert.equal(dialog.length, 1);
     assert.equal(dialog.attr('aria-labelledby'), 'download-lead-title');
     assert.match($('#download-lead-title').text(), new RegExp(heading));
+    assert.equal(dialog.find('form#download-lead-form').length, 1);
+    assert.equal(dialog.find('form#download-lead-form').attr('method'), undefined);
+    assert.equal(dialog.find('input[name="email"][type="email"][required]').length, 1);
     assert.equal(dialog.find('input[name="email"][type="email"]').length, 1);
     assert.equal(dialog.find('input[name="marketingOptIn"]').is(':checked'), false);
 

@@ -49,8 +49,8 @@ test('build generates both contribution indexes and both localized articles', as
 test('contribution indexes link to usable localized intake pages', async () => {
   const portuguese = await loadPage('contribuicoes/index.html');
   const english = await loadPage('en/contributions/index.html');
-  assert.equal(portuguese('a[href="/contribua/"]').length, 1);
-  assert.equal(english('a[href="/en/contribute/"]').length, 1);
+  assert.equal(portuguese('main a[href="/contribua/"]').length, 1);
+  assert.equal(english('main a[href="/en/contribute/"]').length, 1);
   assert.match((await loadPage('contribua/index.html'))('main').text(), /e-mail/i);
   assert.match((await loadPage('en/contribute/index.html'))('main').text(), /send/i);
 });
