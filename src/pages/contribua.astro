@@ -1,66 +1,51 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
 import ContactEmail from '../components/ContactEmail.astro';
+import ContributionForm from '../components/ContributionForm.astro';
 
 const title = 'Contribua com uma ideia';
 const description = 'Envie uma pauta, experiência ou texto sobre produto, agentes, avaliação e governança de IA para avaliação editorial.';
+const submitted = Astro.url.searchParams.get('submitted') === '1';
 ---
 
 <BaseLayout title={title} description={description} lang="pt-BR" alternateUrl="/en/contribute/">
-  <section class="container intake" aria-labelledby="intake-heading">
-    <nav class="mono-sm intake__breadcrumb" aria-label="Breadcrumb"><a href="/contribuicoes/">CONTRIBUIÇÕES</a><span>/</span><span>CONTRIBUA</span></nav>
-    <div class="intake__intro">
-      <span class="mono" style="color: var(--accent);">[ CHAMADA EDITORIAL ]</span>
-      <h1 id="intake-heading">Uma ideia que merece contexto.</h1>
-      <p class="intake__lede">O Produto com IA publica vozes de quem constrói produtos, agentes e sistemas de IA. Se você tem uma experiência prática para compartilhar, comece com uma mensagem curta.</p>
+  <section class="container contribution-intake" aria-labelledby="contribution-intake-title">
+    <nav class="mono-sm contribution-intake__breadcrumb" aria-label="Breadcrumb"><a href="/contribuicoes/">CONTRIBUIÇÕES</a><span>/</span><span>CONTRIBUA</span></nav>
+    <div class="contribution-intake__hero">
+      <div><span class="mono contribution-intake__eyebrow">[ CHAMADA EDITORIAL ]</span><h1 id="contribution-intake-title">Uma ideia que merece contexto.</h1></div>
+      <div class="contribution-intake__lead"><p>O Produto com IA abre espaço para quem constrói produtos, agentes e sistemas de IA compartilhar aprendizados com contexto, autoria e evidência.</p><p class="contribution-intake__promise">Toda submissão passa por triagem editorial. Ela não é publicada automaticamente.</p></div>
     </div>
-
-    <div class="intake__grid">
-      <section class="intake__card intake__card--accent" aria-labelledby="send-heading">
-        <span class="mono-sm">01 / PRIMEIRO PASSO</span>
-        <h2 id="send-heading">Envie um pitch curto</h2>
-        <p>Conte qual é a ideia, por que ela importa e quem deveria lê-la. Não é preciso preparar um formulário ou um texto completo agora.</p>
-        <ContactEmail class="btn btn--accent btn--lg" />
-        <p class="intake__note">Assunto sugerido: <strong>Contribuição editorial — seu nome</strong></p>
-      </section>
-
-      <section class="intake__card" aria-labelledby="include-heading">
-        <span class="mono-sm">02 / O QUE INCLUIR</span>
-        <h2 id="include-heading">Dê à ideia um ponto de partida</h2>
-        <ul>
-          <li>título ou pergunta central</li>
-          <li>experiência, caso ou evidência que sustenta o ponto</li>
-          <li>breve bio e links que ajudem a contextualizar sua autoria</li>
-        </ul>
-      </section>
-    </div>
-
-    <div class="intake__footer">
-      <span class="mono-sm">[ COMO FUNCIONA ]</span>
-      <p>A equipe editorial lê cada proposta e responde quando houver aderência ao foco da seção. Publicações preservam a voz do autor, com contexto e créditos claros.</p>
-      <a href="/contribuicoes/">← VOLTAR ÀS CONTRIBUIÇÕES</a>
+    <div class="contribution-intake__layout">
+      <aside class="contribution-intake__aside" aria-label="Como funciona">
+        <span class="mono-sm">01 / COMO FUNCIONA</span>
+        <ol><li><strong>Você envia.</strong> Uma ideia, um rascunho ou um texto completo.</li><li><strong>A equipe lê.</strong> Avaliamos aderência, clareza e utilidade para a comunidade.</li><li><strong>A gente conversa.</strong> Se fizer sentido, alinhamos edição, créditos e publicação.</li></ol>
+        <div class="contribution-intake__trust"><span class="mono-sm">AUTORIA E CRÉDITOS</span><p>Preservamos a voz de quem escreve e deixamos claros os créditos, links e contexto da contribuição.</p></div>
+        <div class="contribution-intake__direct"><span class="mono-sm">PREFERE CONVERSAR?</span><p>Se o material tiver anexos ou você quiser começar por uma pergunta, fale diretamente com o editor.</p><a href="/sobre#contato">FALAR COM O EDITOR →</a><ContactEmail /></div>
+      </aside>
+      <ContributionForm lang="pt-BR" submitted={submitted} />
     </div>
   </section>
 </BaseLayout>
 
 <style>
-  .intake { padding-top: 2rem; padding-bottom: 5rem; }
-  .intake__breadcrumb { display: flex; gap: 0.5rem; margin-bottom: 4rem; color: var(--fg-muted); }
-  .intake__breadcrumb a { border: 0; color: inherit; }
-  .intake__intro { max-width: 760px; }
-  .intake h1 { max-width: 10ch; margin: 0.75rem 0 1.5rem; }
-  .intake__lede { max-width: 65ch; color: var(--fg-soft); font-size: var(--step-1); line-height: 1.6; }
-  .intake__grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1px; margin-top: 4rem; border: 2px solid var(--line); background: var(--line); }
-  .intake__card { padding: 2rem; background: var(--bg); }
-  .intake__card--accent { background: var(--fg); color: var(--fg-invert); }
-  .intake__card--accent h2 { color: var(--fg-invert); }
-  .intake__card h2 { margin: 0.75rem 0 1rem; font-size: var(--step-2); }
-  .intake__card p, .intake__card li { color: var(--fg-soft); }
-  .intake__card--accent p, .intake__card--accent li { color: var(--bg-alt); }
-  .intake__card .btn { margin-top: 0.75rem; }
-  .intake__note { margin-top: 1.25rem; font-size: var(--step--1); }
-  .intake__footer { max-width: 760px; margin-top: 4rem; padding-top: 1.5rem; border-top: 2px solid var(--line); }
-  .intake__footer p { color: var(--fg-soft); }
-  .intake__footer a { color: var(--accent); font-family: var(--font-mono); font-size: 0.75rem; }
-  @media (max-width: 720px) { .intake__grid { grid-template-columns: 1fr; } }
+  .contribution-intake { padding-top: 2rem; padding-bottom: 5rem; }
+  .contribution-intake__breadcrumb { display: flex; gap: 0.5rem; margin-bottom: clamp(3rem, 8vw, 6rem); color: var(--fg-muted); }
+  .contribution-intake__breadcrumb a { border: 0; color: inherit; }
+  .contribution-intake__hero { display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(18rem, 0.85fr); gap: clamp(2rem, 6vw, 8rem); align-items: end; padding-bottom: clamp(2rem, 5vw, 4rem); border-bottom: 2px solid var(--line); }
+  .contribution-intake__eyebrow { color: var(--accent); }
+  .contribution-intake h1 { max-width: 10ch; margin: 0.9rem 0 0; font-size: var(--step-5); }
+  .contribution-intake__lead { max-width: 50ch; color: var(--fg-soft); font-size: var(--step-1); line-height: 1.55; }
+  .contribution-intake__lead p { margin-bottom: 1rem; }
+  .contribution-intake__promise { padding-left: 1rem; border-left: 4px solid var(--accent); color: var(--fg); font-weight: 700; }
+  .contribution-intake__layout { display: grid; grid-template-columns: minmax(15rem, 0.65fr) minmax(0, 1.35fr); gap: clamp(2rem, 6vw, 7rem); margin-top: clamp(2.5rem, 6vw, 5rem); align-items: start; }
+  .contribution-intake__aside { position: sticky; top: 5rem; }
+  .contribution-intake__aside ol { margin-top: 1.25rem; padding-left: 1.2rem; }
+  .contribution-intake__aside li { padding-left: 0.35rem; margin-bottom: 1.25rem; color: var(--fg-soft); }
+  .contribution-intake__aside strong { color: var(--fg); }
+  .contribution-intake__trust, .contribution-intake__direct { margin-top: 2.5rem; padding-top: 1.5rem; border-top: 2px solid var(--line); }
+  .contribution-intake__trust p, .contribution-intake__direct p { color: var(--fg-soft); font-size: var(--step--1); }
+  .contribution-intake__direct a { display: block; width: fit-content; margin-bottom: 0.75rem; color: var(--accent); font-family: var(--font-mono); font-size: 0.75rem; }
+  .contribution-intake__direct [data-contact-email] { display: block; color: var(--fg-muted); font-size: var(--step--1); }
+  @media (max-width: 900px) { .contribution-intake__hero, .contribution-intake__layout { grid-template-columns: 1fr; } .contribution-intake__aside { position: static; } .contribution-intake h1 { max-width: 14ch; } }
+  @media (max-width: 600px) { .contribution-intake h1 { font-size: var(--step-4); } }
 </style>

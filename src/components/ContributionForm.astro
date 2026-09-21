@@ -1,0 +1,144 @@
+---
+import ContactEmail from './ContactEmail.astro';
+import type { Lang } from '../i18n/lang';
+
+interface Props { lang?: Lang; submitted?: boolean; }
+
+const { lang = 'pt-BR', submitted = false } = Astro.props;
+const english = lang === 'en';
+const sourcePath = english ? '/en/contribute/' : '/contribua/';
+const privacyPath = english ? '/en/privacy/' : '/privacidade/';
+const privacyVersion = '2026-07-22';
+---
+
+<section class="contribution-form" aria-labelledby="contribution-form-title" data-contribution-form-root data-lang={lang}>
+  <div class="contribution-form__heading">
+    <span class="mono-sm">{english ? '02 / SEND FOR REVIEW' : '02 / ENVIE PARA AVALIAÇÃO'}</span>
+    <h2 id="contribution-form-title">{english ? 'Give the idea a clear shape.' : 'Dê forma clara à sua ideia.'}</h2>
+    <p>{english ? 'The more context you share, the easier it is for us to understand the author, the argument, and the readers it can help.' : 'Quanto mais contexto você compartilhar, mais fácil será entender a autoria, o argumento e quem pode se beneficiar dele.'}</p>
+  </div>
+
+  <div class="contribution-form__success" data-contribution-success tabindex="-1" role="status" aria-live="polite" hidden={!submitted}>
+    <span class="mono-sm">{english ? '[ RECEIVED ]' : '[ RECEBIDO ]'}</span>
+    <h3>{english ? 'Your contribution is in editorial review.' : 'Sua contribuição entrou em avaliação editorial.'}</h3>
+    <p>{english ? 'We will read the submission and contact you if it fits the section. Nothing is published automatically.' : 'Vamos ler o envio e entrar em contato se ele fizer sentido para a seção. Nada é publicado automaticamente.'}</p>
+  </div>
+
+  <form class="contribution-form__form" method="post" action="/api/contributions/submit" enctype="application/x-www-form-urlencoded" data-contribution-form hidden={submitted}>
+    <div class="contribution-form__fields">
+      <div class="contribution-form__field"><label for="contribution-name">{english ? 'Name' : 'Nome'} <span aria-hidden="true">*</span></label><input id="contribution-name" name="name" type="text" autocomplete="name" required /></div>
+      <div class="contribution-form__field"><label for="contribution-email">{english ? 'Email' : 'E-mail'} <span aria-hidden="true">*</span></label><input id="contribution-email" name="email" type="email" autocomplete="email" required /></div>
+      <div class="contribution-form__field"><label for="contribution-role">{english ? 'Role or professional context' : 'Cargo ou contexto profissional'}</label><input id="contribution-role" name="role" type="text" autocomplete="organization-title" /></div>
+      <div class="contribution-form__field"><label for="contribution-site">{english ? 'Website' : 'Site'}</label><input id="contribution-site" name="siteUrl" type="url" autocomplete="url" placeholder="https://" /></div>
+      <div class="contribution-form__field contribution-form__field--wide"><label for="contribution-title">{english ? 'Contribution title' : 'Título da contribuição'} <span aria-hidden="true">*</span></label><input id="contribution-title" name="title" type="text" required /></div>
+      <div class="contribution-form__field contribution-form__field--wide"><label for="contribution-excerpt">{english ? 'Short summary' : 'Resumo curto'} <span aria-hidden="true">*</span></label><textarea id="contribution-excerpt" name="excerpt" rows="3" required aria-describedby="contribution-excerpt-help"></textarea><small id="contribution-excerpt-help">{english ? 'What should a reader understand before opening the full piece?' : 'O que a pessoa leitora precisa entender antes de abrir o texto completo?'}</small></div>
+      <div class="contribution-form__field contribution-form__field--wide"><label for="contribution-content">{english ? 'Full contribution' : 'Texto completo da contribuição'} <span aria-hidden="true">*</span></label><textarea id="contribution-content" name="content" rows="12" required aria-describedby="contribution-content-help"></textarea><small id="contribution-content-help">{english ? 'Paste the draft or the complete text. Plain text and Markdown are welcome.' : 'Cole o rascunho ou o texto completo. Texto simples e Markdown são bem-vindos.'}</small></div>
+      <div class="contribution-form__field"><label for="contribution-links">{english ? 'Links to credit' : 'Links para creditar'}</label><textarea id="contribution-links" name="links" rows="4" aria-describedby="contribution-links-help"></textarea><small id="contribution-links-help">{english ? 'One URL per line.' : 'Uma URL por linha.'}</small></div>
+      <div class="contribution-form__field"><label for="contribution-bio">{english ? 'Short bio' : 'Bio curta'} <span aria-hidden="true">*</span></label><textarea id="contribution-bio" name="bio" rows="4" required></textarea></div>
+    </div>
+
+    <label class="contribution-form__consent" for="contribution-consent"><input id="contribution-consent" name="consent" type="checkbox" value="on" required /><span>{english ? 'I confirm that I am the author or have permission to submit this material, and authorize editorial review.' : 'Confirmo que sou autor ou tenho autorização para enviar este material e autorizo a avaliação editorial.'}</span></label>
+    <div class="contribution-form__honeypot" aria-hidden="true"><label for="contribution-company">Company</label><input id="contribution-company" name="company" type="text" tabindex="-1" autocomplete="off" /></div>
+    <input type="hidden" name="lang" value={lang} /><input type="hidden" name="sourcePath" value={sourcePath} /><input type="hidden" name="privacyVersion" value={privacyVersion} data-privacy-version />
+    <div class="cf-turnstile contribution-form__turnstile" data-turnstile data-action="contribution_submit" data-appearance="interaction-only"></div>
+    <p class="contribution-form__status" data-contribution-status role="alert" aria-live="assertive"></p>
+    <button class="btn btn--primary contribution-form__submit" type="submit">{english ? 'SEND FOR REVIEW →' : 'ENVIAR PARA AVALIAÇÃO →'}</button>
+    <p class="contribution-form__privacy">{english ? 'We use these details to evaluate the contribution and contact you about it.' : 'Usamos estes dados para avaliar a contribuição e falar com você sobre ela.'}{' '}<a href={privacyPath}>{english ? 'Read the privacy policy' : 'Leia a política de privacidade'}</a>.</p>
+  </form>
+
+  <p class="contribution-form__contact">{english ? 'Prefer to start with a question? ' : 'Prefere começar com uma pergunta? '}<a href={english ? '/en/about#contact' : '/sobre#contato'}>{english ? 'Contact the editor' : 'Fale com o editor'}</a>{' '}<span aria-hidden="true">·</span>{' '}<ContactEmail lang={lang} /></p>
+</section>
+
+<script>
+  type TurnstileApi = { render: (container: HTMLElement, options: Record<string, unknown>) => string; reset: (widgetId: string) => void; };
+  type ContributionBrowser = Window & { turnstile?: TurnstileApi };
+  const browser = window as ContributionBrowser;
+  const root = document.querySelector<HTMLElement>('[data-contribution-form-root]');
+  const form = root?.querySelector<HTMLFormElement>('[data-contribution-form]');
+  const status = root?.querySelector<HTMLElement>('[data-contribution-status]');
+  const success = root?.querySelector<HTMLElement>('[data-contribution-success]');
+  const turnstileContainer = root?.querySelector<HTMLElement>('[data-turnstile]');
+  const privacyInput = root?.querySelector<HTMLInputElement>('[data-privacy-version]');
+  const lang = root?.dataset.lang === 'en' ? 'en' : 'pt-BR';
+  let turnstileToken = '';
+  let turnstileWidgetId = '';
+  let turnstilePromise: Promise<TurnstileApi> | null = null;
+
+  function copy(pt: string, en: string) { return lang === 'en' ? en : pt; }
+  function errorMessage(code: string) {
+    const messages: Record<string, [string, string]> = {
+      invalid_submission: ['Confira os campos obrigatórios e tente novamente.', 'Check the required fields and try again.'], invalid_email: ['Digite um e-mail válido.', 'Enter a valid email.'], invalid_url: ['Use apenas links válidos começando com http ou https.', 'Use valid links beginning with http or https.'], body_too_large: ['O texto enviado é grande demais. Reduza o conteúdo e tente novamente.', 'The submitted text is too large. Shorten it and try again.'], privacy_version_mismatch: ['Atualize a página para aceitar a versão atual da política de privacidade.', 'Reload the page to accept the current privacy policy version.'], turnstile_failed: ['Não foi possível validar a verificação. Tente novamente.', 'The verification could not be completed. Please try again.'], rate_limited: ['Aguarde alguns minutos ou fale diretamente com o editor.', 'Please wait a few minutes or contact the editor directly.'],
+    };
+    const message = messages[code];
+    return message ? copy(message[0], message[1]) : copy('Não foi possível enviar agora. Fale diretamente com o editor.', 'The submission could not be sent. Contact the editor directly.');
+  }
+  function loadTurnstile() {
+    if (browser.turnstile) return Promise.resolve(browser.turnstile);
+    if (turnstilePromise) return turnstilePromise;
+    turnstilePromise = new Promise((resolve, reject) => {
+      const script = document.createElement('script');
+      script.src = 'https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit'; script.async = true; script.defer = true;
+      script.addEventListener('load', () => browser.turnstile ? resolve(browser.turnstile) : reject(new Error('Turnstile unavailable')));
+      script.addEventListener('error', () => reject(new Error('Turnstile unavailable'))); document.head.append(script);
+    });
+    return turnstilePromise;
+  }
+  async function prepare() {
+    const configResponse = await fetch('/api/download-leads/config', { headers: { accept: 'application/json' } });
+    if (!configResponse.ok) throw new Error('Configuration unavailable');
+    const config = await configResponse.json();
+    if (privacyInput && typeof config.privacyVersion === 'string') privacyInput.value = config.privacyVersion;
+    const turnstile = await loadTurnstile();
+    if (!turnstileWidgetId && turnstileContainer) {
+      turnstileContainer.dataset.sitekey = config.turnstileSiteKey;
+      turnstileWidgetId = turnstile.render(turnstileContainer, { sitekey: config.turnstileSiteKey, action: 'contribution_submit', appearance: 'interaction-only', callback: (token: string) => { turnstileToken = token; }, 'expired-callback': () => { turnstileToken = ''; }, 'error-callback': () => { turnstileToken = ''; } });
+    }
+  }
+  prepare().catch(() => { if (status) status.textContent = copy('Não foi possível carregar a verificação. Tente novamente.', 'Could not load verification. Please try again.'); });
+  form?.addEventListener('submit', async (event) => {
+    event.preventDefault(); if (!form) return;
+    const submit = form.querySelector<HTMLButtonElement>('button[type="submit"]'); const fields = new FormData(form);
+    if (submit) submit.disabled = true; if (status) status.textContent = copy('Enviando para avaliação…', 'Sending for review…');
+    try {
+      if (!privacyInput?.value || !turnstileWidgetId) await prepare();
+      if (!turnstileToken) throw new Error(copy('Conclua a verificação e tente novamente.', 'Complete the verification and try again.'));
+      const body = Object.fromEntries(fields.entries()); body.turnstileToken = turnstileToken;
+      const response = await fetch('/api/contributions/submit', { method: 'POST', credentials: 'same-origin', headers: { 'content-type': 'application/json', accept: 'application/json' }, body: JSON.stringify(body) });
+      const payload = await response.json().catch(() => ({}));
+      if (!response.ok) throw new Error(errorMessage(typeof payload.error === 'string' ? payload.error : 'internal_error'));
+      if (success) { success.hidden = false; success.focus(); } form.hidden = true; if (status) status.textContent = '';
+    } catch (error) {
+      if (status) { status.textContent = error instanceof Error ? error.message : copy('Não foi possível enviar agora.', 'The submission could not be sent.'); status.focus(); }
+      turnstileToken = ''; if (turnstileWidgetId) browser.turnstile?.reset(turnstileWidgetId);
+    } finally { if (submit) submit.disabled = false; }
+  });
+</script>
+
+<style>
+  .contribution-form { border: 2px solid var(--line); background: var(--bg); }
+  .contribution-form__heading { padding: clamp(1.5rem, 4vw, 3rem); border-bottom: 2px solid var(--line); background: var(--fg); color: var(--fg-invert); }
+  .contribution-form__heading h2 { max-width: 15ch; margin: 0.75rem 0 1rem; color: var(--fg-invert); font-size: var(--step-3); }
+  .contribution-form__heading p { max-width: 58ch; color: var(--bg-alt); margin: 0; }
+  .contribution-form__form { padding: clamp(1.25rem, 3vw, 2.5rem); }
+  .contribution-form__fields { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1.25rem; }
+  .contribution-form__field { display: grid; gap: 0.45rem; align-content: start; }
+  .contribution-form__field--wide { grid-column: 1 / -1; }
+  .contribution-form label { font-family: var(--font-mono); font-size: 0.75rem; letter-spacing: 0.04em; text-transform: uppercase; }
+  .contribution-form label > span, .contribution-form label span[aria-hidden='true'] { color: var(--accent); }
+  .contribution-form input:not([type='checkbox']), .contribution-form textarea { width: 100%; border: 2px solid var(--line); border-radius: 0; padding: 0.75rem; background: var(--bg); color: var(--fg); font: inherit; line-height: 1.45; }
+  .contribution-form textarea { resize: vertical; min-height: 7rem; }
+  .contribution-form input:not([type='checkbox']):focus-visible, .contribution-form textarea:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+  .contribution-form small { color: var(--fg-muted); font-size: var(--step--1); line-height: 1.4; }
+  .contribution-form__consent { display: flex; align-items: flex-start; gap: 0.75rem; margin-top: 1.75rem; text-transform: none !important; font-family: var(--font-body) !important; font-size: var(--step--1) !important; letter-spacing: normal !important; }
+  .contribution-form__consent input { flex: 0 0 auto; width: 1.25rem; height: 1.25rem; margin-top: 0.1rem; accent-color: var(--accent); }
+  .contribution-form__honeypot { position: absolute; left: -10000px; width: 1px; height: 1px; overflow: hidden; }
+  .contribution-form__turnstile { min-height: 0.5rem; margin-top: 1.5rem; }
+  .contribution-form__status { min-height: 1.5rem; margin: 1rem 0 0; color: var(--accent-dark); font-weight: 700; }
+  .contribution-form__submit { margin-top: 1.25rem; }
+  .contribution-form__privacy, .contribution-form__contact { color: var(--fg-muted); font-size: var(--step--1); margin: 1.5rem 0 0; }
+  .contribution-form__success { padding: clamp(1.5rem, 4vw, 3rem); background: var(--accent); color: var(--fg-invert); }
+  .contribution-form__success:focus { outline: 3px solid var(--fg); outline-offset: -7px; }
+  .contribution-form__success h3 { max-width: 18ch; margin: 0.75rem 0 1rem; color: var(--fg-invert); font-size: var(--step-3); }
+  .contribution-form__success p { max-width: 55ch; margin: 0; color: var(--fg-invert); }
+  @media (max-width: 640px) { .contribution-form__fields { grid-template-columns: 1fr; } .contribution-form__field--wide { grid-column: auto; } }
+</style>

@@ -42,6 +42,14 @@ function sendRedirect(response, location) {
   response.end();
 }
 
+function sendContributionRedirect(response, location) {
+  response.writeHead(303, {
+    location,
+    'cache-control': 'no-store',
+  });
+  response.end();
+}
+
 async function readBody(request, limit) {
   const chunks = [];
   let total = 0;
@@ -129,7 +137,137 @@ function errorPayload(error, requestId) {
   };
 }
 
-export function createLeadHandler({ config, catalog, workflow, rateLimiter }) {
+const CONTRIBUTION_ERROR_MESSAGES = Object.freeze({
+  invalid_submission: {
+    'pt-BR': 'Confira os campos obrigatórios e tente novamente.',
+    en: 'Check the required fields and try again.',
+  },
+  invalid_email: {
+    'pt-BR': 'Digite um e-mail válido.',
+    en: 'Enter a valid email.',
+  },
+  invalid_url: {
+    'pt-BR': 'Use apenas links válidos começando com http ou https.',
+    en: 'Use valid links beginning with http or https.',
+  },
+  body_too_large: {
+    'pt-BR': 'O texto enviado é grande demais. Reduza o conteúdo e tente novamente.',
+    en: 'The submitted text is too large. Shorten it and try again.',
+  },
+  privacy_version_mismatch: {
+    'pt-BR': 'Atualize a página para aceitar a versão atual da política de privacidade.',
+    en: 'Reload the page to accept the current privacy policy version.',
+  },
+  turnstile_failed: {
+    'pt-BR': 'Não foi possível validar a verificação. Tente novamente.',
+    en: 'The verification could not be completed. Please try again.',
+  },
+  rate_limited: {
+    'pt-BR': 'Aguarde alguns minutos antes de enviar outra contribuição ou fale diretamente com o editor.',
+    en: 'Please wait a few minutes before trying again, or contact the editor directly.',
+  },
+  forbidden_origin: {
+    'pt-BR': 'Não foi possível validar a origem deste envio.',
+    en: 'The origin of this submission could not be validated.',
+  },
+  invalid_json: {
+    'pt-BR': 'O envio não está em um formato válido.',
+    en: 'The submission format is invalid.',
+  },
+  unsupported_media_type: {
+    'pt-BR': 'Este formato de envio não é aceito.',
+    en: 'This submission format is not supported.',
+  },
+  internal_error: {
+    'pt-BR': 'Não foi possível receber a contribuição agora. Fale diretamente com o editor.',
+    en: 'The contribution could not be received right now. Contact the editor directly.',
+  },
+});
+
+function contributionLanguage(body) {
+  return body?.lang === 'en' || body?.language === 'en' ? 'en' : 'pt-BR';
+}
+
+function contributionMessage(error, lang) {
+  const code = error instanceof LeadFlowError ? error.code : 'internal_error';
+  return CONTRIBUTION_ERROR_MESSAGES[code]?.[lang]
+    ?? CONTRIBUTION_ERROR_MESSAGES.internal_error[lang];
+}
+
+function contributionErrorPayload(error, lang) {
+  const code = error instanceof LeadFlowError ? error.code : 'internal_error';
+  return { error: code, message: contributionMessage(error, lang) };
+}
+
+function contributionFieldValue(body, field) {
+  return typeof body?.[field] === 'string' ? body[field] : '';
+}
+
+function contributionFallbackPage({ config, values = {}, lang = 'pt-BR', error = '' }) {
+  const english = lang === 'en';
+  const pagePath = english ? '/en/contribute/' : '/contribua/';
+  const privacyHref = english ? '/en/privacy/' : '/privacidade/';
+  const contactHref = english ? '/en/about#contact' : '/sobre#contato';
+  const copy = english
+    ? {
+      title: 'Contribute an idea',
+      intro: 'Send an editorial contribution for review. Submissions are reviewed by the editorial team and are not automatically published.',
+      name: 'Name',
+      email: 'Email',
+      role: 'Role or professional context',
+      siteUrl: 'Website',
+      titleField: 'Contribution title',
+      excerpt: 'Short summary',
+      content: 'Full contribution',
+      links: 'Links to credit',
+      bio: 'Short bio',
+      submit: 'Send for review',
+      privacy: 'We use these details to evaluate the contribution and contact you about it.',
+      privacyLink: 'Privacy policy',
+      contact: 'Prefer to start with a question? Contact the editor directly.',
+      contactLink: 'Contact the editor',
+      turnstile: 'This form uses Cloudflare Turnstile for abuse prevention.',
+    }
+    : {
+      title: 'Contribua com uma ideia',
+      intro: 'Envie uma contribuição editorial para avaliação. Cada envio é lido pela equipe editorial e não é publicado automaticamente.',
+      name: 'Nome',
+      email: 'E-mail',
+      role: 'Cargo ou contexto profissional',
+      siteUrl: 'Site',
+      titleField: 'Título da contribuição',
+      excerpt: 'Resumo curto',
+      content: 'Texto completo da contribuição',
+      links: 'Links para creditar',
+      bio: 'Bio curta',
+      submit: 'Enviar para avaliação',
+      privacy: 'Usamos esses dados para avaliar a contribuição e falar com você sobre ela.',
+      privacyLink: 'Política de privacidade',
+      contact: 'Prefere começar com uma pergunta? Fale diretamente com o editor.',
+      contactLink: 'Falar com o editor',
+      turnstile: 'Este formulário usa Cloudflare Turnstile para evitar abusos.',
+    };
+  const field = (name, label, type = 'text') => `<label for="contribution-${name}">${label}</label><input id="contribution-${name}" name="${name}" type="${type}" value="${escapeHtml(contributionFieldValue(values, name))}"${type === 'email' ? ' autocomplete="email"' : ''}>`;
+  const textarea = (name, label) => `<label for="contribution-${name}">${label}</label><textarea id="contribution-${name}" name="${name}">${escapeHtml(contributionFieldValue(values, name))}</textarea>`;
+  const errorHtml = error ? `<div role="alert"><strong>${escapeHtml(error)}</strong></div>` : '';
+  const hidden = (name, value) => `<input type="hidden" name="${name}" value="${escapeHtml(value)}">`;
+  return `<!doctype html>
+<html lang="${english ? 'en' : 'pt-BR'}"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width"><title>${escapeHtml(copy.title)} — Produto com IA</title><meta name="robots" content="noindex, nofollow, noarchive"></head>
+<body><main><p><a href="${pagePath}">Produto com IA</a></p><h1>${escapeHtml(copy.title)}</h1><p>${escapeHtml(copy.intro)}</p>${errorHtml}
+<form method="post" action="/api/contributions/submit">
+${field('name', copy.name)}${field('email', copy.email, 'email')}${field('role', copy.role)}${field('siteUrl', copy.siteUrl)}${field('title', copy.titleField)}${textarea('excerpt', copy.excerpt)}${textarea('content', copy.content)}${textarea('links', copy.links)}${textarea('bio', copy.bio)}
+<label><input name="consent" type="checkbox" value="on" required> ${escapeHtml(english ? 'I confirm that I am the author or have permission to submit this material.' : 'Confirmo que sou autor ou tenho autorização para enviar este material.')}</label>
+<div aria-hidden="true" style="position:absolute;left:-10000px"><label for="contribution-company">Company</label><input id="contribution-company" name="company" tabindex="-1" autocomplete="off"></div>
+${hidden('lang', english ? 'en' : 'pt-BR')}${hidden('sourcePath', pagePath)}${hidden('privacyVersion', config.contributionPrivacyVersion || config.privacyVersion)}
+<div class="cf-turnstile" data-sitekey="${escapeHtml(config.turnstileSiteKey)}" data-action="contribution_submit" data-appearance="interaction-only"></div>
+<p>${escapeHtml(copy.privacy)} <a href="${privacyHref}">${escapeHtml(copy.privacyLink)}</a>. ${escapeHtml(copy.turnstile)}</p><p>${escapeHtml(copy.contact)} <a href="${contactHref}">${escapeHtml(copy.contactLink)}</a>.</p>
+<button type="submit">${escapeHtml(copy.submit)}</button></form></main><script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script></body></html>`;
+}
+
+export function createLeadHandler({ config, catalog, workflow, rateLimiter, contributionWorkflow, contributionRateLimiter }) {
+  // The dedicated workflow owns the canonical limiter check; keeping this dependency
+  // in the handler composition makes the security boundary explicit without double-counting requests.
+  void contributionRateLimiter;
   return async function leadHandler(request, response) {
     const requestId = randomUUID();
     response.setHeader('x-request-id', requestId);
@@ -183,6 +321,31 @@ export function createLeadHandler({ config, catalog, workflow, rateLimiter }) {
       const isRegister = request.method === 'POST'
         && ['/api/download-leads/register', '/api/download-leads/register-form'].includes(url.pathname);
       const isAuthorize = request.method === 'POST' && url.pathname === '/api/download-leads/authorize';
+      const isContribution = request.method === 'POST' && url.pathname === '/api/contributions/submit';
+
+      if (isContribution) {
+        if (!verifyOrigin(request.headers.origin, config.allowedOrigin)) {
+          throw new LeadFlowError('forbidden_origin', 403, 'Forbidden origin');
+        }
+        if (!contributionWorkflow) {
+          throw new LeadFlowError('internal_error', 503, 'Contribution service unavailable');
+        }
+        const body = await parseBody(request, config.contributionMaxBodyBytes);
+        parsedBody = body;
+        const result = await contributionWorkflow.submit({
+          ...body,
+          language: body.language ?? body.lang,
+          remoteIp: remoteIp(request),
+        });
+        const contentType = request.headers['content-type']?.split(';')[0]?.trim();
+        if (contentType === 'application/x-www-form-urlencoded') {
+          return sendContributionRedirect(
+            response,
+            contributionLanguage(body) === 'en' ? '/en/contribute/?submitted=1' : '/contribua/?submitted=1',
+          );
+        }
+        return sendJson(response, 201, { status: result.status });
+      }
 
       if (isRegister || isAuthorize) {
         if (!verifyOrigin(request.headers.origin, config.allowedOrigin)) {
@@ -232,6 +395,20 @@ export function createLeadHandler({ config, catalog, workflow, rateLimiter }) {
           lang: parsedBody?.lang === 'en' ? 'en' : 'pt-BR',
           error: error instanceof LeadFlowError ? error.message : 'Serviço temporariamente indisponível',
         }), { 'x-robots-tag': 'noindex, nofollow, noarchive' });
+      }
+      if (request.method === 'POST' && url.pathname === '/api/contributions/submit') {
+        const lang = contributionLanguage(parsedBody);
+        const contentType = request.headers['content-type']?.split(';')[0]?.trim();
+        const retryHeaders = error?.retryAfter ? { 'retry-after': String(error.retryAfter) } : {};
+        if (contentType === 'application/x-www-form-urlencoded') {
+          return sendHtml(response, status, contributionFallbackPage({
+            config,
+            values: parsedBody,
+            lang,
+            error: contributionMessage(error, lang),
+          }), { 'x-robots-tag': 'noindex, nofollow, noarchive', ...retryHeaders });
+        }
+        return sendJson(response, status, contributionErrorPayload(error, lang), retryHeaders);
       }
       return sendJson(response, status, errorPayload(error, requestId));
     }

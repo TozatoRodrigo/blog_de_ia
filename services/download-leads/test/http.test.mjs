@@ -5,6 +5,7 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import test from 'node:test';
 import { createLeadDatabase } from '../src/database.mjs';
+import { createContributionWorkflow } from '../src/contribution-workflow.mjs';
 import { createLeadHandler } from '../src/http.mjs';
 import { createRateLimiter } from '../src/security.mjs';
 import { createLeadWorkflow } from '../src/workflow.mjs';
@@ -37,6 +38,8 @@ async function setup() {
     turnstileSecretKey: 'turnstile-secret',
     turnstileSiteKey: '1x00000000000000000000AA',
     privacyVersion: '2026-07-22',
+    contributionPrivacyVersion: '2026-07-22',
+    contributionMaxBodyBytes: 96 * 1024,
   });
   const catalog = Object.freeze({
     items: Object.freeze([material]),
@@ -56,11 +59,19 @@ async function setup() {
     verifyTurnstileFn: async ({ token }) => token === 'valid-turnstile',
     clock: () => new Date('2026-07-22T15:00:00.000Z'),
   });
+  const contributionWorkflow = createContributionWorkflow({
+    config,
+    db,
+    rateLimiter: createRateLimiter({ secret: config.cookieSecret, maxAttempts: 5 }),
+    verifyTurnstileFn: async ({ token, action }) => token === 'valid-contribution-turnstile' && action === 'contribution_submit',
+    clock: () => new Date('2026-07-22T15:00:00.000Z'),
+  });
   const handler = createLeadHandler({
     config,
     catalog,
     workflow,
     rateLimiter: createRateLimiter({ secret: config.cookieSecret }),
+    contributionWorkflow,
   });
   const server = createServer(handler);
   await new Promise((resolve) => server.listen(0, '127.0.0.1', resolve));
@@ -98,6 +109,24 @@ const validRegistration = Object.freeze({
   campaign: 'linkedin',
   turnstileToken: 'valid-turnstile',
   company: '',
+});
+
+const validContribution = Object.freeze({
+  name: 'Pessoa autora',
+  email: 'autora@example.com',
+  role: 'Product Manager',
+  siteUrl: 'https://example.com/',
+  title: 'Uma contribuição útil',
+  excerpt: 'Resumo editorial da contribuição.',
+  content: 'Texto completo da contribuição.',
+  links: 'https://example.com/referencia',
+  bio: 'Bio curta da pessoa autora.',
+  lang: 'pt-BR',
+  privacyVersion: '2026-07-22',
+  turnstileToken: 'valid-contribution-turnstile',
+  company: '',
+  sourcePath: '/contribua/',
+  consent: 'on',
 });
 
 test('exposes only public client configuration and a real health check', async () => {
@@ -286,6 +315,112 @@ test('keeps the no-JavaScript form localized after a validation error', async ()
     assert.match(html, /Download the resource/);
     assert.match(html, /Enter a valid email/);
     assert.match(html, /name="materialId" value="ai-risk-matrix"/);
+  } finally {
+    await app.close();
+  }
+});
+
+test('contribution endpoint accepts valid JSON without exposing internal fields', async () => {
+  const app = await setup();
+  try {
+    const response = await fetch(`${app.baseUrl}/api/contributions/submit`, jsonRequest(validContribution));
+    assert.equal(response.status, 201);
+    assert.deepEqual(await response.json(), { status: 'pending' });
+    assert.equal(app.db.pendingContributionNotifications(10).length, 1);
+  } finally {
+    await app.close();
+  }
+});
+
+test('contribution endpoint rejects unsafe JSON requests without echoing submitted data', async () => {
+  const app = await setup();
+  try {
+    const wrongOrigin = await fetch(`${app.baseUrl}/api/contributions/submit`, jsonRequest(validContribution, { origin: 'https://evil.example' }));
+    assert.equal(wrongOrigin.status, 403);
+
+    const honeypot = await fetch(`${app.baseUrl}/api/contributions/submit`, jsonRequest({ ...validContribution, company: 'ACME' }));
+    assert.equal(honeypot.status, 400);
+
+    const invalidEmail = await fetch(`${app.baseUrl}/api/contributions/submit`, jsonRequest({ ...validContribution, email: 'invalid' }));
+    assert.equal(invalidEmail.status, 400);
+    assert.deepEqual((await invalidEmail.json()).error, 'invalid_email');
+
+    const invalidTurnstile = await fetch(`${app.baseUrl}/api/contributions/submit`, jsonRequest({ ...validContribution, turnstileToken: 'invalid' }));
+    assert.equal(invalidTurnstile.status, 400);
+    assert.deepEqual((await invalidTurnstile.json()).error, 'turnstile_failed');
+
+    const tooLarge = await fetch(`${app.baseUrl}/api/contributions/submit`, jsonRequest({ ...validContribution, content: 'x'.repeat(100_000) }));
+    assert.equal(tooLarge.status, 413);
+    assert.deepEqual(app.db.pendingContributionNotifications(10), []);
+  } finally {
+    await app.close();
+  }
+});
+
+test('contribution endpoint rate limits repeated submissions', async () => {
+  const app = await setup();
+  try {
+    for (let attempt = 0; attempt < 5; attempt += 1) {
+      const response = await fetch(`${app.baseUrl}/api/contributions/submit`, jsonRequest({
+        ...validContribution,
+        title: `${validContribution.title} ${attempt}`,
+      }));
+      assert.equal(response.status, 201);
+    }
+    const blocked = await fetch(`${app.baseUrl}/api/contributions/submit`, jsonRequest(validContribution));
+    assert.equal(blocked.status, 429);
+    assert.ok(Number(blocked.headers.get('retry-after')) > 0);
+    assert.deepEqual((await blocked.json()).error, 'rate_limited');
+  } finally {
+    await app.close();
+  }
+});
+
+test('contribution form submission redirects to the localized success state', async () => {
+  const app = await setup();
+  try {
+    const response = await fetch(`${app.baseUrl}/api/contributions/submit`, {
+      method: 'POST',
+      redirect: 'manual',
+      headers: {
+        origin: 'https://produtocomia.com.br',
+        'content-type': 'application/x-www-form-urlencoded',
+      },
+      body: new URLSearchParams(validContribution),
+    });
+    assert.equal(response.status, 303);
+    assert.equal(response.headers.get('location'), '/contribua/?submitted=1');
+  } finally {
+    await app.close();
+  }
+});
+
+test('contribution form errors render escaped localized fallback HTML', async () => {
+  const app = await setup();
+  try {
+    const response = await fetch(`${app.baseUrl}/api/contributions/submit`, {
+      method: 'POST',
+      headers: {
+        origin: 'https://produtocomia.com.br',
+        'content-type': 'application/x-www-form-urlencoded',
+      },
+      body: new URLSearchParams({
+        ...validContribution,
+        lang: 'en',
+        sourcePath: '/en/contribute/',
+        email: 'invalid',
+        content: '<script>alert("article")</script>',
+        title: '<b>Unsafe title</b>',
+      }),
+    });
+    assert.equal(response.status, 400);
+    assert.equal(response.headers.get('x-robots-tag'), 'noindex, nofollow, noarchive');
+    const html = await response.text();
+    assert.match(html, /Enter a valid email/);
+    assert.match(html, /&lt;script&gt;alert\(&quot;article&quot;\)&lt;\/script&gt;/);
+    assert.doesNotMatch(html, /<script>alert/);
+    assert.match(html, /\/en\/privacy\//);
+    assert.match(html, /\/en\/about#contact/);
   } finally {
     await app.close();
   }

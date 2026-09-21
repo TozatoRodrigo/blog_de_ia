@@ -37,7 +37,14 @@ export async function createApplication({ env = process.env, fetchImpl = fetch, 
     db,
     rateLimiter: contributionRateLimiter,
   });
-  const server = createServer(createLeadHandler({ config, catalog, workflow, rateLimiter }));
+  const server = createServer(createLeadHandler({
+    config,
+    catalog,
+    workflow,
+    rateLimiter,
+    contributionWorkflow,
+    contributionRateLimiter,
+  }));
   const timers = new Set();
   const activeNotificationRuns = new Set();
   let closed = false;
