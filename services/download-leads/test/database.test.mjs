@@ -140,6 +140,20 @@ test('stores editorial submissions separately and tracks notification state', ()
   db.markContributionNotificationSent(submission.id);
   assert.deepEqual(db.pendingContributionNotifications(10), []);
   assert.equal(db.purgeEditorialSubmissions('2026-07-22T11:59:00.000Z'), 0);
+  const oldSubmission = db.createEditorialSubmission({
+    name: 'Pessoa antiga',
+    email: 'antiga@example.com',
+    title: 'Contribuição antiga',
+    excerpt: 'Resumo antigo.',
+    content: 'Texto antigo.',
+    bio: 'Bio antiga.',
+    language: 'pt-BR',
+    sourcePath: '/contribua/',
+    privacyVersion: '2026-09-21',
+    createdAt: '2026-07-01T12:00:00.000Z',
+  });
+  assert.equal(db.purgeEditorialSubmissions('2026-07-22T11:59:00.000Z'), 1);
+  assert.equal(db.findEditorialSubmissionById(oldSubmission.id), undefined);
   db.close();
 });
 

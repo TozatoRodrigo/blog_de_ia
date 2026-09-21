@@ -28,6 +28,7 @@ const validContribution = Object.freeze({
   turnstileToken: 'valid-contribution-turnstile',
   company: '',
   sourcePath: '/contribua/',
+  consent: 'on',
 });
 
 const allowAllRateLimiter = Object.freeze({
@@ -73,6 +74,23 @@ test('rejects missing required contribution fields', async () => {
     () => workflow.submit({ ...validContribution, content: '   ' }),
     (error) => error instanceof LeadFlowError && error.code === 'invalid_submission' && error.status === 400,
   );
+  db.close();
+});
+
+test('requires explicit accepted consent values', async () => {
+  const { db, workflow } = setup();
+  for (const consent of [undefined, false, 'false', 'accepted', 1]) {
+    await assert.rejects(
+      () => workflow.submit({ ...validContribution, consent }),
+      (error) => error instanceof LeadFlowError
+        && error.code === 'invalid_submission'
+        && error.status === 400,
+      `consent ${String(consent)} should be rejected`,
+    );
+  }
+
+  const booleanConsent = await workflow.submit({ ...validContribution, consent: true });
+  assert.equal(booleanConsent.status, 'pending');
   db.close();
 });
 

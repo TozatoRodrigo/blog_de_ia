@@ -38,6 +38,10 @@ test('Portuguese contribution page renders a complete accessible progressive for
   assert.match($('main').text(), /não .*publicada automaticamente/i);
   assert.equal(form.find('a[href="/privacidade/"]').length, 1);
   assert.equal($('.contribution-form [data-contact-email]').length, 1);
+  assert.equal($('noscript').length, 1);
+  assert.match($('noscript').text(), /JavaScript.*Turnstile.*não pode verificar/i);
+  assert.match($('noscript').html(), /href="\/sobre#contato"/);
+  assert.match($('noscript').html(), /href="\/privacidade\/"/);
 });
 
 test('enhanced contribution form uses its dedicated public privacy version', async () => {
@@ -56,5 +60,9 @@ test('English contribution page preserves its localized submission contract', as
   assert.equal(form.find('a[href="/en/privacy/"]').length, 1);
   assert.equal($('.contribution-form [data-contact-email]').length, 1);
   assert.match($('main').text(), /not automatically published/i);
+  assert.equal($('noscript').length, 1);
+  assert.match($('noscript').text(), /JavaScript.*Turnstile.*cannot verify/i);
+  assert.match($('noscript').html(), /href="\/en\/about#contact"/);
+  assert.match($('noscript').html(), /href="\/en\/privacy\/"/);
   assert.doesNotMatch(await readFile(new URL('../src/components/ContributionForm.astro', import.meta.url), 'utf8'), /umami|track\s*\(/i);
 });

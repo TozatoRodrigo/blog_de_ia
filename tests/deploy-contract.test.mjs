@@ -85,12 +85,13 @@ test('Nginx proxies contribution submissions to the lead service with the API co
   assert.match(contributionLocation, /proxy_set_header Host \$host;/);
   assert.match(contributionLocation, /proxy_set_header X-Real-IP \$remote_addr;/);
   assert.match(contributionLocation, /proxy_set_header X-Forwarded-Proto \$http_x_forwarded_proto;/);
-  assert.match(contributionLocation, /proxy_set_header CF-Connecting-IP \$http_cf_connecting_ip;/);
+  assert.match(contributionLocation, /proxy_set_header CF-Connecting-IP \$remote_addr;/);
   assert.match(contributionLocation, /proxy_connect_timeout 10s;/);
   assert.match(contributionLocation, /proxy_read_timeout 10s;/);
   assert.match(contributionLocation, /proxy_pass http:\/\/download-leads:8787;/);
   assert.match(nginx, /location \/api\/download-leads\/\s*{[\s\S]*?client_max_body_size 128k;/);
   assert.match(nginx, /location \^~ \/downloads\/\s*{[\s\S]*?client_max_body_size 16k;/);
+  assert.doesNotMatch(nginx, /proxy_set_header CF-Connecting-IP \$http_cf_connecting_ip;/);
 });
 
 test('Nginx allows the editorial contribution body while keeping downloads bounded', () => {

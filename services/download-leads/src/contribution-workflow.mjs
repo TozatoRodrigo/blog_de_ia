@@ -26,6 +26,13 @@ const FIELD_LIMITS = Object.freeze({
 function invalidSubmission(message = 'Invalid submission') {
   return new LeadFlowError('invalid_submission', 400, message);
 }
+
+function consentAccepted(value) {
+  if (value === true) return true;
+  if (typeof value !== 'string') return false;
+  return ['on', 'true', '1', 'yes'].includes(value.trim().toLowerCase());
+}
+
 function stringValue(value, field, { required = false } = {}) {
   if (typeof value !== 'string') {
     if (required) throw invalidSubmission('Required fields are missing');
@@ -95,6 +102,7 @@ export function createContributionWorkflow({
       }
 
       if (!isHoneypotClear(input.company)) throw invalidSubmission();
+      if (!consentAccepted(input.consent)) throw invalidSubmission();
 
       const limit = rateLimiter.check(input.remoteIp);
       if (!limit.allowed) throw rateLimited(limit.retryAfter);

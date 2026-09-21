@@ -1,4 +1,5 @@
 import { createReadStream } from 'node:fs';
+import { isIP } from 'node:net';
 import { stat } from 'node:fs/promises';
 import { randomUUID } from 'node:crypto';
 import { isHoneypotClear, parseSessionCookie, sessionCookie, verifyOrigin } from './security.mjs';
@@ -87,13 +88,25 @@ async function parseBody(request, limit) {
   throw new LeadFlowError('unsupported_media_type', 415, 'Unsupported request');
 }
 
+function normalizedIp(value) {
+  const candidate = String(value ?? '').trim();
+  return isIP(candidate) ? candidate : '';
+}
+
+function isPrivateProxyAddress(value) {
+  const ip = normalizedIp(value);
+  if (!ip || ip.includes(':')) return false;
+  const octets = ip.split('.').map(Number);
+  return octets[0] === 10
+    || (octets[0] === 172 && octets[1] >= 16 && octets[1] <= 31)
+    || (octets[0] === 192 && octets[1] === 168);
+}
+
 function remoteIp(request) {
-  const forwarded = request.headers['cf-connecting-ip']
-    || request.headers['x-real-ip']
-    || request.headers['x-forwarded-for']
-    || request.socket.remoteAddress
-    || 'unknown';
-  return String(forwarded).split(',')[0].trim();
+  const socketIp = normalizedIp(request.socket?.remoteAddress);
+  const proxyIp = normalizedIp(request.headers['x-real-ip']);
+  if (isPrivateProxyAddress(socketIp) && proxyIp) return proxyIp;
+  return socketIp || 'unknown';
 }
 
 function fallbackPage({ config, material, lang = 'pt-BR', error = '' }) {
@@ -227,6 +240,7 @@ function contributionFallbackPage({ config, values = {}, lang = 'pt-BR', error =
       contact: 'Prefer to start with a question? Contact the editor directly.',
       contactLink: 'Contact the editor',
       turnstile: 'This form uses Cloudflare Turnstile for abuse prevention.',
+      noScript: 'JavaScript is required to complete Cloudflare Turnstile; without it, this endpoint cannot verify the submission.',
     }
     : {
       title: 'Contribua com uma ideia',
@@ -246,6 +260,7 @@ function contributionFallbackPage({ config, values = {}, lang = 'pt-BR', error =
       contact: 'Prefere começar com uma pergunta? Fale diretamente com o editor.',
       contactLink: 'Falar com o editor',
       turnstile: 'Este formulário usa Cloudflare Turnstile para evitar abusos.',
+      noScript: 'JavaScript é necessário para concluir o Cloudflare Turnstile; sem ele, este endpoint não pode verificar o envio.',
     };
   const field = (name, label, type = 'text') => `<label for="contribution-${name}">${label}</label><input id="contribution-${name}" name="${name}" type="${type}" value="${escapeHtml(contributionFieldValue(values, name))}"${type === 'email' ? ' autocomplete="email"' : ''}>`;
   const textarea = (name, label) => `<label for="contribution-${name}">${label}</label><textarea id="contribution-${name}" name="${name}">${escapeHtml(contributionFieldValue(values, name))}</textarea>`;
@@ -254,6 +269,7 @@ function contributionFallbackPage({ config, values = {}, lang = 'pt-BR', error =
   return `<!doctype html>
 <html lang="${english ? 'en' : 'pt-BR'}"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width"><title>${escapeHtml(copy.title)} — Produto com IA</title><meta name="robots" content="noindex, nofollow, noarchive"></head>
 <body><main><p><a href="${pagePath}">Produto com IA</a></p><h1>${escapeHtml(copy.title)}</h1><p>${escapeHtml(copy.intro)}</p>${errorHtml}
+<noscript><p>${escapeHtml(copy.noScript)} <a href="${contactHref}">${escapeHtml(copy.contactLink)}</a> · <a href="${privacyHref}">${escapeHtml(copy.privacyLink)}</a>.</p></noscript>
 <form method="post" action="/api/contributions/submit">
 ${field('name', copy.name)}${field('email', copy.email, 'email')}${field('role', copy.role)}${field('siteUrl', copy.siteUrl)}${field('title', copy.titleField)}${textarea('excerpt', copy.excerpt)}${textarea('content', copy.content)}${textarea('links', copy.links)}${textarea('bio', copy.bio)}
 <label><input name="consent" type="checkbox" value="on" required> ${escapeHtml(english ? 'I confirm that I am the author or have permission to submit this material.' : 'Confirmo que sou autor ou tenho autorização para enviar este material.')}</label>

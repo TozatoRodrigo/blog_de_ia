@@ -24,6 +24,8 @@ const contributionPrivacyVersion = '2026-09-21';
     <p>{english ? 'We will read the submission and contact you if it fits the section. Nothing is published automatically.' : 'Vamos ler o envio e entrar em contato se ele fizer sentido para a seção. Nada é publicado automaticamente.'}</p>
   </div>
 
+  <noscript><p class="contribution-form__noscript">{english ? 'JavaScript is required to complete Cloudflare Turnstile; without it, this endpoint cannot verify the submission.' : 'JavaScript é necessário para concluir o Cloudflare Turnstile; sem ele, este endpoint não pode verificar o envio.'}{' '}<a href={english ? '/en/about#contact' : '/sobre#contato'}>{english ? 'Contact the editor directly' : 'Fale diretamente com o editor'}</a>{' '}<span aria-hidden="true">·</span>{' '}<a href={privacyPath}>{english ? 'Read the privacy policy' : 'Leia a política de privacidade'}</a>.</p></noscript>
+
   <form class="contribution-form__form" method="post" action="/api/contributions/submit" enctype="application/x-www-form-urlencoded" data-contribution-form hidden={submitted}>
     <div class="contribution-form__fields">
       <div class="contribution-form__field"><label for="contribution-name">{english ? 'Name' : 'Nome'} <span aria-hidden="true">*</span></label><input id="contribution-name" name="name" type="text" autocomplete="name" required /></div>
@@ -137,6 +139,7 @@ const contributionPrivacyVersion = '2026-09-21';
   .contribution-form__status { min-height: 1.5rem; margin: 1rem 0 0; color: var(--accent-dark); font-weight: 700; }
   .contribution-form__submit { margin-top: 1.25rem; }
   .contribution-form__privacy, .contribution-form__contact { color: var(--fg-muted); font-size: var(--step--1); margin: 1.5rem 0 0; }
+  .contribution-form__noscript { margin: 0; padding: 1rem clamp(1.25rem, 3vw, 2.5rem); border-bottom: 2px solid var(--line); background: var(--bg-alt); color: var(--fg); font-size: var(--step--1); }
   .contribution-form__success { padding: clamp(1.5rem, 4vw, 3rem); background: var(--accent); color: var(--fg-invert); }
   .contribution-form__success:focus { outline: 3px solid var(--fg); outline-offset: -7px; }
   .contribution-form__success h3 { max-width: 18ch; margin: 0.75rem 0 1rem; color: var(--fg-invert); font-size: var(--step-3); }

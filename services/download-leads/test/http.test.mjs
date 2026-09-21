@@ -357,6 +357,20 @@ test('contribution endpoint rejects unsafe JSON requests without echoing submitt
     const honeypot = await fetch(`${app.baseUrl}/api/contributions/submit`, jsonRequest({ ...validContribution, company: 'ACME' }));
     assert.equal(honeypot.status, 400);
 
+    const missingConsent = { ...validContribution };
+    delete missingConsent.consent;
+    const missingConsentResponse = await fetch(`${app.baseUrl}/api/contributions/submit`, jsonRequest(missingConsent));
+    assert.equal(missingConsentResponse.status, 400);
+    assert.equal((await missingConsentResponse.json()).error, 'invalid_submission');
+
+    const falseConsent = await fetch(`${app.baseUrl}/api/contributions/submit`, jsonRequest({ ...validContribution, consent: false }));
+    assert.equal(falseConsent.status, 400);
+    assert.equal((await falseConsent.json()).error, 'invalid_submission');
+
+    const forgedConsent = await fetch(`${app.baseUrl}/api/contributions/submit`, jsonRequest({ ...validContribution, consent: 'accepted' }));
+    assert.equal(forgedConsent.status, 400);
+    assert.equal((await forgedConsent.json()).error, 'invalid_submission');
+
     const invalidEmail = await fetch(`${app.baseUrl}/api/contributions/submit`, jsonRequest({ ...validContribution, email: 'invalid' }));
     assert.equal(invalidEmail.status, 400);
     assert.deepEqual((await invalidEmail.json()).error, 'invalid_email');
@@ -367,6 +381,40 @@ test('contribution endpoint rejects unsafe JSON requests without echoing submitt
 
     const tooLarge = await fetch(`${app.baseUrl}/api/contributions/submit`, jsonRequest({ ...validContribution, content: 'x'.repeat(100_000) }));
     assert.equal(tooLarge.status, 413);
+    assert.deepEqual(app.db.pendingContributionNotifications(10), []);
+  } finally {
+    await app.close();
+  }
+});
+
+test('contribution form rejects missing and false consent', async () => {
+  const app = await setup();
+  try {
+    const missingConsent = new URLSearchParams(validContribution);
+    missingConsent.delete('consent');
+    const missingResponse = await fetch(`${app.baseUrl}/api/contributions/submit`, {
+      method: 'POST',
+      redirect: 'manual',
+      headers: {
+        origin: 'https://produtocomia.com.br',
+        'content-type': 'application/x-www-form-urlencoded',
+      },
+      body: missingConsent,
+    });
+    assert.equal(missingResponse.status, 400);
+    assert.match(await missingResponse.text(), /Confira os campos obrigatórios e tente novamente/);
+
+    const falseConsent = await fetch(`${app.baseUrl}/api/contributions/submit`, {
+      method: 'POST',
+      redirect: 'manual',
+      headers: {
+        origin: 'https://produtocomia.com.br',
+        'content-type': 'application/x-www-form-urlencoded',
+      },
+      body: new URLSearchParams({ ...validContribution, consent: 'false' }),
+    });
+    assert.equal(falseConsent.status, 400);
+    assert.match(await falseConsent.text(), /Confira os campos obrigatórios/);
     assert.deepEqual(app.db.pendingContributionNotifications(10), []);
   } finally {
     await app.close();
@@ -387,6 +435,28 @@ test('contribution endpoint rate limits repeated submissions', async () => {
     assert.equal(blocked.status, 429);
     assert.ok(Number(blocked.headers.get('retry-after')) > 0);
     assert.deepEqual((await blocked.json()).error, 'rate_limited');
+  } finally {
+    await app.close();
+  }
+});
+
+test('does not let direct CF-Connecting-IP headers choose rate-limit identities', async () => {
+  const app = await setup();
+  try {
+    for (let attempt = 0; attempt < 5; attempt += 1) {
+      const response = await fetch(`${app.baseUrl}/api/contributions/submit`, jsonRequest({
+        ...validContribution,
+        title: `${validContribution.title} spoof ${attempt}`,
+      }, { 'cf-connecting-ip': `198.51.100.${attempt + 10}` }));
+      assert.equal(response.status, 201);
+    }
+
+    const blocked = await fetch(`${app.baseUrl}/api/contributions/submit`, jsonRequest({
+      ...validContribution,
+      title: `${validContribution.title} spoof blocked`,
+    }, { 'cf-connecting-ip': '203.0.113.99' }));
+    assert.equal(blocked.status, 429);
+    assert.equal((await blocked.json()).error, 'rate_limited');
   } finally {
     await app.close();
   }
@@ -437,6 +507,8 @@ test('contribution form errors render escaped localized fallback HTML', async ()
     assert.doesNotMatch(html, /<script>alert/);
     assert.match(html, /\/en\/privacy\//);
     assert.match(html, /\/en\/about#contact/);
+    assert.match(html, /<noscript>[\s\S]*JavaScript is required to complete Cloudflare Turnstile/);
+    assert.match(html, /cannot verify the submission/);
   } finally {
     await app.close();
   }

@@ -73,7 +73,15 @@ test('privacy pages disclose the complete lead lifecycle in both languages', asy
     assert.match(text, /Resend/);
     assert.match(text, /Cloudflare Turnstile/);
     assert.match(text, /730/);
-    assert.match(text, /2026-07-22/);
+    assert.match(text, /2026-09-21/);
+    assert.match(text, /(contribui(ção|ções)|submission)/i);
+    assert.match(text, /(identidade|identity)/i);
+    assert.match(text, /(bio|links)/i);
+    assert.match(text, /(trecho|excerpt)/i);
+    assert.match(text, /(texto completo|article text|full contribution)/i);
+    assert.match(text, /(avaliação editorial|editorial review)/i);
+    assert.match(text, /(não é publicad[oa] automaticamente|not auto-published|not automatically published)/i);
+    assert.match(text, /(730 dias|730 days)/i);
     assert.match(text, /(acesso|access)/i);
     assert.match(text, /(correção|correction)/i);
     assert.match(text, /(exclusão|deletion)/i);

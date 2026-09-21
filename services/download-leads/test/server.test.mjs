@@ -85,7 +85,7 @@ test('composes the service without starting network listeners during import', as
   assert.equal(blocked.allowed, false);
   assert.ok(blocked.retryAfter > 0);
   await assert.rejects(
-    () => app.contributionWorkflow.submit({ remoteIp: '198.51.100.10' }),
+    () => app.contributionWorkflow.submit({ remoteIp: '198.51.100.10', consent: true }),
     (error) => error.code === 'rate_limited' && error.status === 429,
   );
   assert.equal(await app.workflow.health(), true);
