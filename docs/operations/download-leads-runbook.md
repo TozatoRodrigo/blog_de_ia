@@ -108,7 +108,7 @@ O banco SQLite aceita backup consistente com o serviço no ar. Crie o destino de
 cd /home/rodrigo/apps/radar-ia
 mkdir -p lead-data/backups
 chmod 700 lead-data/backups
-docker compose exec -T download-leads node --input-type=module -e 'import { createLeadDatabase } from "./src/database.mjs"; const db = createLeadDatabase({ path: "/data/leads.sqlite" }); await db.backup("/data/backups/leads-manual.sqlite"); db.close();'
+docker compose exec -T download-leads node --input-type=module -e 'import { createLeadDatabase } from "./src/database.mjs"; const db = createLeadDatabase({ path: "/data/leads.sqlite" }); db.backupTo("/data/backups/leads-manual.sqlite"); db.close();'
 ```
 
 Verifique se o arquivo existe e tem tamanho maior que zero. Cópias fora do servidor devem ser cifradas e ter acesso restrito. O publicador preserva `lead-data` entre versões e nunca o remove no rollback.

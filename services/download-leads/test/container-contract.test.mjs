@@ -88,4 +88,6 @@ test('operations runbook covers activation, privacy requests and recovery', asyn
   assert.match(runbook, /node scripts\/smoke-test\.mjs/);
   assert.match(runbook, /deleteEditorialSubmissionsByEmail/);
   assert.match(runbook, /requeueContributionNotification/);
+  assert.match(runbook, /db\.backupTo\("\/data\/backups\/leads-manual\.sqlite"\);/);
+  assert.doesNotMatch(runbook, /db\.backup\(/);
 });

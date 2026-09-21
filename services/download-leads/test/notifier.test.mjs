@@ -165,6 +165,58 @@ test('notification worker preserves failed events for retry', async () => {
   db.close();
 });
 
+test('keeps a download notification sent when an overlapping failure finishes late', async () => {
+  const db = createLeadDatabase({
+    path: ':memory:',
+    randomUUID: (() => { let id = 0; return () => `download-overlap-${++id}`; })(),
+  });
+  const storedLead = db.upsertLead({
+    email: lead.email,
+    marketingOptIn: false,
+    privacyVersion: '2026-07-22',
+  });
+  db.createDownloadEvent({
+    leadId: storedLead.id,
+    materialId: material.id,
+    sourcePath: event.sourcePath,
+    lang: event.lang,
+    campaign: event.campaign,
+  });
+  let releaseSuccess;
+  let releaseFailure;
+  const successReady = new Promise((resolve) => { releaseSuccess = resolve; });
+  const failureReady = new Promise((resolve) => { releaseFailure = resolve; });
+  const catalog = { byId: new Map([[material.id, material]]) };
+  const successBatch = runNotificationBatch({
+    db,
+    catalog,
+    notifier: {
+      sendDownloadNotification: async () => {
+        await successReady;
+        return { id: 'download-email-id' };
+      },
+    },
+  });
+  const failureBatch = runNotificationBatch({
+    db,
+    catalog,
+    notifier: {
+      sendDownloadNotification: async () => {
+        await failureReady;
+        throw Object.assign(new Error('failed'), { code: 'resend_http_503' });
+      },
+    },
+  });
+
+  releaseSuccess();
+  assert.deepEqual(await successBatch, { sent: 1, failed: 0 });
+  releaseFailure();
+  assert.deepEqual(await failureBatch, { sent: 0, failed: 1 });
+
+  assert.deepEqual(db.pendingNotifications(20), []);
+  db.close();
+});
+
 test('sends a complete idempotent editorial contribution notification', async () => {
   let request;
   const notifier = createNotifier({

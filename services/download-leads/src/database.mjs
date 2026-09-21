@@ -186,7 +186,7 @@ export function createLeadDatabase({ path, clock = () => new Date(), randomUUID 
       UPDATE download_events
       SET notification_state = 'failed', notification_attempts = notification_attempts + 1,
           notification_last_error = ?
-      WHERE id = ?
+      WHERE id = ? AND notification_state IN ('pending', 'failed')
     `),
     createEditorialSubmission: database.prepare(`
       INSERT INTO editorial_submissions
