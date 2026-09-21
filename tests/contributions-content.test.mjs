@@ -31,7 +31,9 @@ test('both contribution files keep the published bilingual content contract', as
     assert.equal(parsed[language].data.translationKey, 'ricardo-evals');
     assert.equal(parsed[language].data.authorId, 'ricardo-guia');
     assert.equal(parsed[language].data.date, '2026-09-21');
-    assert.deepEqual(parsed[language].data.tags, ['produto', 'agentes-de-ia', 'governanca-de-ia']);
+    assert.deepEqual(parsed[language].data.tags, language === 'en'
+      ? ['product', 'ai-agents', 'ai-governance']
+      : ['produto', 'agentes-de-ia', 'governanca-de-ia']);
     assert.equal(parsed[language].data.featured, true);
     assert.equal(parsed[language].data.draft, false);
     assert.ok(parsed[language].body.split(/\n\n+/).length >= 12, `${language} contribution body is unexpectedly short`);

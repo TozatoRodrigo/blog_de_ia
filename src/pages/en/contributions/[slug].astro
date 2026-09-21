@@ -4,7 +4,7 @@ import BaseLayout from '../../../layouts/BaseLayout.astro';
 import ContributionAuthor from '../../../components/ContributionAuthor.astro';
 import { contributorFor } from '../../../data/contributors';
 import { formatDate, formatDateISO } from '../../../utils/format';
-import { contributionIndexPath, contributionPath } from '../../../utils/contribution-routes';
+import { assertUniqueContributionSlugs, contributionIndexPath, contributionPath, findContributionTranslation } from '../../../utils/contribution-routes';
 import { contributionPostingSchema, breadcrumbSchema } from '../../../utils/schema';
 import { guideForTag } from '../../../data/guideLinks';
 
@@ -12,14 +12,14 @@ const lang = 'en' as const;
 
 export async function getStaticPaths() {
   const entries = await getCollection('contributions-en', ({ data }) => !data.draft);
+  assertUniqueContributionSlugs('en', entries);
   return entries.map((entry) => ({ params: { slug: entry.data.seoSlug }, props: { entry } }));
 }
 
 const { entry } = Astro.props;
 const { Content } = await render(entry);
 const allPortuguese = await getCollection('contributions', ({ data }) => !data.draft);
-const alternateEntry = allPortuguese.find((candidate) => candidate.data.translationKey === entry.data.translationKey);
-if (!alternateEntry) throw new Error(`missing-contribution-translation:${entry.data.translationKey}`);
+const alternateEntry = findContributionTranslation(allPortuguese, entry.data.translationKey, 'pt-BR');
 const articleUrl = contributionPath(lang, entry.data.seoSlug);
 const alternateUrl = contributionPath('pt-BR', alternateEntry.data.seoSlug);
 const contributor = contributorFor(entry.data.authorId);
@@ -41,7 +41,7 @@ const jsonLd = [
       <div class="article-header__eyebrow"><span class="accent">●</span><span>EDITORIAL CONTRIBUTION — {formatDate(entry.data.date, lang)}</span></div>
       <h1>{entry.data.title}</h1>
       <p class="contribution-article__excerpt">{entry.data.excerpt}</p>
-      <div class="article-header__meta"><span>BY — {contributor.name.toUpperCase()}</span><span>PRODUCT EXECUTIVE AND AUTHOR</span></div>
+      <div class="article-header__meta"><span>BY — {contributor.name.toUpperCase()}</span><span>{contributor.roleEn.toUpperCase()}</span></div>
     </header>
 
     {entry.data.translationNote && <p class="contribution-translation-note"><span class="mono-sm">TRANSLATION NOTE</span> {entry.data.translationNote}</p>}

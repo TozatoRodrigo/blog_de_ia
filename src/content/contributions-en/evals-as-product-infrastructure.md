@@ -3,7 +3,7 @@ title: "Your AI product needs to remember its own mistakes"
 date: "2026-09-21"
 seoSlug: "evals-as-product-infrastructure"
 excerpt: "Evals turn real failures into infrastructure that keeps up with every change to the model, prompt, or flow."
-tags: ["produto", "agentes-de-ia", "governanca-de-ia"]
+tags: ["product", "ai-agents", "ai-governance"]
 authorId: "ricardo-guia"
 translationKey: "ricardo-evals"
 featured: true

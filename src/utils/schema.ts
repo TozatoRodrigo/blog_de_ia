@@ -55,6 +55,8 @@ export function blogPostingSchema(input: ArticleInput) {
 export function contributionPostingSchema(input: ArticleInput & { contributor: Contributor }) {
   const url = absoluteUrl(input.url);
   const contributorUrl = input.contributor.site;
+  const contributorRole = input.lang === 'en' ? input.contributor.roleEn : input.contributor.role;
+  const contributorBio = input.lang === 'en' ? input.contributor.bioEn : input.contributor.bio;
   return {
     '@context': 'https://schema.org', '@type': 'BlogPosting', '@id': `${url}#article`,
     headline: input.title, description: input.description,
@@ -65,8 +67,8 @@ export function contributionPostingSchema(input: ArticleInput & { contributor: C
       '@type': 'Person',
       '@id': `${url}#author-${input.contributor.id}`,
       name: input.contributor.name,
-      jobTitle: input.contributor.role,
-      description: input.contributor.bio,
+      jobTitle: contributorRole,
+      description: contributorBio,
       ...(contributorUrl ? { url: contributorUrl } : {}),
       sameAs: input.contributor.links.map((link) => link.href),
     },

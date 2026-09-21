@@ -1,0 +1,66 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import ContactEmail from '../components/ContactEmail.astro';
+
+const title = 'Contribua com uma ideia';
+const description = 'Envie uma pauta, experiência ou texto sobre produto, agentes, avaliação e governança de IA para avaliação editorial.';
+---
+
+<BaseLayout title={title} description={description} lang="pt-BR" alternateUrl="/en/contribute/">
+  <section class="container intake" aria-labelledby="intake-heading">
+    <nav class="mono-sm intake__breadcrumb" aria-label="Breadcrumb"><a href="/contribuicoes/">CONTRIBUIÇÕES</a><span>/</span><span>CONTRIBUA</span></nav>
+    <div class="intake__intro">
+      <span class="mono" style="color: var(--accent);">[ CHAMADA EDITORIAL ]</span>
+      <h1 id="intake-heading">Uma ideia que merece contexto.</h1>
+      <p class="intake__lede">O Produto com IA publica vozes de quem constrói produtos, agentes e sistemas de IA. Se você tem uma experiência prática para compartilhar, comece com uma mensagem curta.</p>
+    </div>
+
+    <div class="intake__grid">
+      <section class="intake__card intake__card--accent" aria-labelledby="send-heading">
+        <span class="mono-sm">01 / PRIMEIRO PASSO</span>
+        <h2 id="send-heading">Envie um pitch curto</h2>
+        <p>Conte qual é a ideia, por que ela importa e quem deveria lê-la. Não é preciso preparar um formulário ou um texto completo agora.</p>
+        <ContactEmail class="btn btn--accent btn--lg" />
+        <p class="intake__note">Assunto sugerido: <strong>Contribuição editorial — seu nome</strong></p>
+      </section>
+
+      <section class="intake__card" aria-labelledby="include-heading">
+        <span class="mono-sm">02 / O QUE INCLUIR</span>
+        <h2 id="include-heading">Dê à ideia um ponto de partida</h2>
+        <ul>
+          <li>título ou pergunta central</li>
+          <li>experiência, caso ou evidência que sustenta o ponto</li>
+          <li>breve bio e links que ajudem a contextualizar sua autoria</li>
+        </ul>
+      </section>
+    </div>
+
+    <div class="intake__footer">
+      <span class="mono-sm">[ COMO FUNCIONA ]</span>
+      <p>A equipe editorial lê cada proposta e responde quando houver aderência ao foco da seção. Publicações preservam a voz do autor, com contexto e créditos claros.</p>
+      <a href="/contribuicoes/">← VOLTAR ÀS CONTRIBUIÇÕES</a>
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .intake { padding-top: 2rem; padding-bottom: 5rem; }
+  .intake__breadcrumb { display: flex; gap: 0.5rem; margin-bottom: 4rem; color: var(--fg-muted); }
+  .intake__breadcrumb a { border: 0; color: inherit; }
+  .intake__intro { max-width: 760px; }
+  .intake h1 { max-width: 10ch; margin: 0.75rem 0 1.5rem; }
+  .intake__lede { max-width: 65ch; color: var(--fg-soft); font-size: var(--step-1); line-height: 1.6; }
+  .intake__grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1px; margin-top: 4rem; border: 2px solid var(--line); background: var(--line); }
+  .intake__card { padding: 2rem; background: var(--bg); }
+  .intake__card--accent { background: var(--fg); color: var(--fg-invert); }
+  .intake__card--accent h2 { color: var(--fg-invert); }
+  .intake__card h2 { margin: 0.75rem 0 1rem; font-size: var(--step-2); }
+  .intake__card p, .intake__card li { color: var(--fg-soft); }
+  .intake__card--accent p, .intake__card--accent li { color: var(--bg-alt); }
+  .intake__card .btn { margin-top: 0.75rem; }
+  .intake__note { margin-top: 1.25rem; font-size: var(--step--1); }
+  .intake__footer { max-width: 760px; margin-top: 4rem; padding-top: 1.5rem; border-top: 2px solid var(--line); }
+  .intake__footer p { color: var(--fg-soft); }
+  .intake__footer a { color: var(--accent); font-family: var(--font-mono); font-size: 0.75rem; }
+  @media (max-width: 720px) { .intake__grid { grid-template-columns: 1fr; } }
+</style>

@@ -2,8 +2,10 @@ import assert from 'node:assert/strict';
 import test from 'node:test';
 
 import {
+  assertUniqueContributionSlugs,
   contributionIndexPath,
   contributionPath,
+  findContributionTranslation,
 } from '../src/utils/contribution-routes.ts';
 import { contributorFor } from '../src/data/contributors.ts';
 
@@ -26,6 +28,8 @@ test('contributorFor returns Ricardo Guia and rejects unknown contributors', () 
     name: 'Ricardo Guia',
     role: 'Executivo de produto e autor da Inteligência à Brasileira',
     bio: 'Ricardo Guia é executivo de produto e autor da Inteligência à Brasileira, onde escreve sobre IA a partir do olhar de quem constrói sistemas e produtos com ela.',
+    roleEn: 'Product executive and author of Inteligência à Brasileira',
+    bioEn: 'Ricardo Guia is a product executive and author of Inteligência à Brasileira, where he writes about AI from the perspective of someone who builds systems and products with it.',
     site: 'https://ricardoguia.com/',
     links: [
       { label: 'Inteligência à Brasileira', href: 'https://iabrasileira.com/' },
@@ -33,4 +37,33 @@ test('contributorFor returns Ricardo Guia and rejects unknown contributors', () 
     ],
   });
   assert.throws(() => contributorFor('missing'), /unknown-contributor:missing/);
+});
+
+test('contribution SEO slugs must be unique within a localized collection', () => {
+  assert.throws(
+    () => assertUniqueContributionSlugs('en', [
+      { data: { seoSlug: 'repeated' } },
+      { data: { seoSlug: 'repeated' } },
+    ]),
+    /duplicate-contribution-seo-slug:en:repeated/,
+  );
+});
+
+test('contribution translations require exactly one counterpart', () => {
+  const entries = [
+    { data: { seoSlug: 'evals-as-product-infrastructure', translationKey: 'ricardo-evals' } },
+  ];
+
+  assert.throws(
+    () => findContributionTranslation(entries, 'missing-key', 'en'),
+    /missing-contribution-translation:en:missing-key/,
+  );
+  assert.throws(
+    () => findContributionTranslation([
+      ...entries,
+      { data: { seoSlug: 'evals-as-product-infrastructure-2', translationKey: 'ricardo-evals' } },
+    ], 'ricardo-evals', 'en'),
+    /duplicate-contribution-translation:en:ricardo-evals/,
+  );
+  assert.deepEqual(findContributionTranslation(entries, 'ricardo-evals', 'en'), entries[0]);
 });

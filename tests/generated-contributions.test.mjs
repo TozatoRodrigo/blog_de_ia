@@ -15,8 +15,10 @@ async function loadPage(pathname) {
 test('build generates both contribution indexes and both localized articles', async () => {
   const paths = [
     'contribuicoes/index.html',
+    'contribua/index.html',
     'contribuicoes/evals-infraestrutura-produto/index.html',
     'en/contributions/index.html',
+    'en/contribute/index.html',
     'en/contributions/evals-as-product-infrastructure/index.html',
   ];
 
@@ -25,7 +27,8 @@ test('build generates both contribution indexes and both localized articles', as
     assert.equal($('html').attr('lang'), pathname.startsWith('en/') ? 'en' : 'pt-BR');
     assert.ok($('main').text().trim().length > 500, `${pathname} should have meaningful public content`);
     const schemas = $('script[type="application/ld+json"]').map((_, element) => $(element).text()).get().join('\n');
-    if (pathname.includes('/index.html') && !pathname.includes('/evals-')) assert.match(schemas, /ItemList/);
+    if (pathname.includes('contribua') || pathname.includes('contribute')) assert.match(schemas, /WebSite/);
+    else if (pathname.includes('/index.html') && !pathname.includes('/evals-')) assert.match(schemas, /ItemList/);
     else assert.match(schemas, /BlogPosting/);
   }
 
@@ -38,4 +41,16 @@ test('build generates both contribution indexes and both localized articles', as
   const english = await loadPage('en/contributions/evals-as-product-infrastructure/index.html');
   assert.equal(english('link[rel="alternate"][hreflang="pt-BR"]').attr('href'), 'https://produtocomia.com.br/contribuicoes/evals-infraestrutura-produto/');
   assert.match(english('main').text(), /Translated from the original Portuguese contribution/);
+  assert.match(english('main').text(), /Product executive and author/);
+  assert.match(english('main').text(), /#product/);
+  assert.match(english('script[type="application/ld+json"]').text(), /Product executive and author/);
+});
+
+test('contribution indexes link to usable localized intake pages', async () => {
+  const portuguese = await loadPage('contribuicoes/index.html');
+  const english = await loadPage('en/contributions/index.html');
+  assert.equal(portuguese('a[href="/contribua/"]').length, 1);
+  assert.equal(english('a[href="/en/contribute/"]').length, 1);
+  assert.match((await loadPage('contribua/index.html'))('main').text(), /e-mail/i);
+  assert.match((await loadPage('en/contribute/index.html'))('main').text(), /send/i);
 });

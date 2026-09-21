@@ -9,10 +9,8 @@ interface Props {
 
 const { authorId, lang } = Astro.props;
 const contributor = contributorFor(authorId);
-const role = lang === 'en' ? 'Product executive and author of Inteligência à Brasileira' : contributor.role;
-const bio = lang === 'en'
-  ? 'Ricardo Guia is a product executive and author of Inteligência à Brasileira, where he writes about AI from the perspective of someone who builds systems and products with it.'
-  : contributor.bio;
+const role = lang === 'en' ? contributor.roleEn : contributor.role;
+const bio = lang === 'en' ? contributor.bioEn : contributor.bio;
 const authorLabel = lang === 'en' ? 'ABOUT THE CONTRIBUTOR' : 'SOBRE O AUTOR';
 const siteLabel = lang === 'en' ? 'MAIN SITE' : 'SITE PRINCIPAL';
 const linksLabel = lang === 'en' ? 'CREDITS AND LINKS' : 'CRÉDITOS E LINKS';
