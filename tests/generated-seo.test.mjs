@@ -53,8 +53,24 @@ test('both home pages surface the localized editorial contribution routes', asyn
     assert.ok($(`header a[href="${indexPath.slice(0, -1)}"]`).length > 0, `${pathname}: missing localized contribution navigation`);
     assert.ok($(`footer a[href="${indexPath}"]`).length > 0, `${pathname}: missing localized contribution footer link`);
     assert.ok($(`footer a[href="${intakePath}"]`).length > 0, `${pathname}: missing localized contribution contact link`);
+    assert.equal($(`header a[href="${indexPath.slice(0, -1)}"]`).text().trim(), featuredLabel);
+    assert.equal($(`footer a[href="${indexPath}"]`).first().text().trim(), featuredLabel);
+    assert.equal($('[data-contribution-strip]').length, 1);
+    assert.equal($('[data-contribution-featured]').length, 1);
     assert.match($('[data-contribution-featured]').text(), /Ricardo Guia|Your AI product needs to remember its own mistakes/);
     assert.match($('[data-contribution-strip]').text(), new RegExp(featuredLabel, 'i'));
+  }
+});
+
+test('privacy pages directly disclose editorial submissions in generated SEO output', async () => {
+  const cases = [
+    ['privacidade/index.html', /contribuição editorial/i],
+    ['en/privacy/index.html', /editorial contribution/i],
+  ];
+
+  for (const [pathname, disclosure] of cases) {
+    const $ = await loadPage(pathname);
+    assert.match($('main').text(), disclosure);
   }
 });
 

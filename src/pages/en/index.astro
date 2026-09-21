@@ -10,6 +10,7 @@ import { t } from '../../i18n/lang';
 import { ui } from '../../i18n/ui';
 import { newsletterPath } from '../../utils/newsletter-routes';
 import ContributionCTA from '../../components/ContributionCTA.astro';
+import ContributionFeatured from '../../components/ContributionFeatured.astro';
 import { contributorFor } from '../../data/contributors';
 
 const lang = 'en' as const;
@@ -84,7 +85,7 @@ const jsonLd = [
 
   <div class="warning-stripe"></div>
 
-  {featuredContribution && <ContributionCTA lang={lang} featuredEntry={featuredContribution} featuredAuthor={featuredAuthor} showStrip={false} />}
+  <ContributionFeatured lang={lang} featuredEntry={featuredContribution} featuredAuthor={featuredAuthor} />
 
   <section class="container" style="padding-top: 4rem; padding-bottom: 4rem;">
     <div class="section-header"><div><span class="mono" style="color: var(--accent);">[ {ui('section.coverage', lang)} ]</span><h2>{ui('section.topicsTitle', lang)}</h2></div><a href="/en/topics" class="mono" style="color: var(--fg-muted);">{ui('section.viewAll', lang)} →</a></div>

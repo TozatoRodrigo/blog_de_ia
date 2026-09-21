@@ -10,7 +10,7 @@ export const UI: Dict = {
   'nav.topics': { 'pt-BR': 'Tópicos', 'en': 'Topics' },
   'nav.concepts': { 'pt-BR': 'Conceitos', 'en': 'Concepts' },
   'nav.about': { 'pt-BR': 'Sobre', 'en': 'About' },
-  'nav.contributions': { 'pt-BR': 'Contribuições', 'en': 'Contributions' },
+  'nav.contributions': { 'pt-BR': 'Contribua', 'en': 'Contribute' },
   'nav.contribute': { 'pt-BR': 'Contribua', 'en': 'Contribute' },
   'nav.menu': { 'pt-BR': 'MENU', 'en': 'MENU' },
   'nav.close': { 'pt-BR': 'Fechar menu', 'en': 'Close menu' },
