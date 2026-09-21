@@ -21,6 +21,19 @@ Revogue uma chave antiga depois de confirmar que a nova envia corretamente. Chav
 4. Copie separadamente a chave pública e a secreta. A pública vai em `TURNSTILE_SITE_KEY`; a secreta vai em `TURNSTILE_SECRET_KEY`, somente no servidor.
 5. Antes dos valores de produção, rode os testes com as chaves de teste oficiais “always pass” do Cloudflare. Não misture chaves de teste e produção.
 
+## Publicação de contribuições editoriais
+
+Antes de publicar uma versão que contenha `/contribua/`, `/en/contribute/` ou as páginas em `/contribuicoes/`, confirme este contrato:
+
+- O formulário público envia para `POST /api/contributions/submit`. A rota exata é publicada pelo Nginx para `download-leads:8787`; não crie uma página estática em `dist/api/` nem exponha a porta 8787 ao proxy externo.
+- `CONTRIBUTION_PRIVACY_VERSION` deve ser exatamente a versão exibida nas páginas `/privacidade/` e `/en/privacy/`, no formulário PT/EN e no fallback do serviço. Ao atualizar a política, altere as fontes e a variável do servidor juntas, gere o build e confirme o valor no endpoint público de configuração sem publicar a chave secreta.
+- `TURNSTILE_SITE_KEY` e `TURNSTILE_SECRET_KEY` devem ser o par do mesmo widget de produção autorizado para `produtocomia.com.br`. A chave pública pode aparecer no HTML/configuração pública; a secreta fica somente no `.env.download-leads`. Nunca use o par de testes no host de produção.
+- O Resend envia a notificação para `LEAD_NOTIFICATION_TO=rodrigo.tozato@icloud.com`, usando o remetente verificado em `RESEND_FROM`. A chamada usa a chave de idempotência `editorial-submission/<submission-id>`; uma falha mantém a submissão privada e o worker tenta novamente até `CONTRIBUTION_NOTIFICATION_MAX_ATTEMPTS` (padrão: 8). Depois do limite, revise a causa e use o requeue por identificador descrito em [Recuperar notificações editoriais](#recuperar-notificações-editoriais); não há endpoint público de reenvio.
+- O envio fica `pending` para triagem. Não existe autopublicação: a equipe revisa autoria, links, escopo e edição antes de criar qualquer arquivo em `src/content/contributions*.md`.
+- O container `download-leads` fica somente na rede interna `leads-internal` (`172.30.0.0/24`). O Nginx é o único caminho até ele e sobrescreve os cabeçalhos de identidade recebidos do proxy. Mantenha `TRUSTED_PROXY_CIDR=172.30.0.0/24` alinhado com essa fronteira; não confie em `CF-Connecting-IP` ou `X-Forwarded-For` enviados diretamente por clientes.
+
+Após a publicação, valide `/api/contributions/submit` por uma submissão controlada e confirme a notificação no mailbox do editor. Em caso de pedido de exclusão, use [Excluir um lead](#excluir-um-lead), que também remove as submissões editoriais pelo mesmo e-mail. Antes de uma migração ou manutenção, crie uma cópia consistente com [Backup](#backup); não copie o banco enquanto o serviço estiver escrevendo.
+
 ## Cloudflare e links de contato
 
 As páginas de contribuição e de privacidade mantêm deliberadamente links estáticos `mailto:`. O fallback estático `mailto:` da contribuição também aparece dentro do bloco `<noscript>` e no HTML de erro do serviço. Eles são caminhos de contato acionáveis para quem não executa JavaScript; não os remova.

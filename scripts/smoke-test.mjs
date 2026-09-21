@@ -6,6 +6,11 @@ const checks = [
   ['/guias/inteligencia-artificial-para-product-managers/', 200, '<h1'],
   ['/guias/gestao-de-produtos-com-ia/', 200, '<h1'], ['/guias/governanca-de-ia/', 200, '<h1'],
   ['/guias/', 200, '<h1'], ['/privacidade/', 200, '<h1'], ['/en/privacy/', 200, '<h1'],
+  ['/contribua/', 200, '<h1'], ['/en/contribute/', 200, '<h1'],
+  ['/contribuicoes/', 200, 'Seu produto de IA precisa lembrar'],
+  ['/contribuicoes/evals-infraestrutura-produto/', 200, 'Seu produto de IA precisa lembrar'],
+  ['/en/contributions/', 200, 'Your AI product needs to remember'],
+  ['/en/contributions/evals-as-product-infrastructure/', 200, 'Your AI product needs to remember'],
   ['/newsletter/', 200, '<h1'], ['/sitemap-index.xml', 200, '<sitemapindex'],
   ['/rss.xml', 200, '<rss'], ['/robots.txt', 200, 'GPTBot'], ['/llms.txt', 200, '# Produto com IA'],
   ['/llms-full.txt', 200, 'corpus editorial'],
@@ -32,7 +37,7 @@ const contactChecks = [
   ['/en/privacy/', ['data-contact-direct="true"', 'href="mailto:', 'href="/en/about#contact"']],
 ];
 for (const [path, required] of contactChecks) {
-  const response = await fetch(`${origin}${path}`);
+  const response = await fetch(`${origin}${path}?smoke=${Date.now()}`, { redirect: 'follow' });
   const text = await response.text();
   const actionable = required.every((marker) => text.includes(marker));
   const obfuscated = text.includes('/cdn-cgi/l/email-protection');
