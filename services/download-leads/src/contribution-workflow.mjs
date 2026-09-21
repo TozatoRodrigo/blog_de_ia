@@ -66,10 +66,23 @@ function bodySize(input) {
   }
 }
 
+const allowAllRateLimiter = Object.freeze({
+  check() {
+    return { allowed: true, retryAfter: 0 };
+  },
+});
+
+function rateLimited(retryAfter) {
+  const error = new LeadFlowError('rate_limited', 429, 'Try again later');
+  error.retryAfter = Math.max(1, Math.ceil(Number(retryAfter) || 1));
+  return error;
+}
+
 export function createContributionWorkflow({
   config,
   db,
   verifyTurnstileFn = verifyTurnstile,
+  rateLimiter = allowAllRateLimiter,
   clock = () => new Date(),
 }) {
   const expectedHostname = new URL(config.allowedOrigin).hostname;
@@ -82,6 +95,9 @@ export function createContributionWorkflow({
       }
 
       if (!isHoneypotClear(input.company)) throw invalidSubmission();
+
+      const limit = rateLimiter.check(input.remoteIp);
+      if (!limit.allowed) throw rateLimited(limit.retryAfter);
 
       const name = stringValue(input.name, 'name', { required: true });
       const role = stringValue(input.role, 'role');

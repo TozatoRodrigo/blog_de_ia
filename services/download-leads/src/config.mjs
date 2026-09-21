@@ -96,6 +96,11 @@ export function loadConfig(env = process.env) {
     maxBodyBytes: positiveInteger(env, 'MAX_BODY_BYTES', 16 * 1024),
     contributionMaxBodyBytes: positiveInteger(env, 'CONTRIBUTION_MAX_BODY_BYTES', 96 * 1024),
     contributionRateLimitAttempts: positiveInteger(env, 'CONTRIBUTION_RATE_LIMIT_ATTEMPTS', 5),
+    contributionNotificationMaxAttempts: positiveInteger(
+      env,
+      'CONTRIBUTION_NOTIFICATION_MAX_ATTEMPTS',
+      8,
+    ),
   };
 
   if (!/^\d{4}-\d{2}-\d{2}$/.test(config.contributionPrivacyVersion)) {

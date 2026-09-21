@@ -33,6 +33,7 @@ test('loadConfig returns normalized immutable values', () => {
   assert.equal(config.contributionPrivacyVersion, '2026-07-22');
   assert.equal(config.contributionMaxBodyBytes, 96 * 1024);
   assert.equal(config.contributionRateLimitAttempts, 5);
+  assert.equal(config.contributionNotificationMaxAttempts, 8);
   assert.equal(config.turnstileTesting, true);
   assert.equal(Object.isFrozen(config), true);
 });
@@ -44,12 +45,14 @@ test('loadConfig allows contribution-specific privacy and size overrides', () =>
     CONTRIBUTION_PRIVACY_VERSION: '2026-09-21',
     CONTRIBUTION_MAX_BODY_BYTES: '120000',
     CONTRIBUTION_RATE_LIMIT_ATTEMPTS: '7',
+    CONTRIBUTION_NOTIFICATION_MAX_ATTEMPTS: '4',
   });
 
   assert.equal(config.privacyVersion, '2026-08-01');
   assert.equal(config.contributionPrivacyVersion, '2026-09-21');
   assert.equal(config.contributionMaxBodyBytes, 120000);
   assert.equal(config.contributionRateLimitAttempts, 7);
+  assert.equal(config.contributionNotificationMaxAttempts, 4);
   assert.equal(config.maxBodyBytes, 16 * 1024);
 });
 

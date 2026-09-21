@@ -232,3 +232,70 @@ test('processes editorial notification batches and preserves failed submissions 
   assert.equal(db.pendingContributionNotifications(20)[0].notificationAttempts, 1);
   db.close();
 });
+
+test('stops contribution retries at the configured limit and keeps failed state for recovery', async () => {
+  const db = createLeadDatabase({
+    path: ':memory:',
+    randomUUID: (() => { let id = 0; return () => `exhausted-${++id}`; })(),
+  });
+  const submission = db.createEditorialSubmission({
+    name: 'Pessoa autora',
+    email: 'autora@example.com',
+    title: 'Uma contribuição útil',
+    excerpt: 'Resumo editorial da contribuição.',
+    content: 'Texto completo da contribuição.',
+    bio: 'Bio curta da pessoa autora.',
+    language: 'pt-BR',
+    sourcePath: '/contribua/',
+    privacyVersion: '2026-09-21',
+  });
+  let attempts = 0;
+  const notifier = {
+    sendContributionNotification: async () => {
+      attempts += 1;
+      throw Object.assign(new Error('failed'), { code: 'resend_http_503' });
+    },
+  };
+
+  for (let run = 0; run < 3; run += 1) {
+    await runContributionNotificationBatch({ db, notifier, limit: 20, maxAttempts: 2 });
+  }
+
+  assert.equal(attempts, 2);
+  assert.deepEqual(db.pendingContributionNotifications(20, 2), []);
+  const failed = db.failedContributionNotifications(20);
+  assert.equal(failed.length, 1);
+  assert.equal(failed[0].id, submission.id);
+  assert.equal(failed[0].notificationState, 'failed');
+  assert.equal(failed[0].notificationAttempts, 2);
+  db.close();
+});
+
+test('marks a contribution sent after a retry succeeds', async () => {
+  const db = createLeadDatabase({ path: ':memory:' });
+  db.createEditorialSubmission({
+    name: 'Pessoa autora',
+    email: 'autora@example.com',
+    title: 'Uma contribuição útil',
+    excerpt: 'Resumo editorial da contribuição.',
+    content: 'Texto completo da contribuição.',
+    bio: 'Bio curta da pessoa autora.',
+    language: 'pt-BR',
+    sourcePath: '/contribua/',
+    privacyVersion: '2026-09-21',
+  });
+  let attempts = 0;
+  const notifier = {
+    sendContributionNotification: async () => {
+      attempts += 1;
+      if (attempts === 1) throw Object.assign(new Error('failed'), { code: 'resend_http_503' });
+      return { id: 'sent-after-retry' };
+    },
+  };
+
+  assert.deepEqual(await runContributionNotificationBatch({ db, notifier, maxAttempts: 2 }), { sent: 0, failed: 1 });
+  assert.deepEqual(await runContributionNotificationBatch({ db, notifier, maxAttempts: 2 }), { sent: 1, failed: 0 });
+  assert.deepEqual(db.pendingContributionNotifications(20, 2), []);
+  assert.deepEqual(db.failedContributionNotifications(20), []);
+  db.close();
+});

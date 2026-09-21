@@ -65,6 +65,8 @@ CREATE INDEX IF NOT EXISTS idx_authorizations_expiry ON download_authorizations(
 CREATE INDEX IF NOT EXISTS idx_editorial_notification ON editorial_submissions(notification_state, created_at);
 `;
 
+const DEFAULT_CONTRIBUTION_NOTIFICATION_MAX_ATTEMPTS = 8;
+
 function leadFromRow(row) {
   if (!row) return undefined;
   return {
@@ -194,8 +196,13 @@ export function createLeadDatabase({ path, clock = () => new Date(), randomUUID 
     `),
     pendingContributionNotifications: database.prepare(`
       SELECT * FROM editorial_submissions
-      WHERE notification_state IN ('pending', 'failed') AND notification_attempts < 8
+      WHERE notification_state IN ('pending', 'failed') AND notification_attempts < ?
       ORDER BY created_at ASC LIMIT ?
+    `),
+    failedContributionNotifications: database.prepare(`
+      SELECT * FROM editorial_submissions
+      WHERE notification_state = 'failed'
+      ORDER BY updated_at ASC LIMIT ?
     `),
     contributionNotificationSent: database.prepare(`
       UPDATE editorial_submissions
@@ -207,7 +214,7 @@ export function createLeadDatabase({ path, clock = () => new Date(), randomUUID 
       UPDATE editorial_submissions
       SET notification_state = 'failed', notification_attempts = notification_attempts + 1,
           notification_last_error = ?, updated_at = ?
-      WHERE id = ?
+      WHERE id = ? AND notification_attempts < ?
     `),
     deleteLead: database.prepare('DELETE FROM leads WHERE email = ?'),
     purgeSessions: database.prepare('DELETE FROM sessions WHERE expires_at <= ?'),
@@ -358,8 +365,15 @@ export function createLeadDatabase({ path, clock = () => new Date(), randomUUID 
       statements.notificationFailed.run(String(errorCode).slice(0, 120), eventId);
     },
 
-    pendingContributionNotifications(limit = 20) {
-      return statements.pendingContributionNotifications.all(limit).map(editorialSubmissionFromRow);
+    pendingContributionNotifications(
+      limit = 20,
+      maxAttempts = DEFAULT_CONTRIBUTION_NOTIFICATION_MAX_ATTEMPTS,
+    ) {
+      return statements.pendingContributionNotifications.all(maxAttempts, limit).map(editorialSubmissionFromRow);
+    },
+
+    failedContributionNotifications(limit = 20) {
+      return statements.failedContributionNotifications.all(limit).map(editorialSubmissionFromRow);
     },
 
     markContributionNotificationSent(submissionId) {
@@ -367,11 +381,16 @@ export function createLeadDatabase({ path, clock = () => new Date(), randomUUID 
       statements.contributionNotificationSent.run(now, now, submissionId);
     },
 
-    markContributionNotificationFailed(submissionId, errorCode) {
+    markContributionNotificationFailed(
+      submissionId,
+      errorCode,
+      maxAttempts = DEFAULT_CONTRIBUTION_NOTIFICATION_MAX_ATTEMPTS,
+    ) {
       statements.contributionNotificationFailed.run(
         String(errorCode).slice(0, 120),
         nowIso(),
         submissionId,
+        maxAttempts,
       );
     },
 

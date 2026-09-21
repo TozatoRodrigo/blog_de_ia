@@ -30,7 +30,10 @@ const validContribution = Object.freeze({
   sourcePath: '/contribua/',
 });
 
-function setup({ verifyTurnstileFn = async ({ token, action }) => token === 'valid-contribution-turnstile' && action === 'contribution_submit' } = {}) {
+function setup({
+  verifyTurnstileFn = async ({ token, action }) => token === 'valid-contribution-turnstile' && action === 'contribution_submit',
+  rateLimiter,
+} = {}) {
   const now = new Date('2026-09-21T15:00:00.000Z');
   let id = 0;
   const db = createLeadDatabase({
@@ -42,6 +45,7 @@ function setup({ verifyTurnstileFn = async ({ token, action }) => token === 'val
     config,
     db,
     verifyTurnstileFn,
+    rateLimiter,
     clock: () => now,
   });
   return { db, workflow };
@@ -129,5 +133,62 @@ test('supports English contributions without linking them to leads', async () =>
   assert.equal(result.status, 'pending');
   assert.equal(stored.language, 'en');
   assert.equal(db.findLeadById('submission-1'), undefined);
+  db.close();
+});
+
+test('rejects contribution submissions with the dedicated rate limit contract', async () => {
+  let verificationCalls = 0;
+  const { db, workflow } = setup({
+    rateLimiter: {
+      check: () => ({ allowed: false, retryAfter: 37 }),
+    },
+    verifyTurnstileFn: async () => {
+      verificationCalls += 1;
+      return true;
+    },
+  });
+
+  await assert.rejects(
+    () => workflow.submit(validContribution),
+    (error) => error instanceof LeadFlowError
+      && error.code === 'rate_limited'
+      && error.status === 429
+      && error.retryAfter === 37,
+  );
+  assert.equal(verificationCalls, 0);
+  assert.deepEqual(db.pendingContributionNotifications(10), []);
+  db.close();
+});
+
+test('rejects oversized contribution fields before external verification', async () => {
+  const fields = [
+    ['name', 'x'.repeat(161)],
+    ['role', 'x'.repeat(161)],
+    ['siteUrl', `https://${'x'.repeat(2_041)}.example`],
+    ['title', 'x'.repeat(241)],
+    ['excerpt', 'x'.repeat(2_001)],
+    ['content', 'x'.repeat(60_001)],
+    ['links', `https://example.com/${'x'.repeat(8_180)}`],
+    ['bio', 'x'.repeat(2_001)],
+    ['language', 'x'.repeat(6)],
+    ['privacyVersion', 'x'.repeat(65)],
+    ['turnstileToken', 'x'.repeat(2_049)],
+  ];
+  let verificationCalls = 0;
+  const { db, workflow } = setup({
+    verifyTurnstileFn: async () => {
+      verificationCalls += 1;
+      return true;
+    },
+  });
+
+  for (const [field, value] of fields) {
+    await assert.rejects(
+      () => workflow.submit({ ...validContribution, [field]: value }),
+      (error) => error.code === 'invalid_submission' && error.status === 400,
+      `field ${field} should be capped`,
+    );
+  }
+  assert.equal(verificationCalls, 0);
   db.close();
 });

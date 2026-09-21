@@ -172,17 +172,26 @@ export async function runNotificationBatch({ db, notifier, catalog, limit = 20 }
   return { sent, failed };
 }
 
-export async function runContributionNotificationBatch({ db, notifier, limit = 20 }) {
+export async function runContributionNotificationBatch({
+  db,
+  notifier,
+  limit = 20,
+  maxAttempts = 8,
+}) {
   let sent = 0;
   let failed = 0;
 
-  for (const submission of db.pendingContributionNotifications(limit)) {
+  for (const submission of db.pendingContributionNotifications(limit, maxAttempts)) {
     try {
       await notifier.sendContributionNotification({ submission });
       db.markContributionNotificationSent(submission.id);
       sent += 1;
     } catch (error) {
-      db.markContributionNotificationFailed(submission.id, error?.code ?? 'notification_unknown');
+      db.markContributionNotificationFailed(
+        submission.id,
+        error?.code ?? 'notification_unknown',
+        maxAttempts,
+      );
       failed += 1;
     }
   }

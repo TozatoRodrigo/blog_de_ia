@@ -26,8 +26,17 @@ export async function createApplication({ env = process.env, fetchImpl = fetch }
     fetchImpl,
   });
   const workflow = createLeadWorkflow({ config, catalog, db });
-  const contributionWorkflow = createContributionWorkflow({ config, db });
   const rateLimiter = createRateLimiter({ secret: config.cookieSecret });
+  const contributionRateLimiter = createRateLimiter({
+    secret: config.cookieSecret,
+    maxAttempts: config.contributionRateLimitAttempts,
+  });
+  // The workflow owns the canonical guard so future HTTP adapters cannot bypass it.
+  const contributionWorkflow = createContributionWorkflow({
+    config,
+    db,
+    rateLimiter: contributionRateLimiter,
+  });
   const server = createServer(createLeadHandler({ config, catalog, workflow, rateLimiter }));
   const timers = new Set();
   let closed = false;
@@ -35,7 +44,12 @@ export async function createApplication({ env = process.env, fetchImpl = fetch }
   async function runNotifications() {
     const [downloads, contributions] = await Promise.all([
       runNotificationBatch({ db, notifier, catalog, limit: 20 }),
-      runContributionNotificationBatch({ db, notifier, limit: 20 }),
+      runContributionNotificationBatch({
+        db,
+        notifier,
+        limit: 20,
+        maxAttempts: config.contributionNotificationMaxAttempts,
+      }),
     ]);
     return {
       sent: downloads.sent + contributions.sent,
@@ -92,6 +106,7 @@ export async function createApplication({ env = process.env, fetchImpl = fetch }
     notifier,
     workflow,
     contributionWorkflow,
+    contributionRateLimiter,
     server,
     runNotifications,
     start,
