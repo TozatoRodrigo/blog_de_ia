@@ -79,6 +79,13 @@ test('Nginx permanently redirects legacy newsletters before static routing', () 
   assert.doesNotMatch(nginx, /\$uri\/index\.html/);
 });
 
+test('Nginx resolves the client identity from the trusted Traefik proxy boundary', () => {
+  assert.match(nginx, /# Traefik proxy network real IP/);
+  assert.match(nginx, /set_real_ip_from 172\.16\.0\.0\/12;/);
+  assert.match(nginx, /real_ip_header CF-Connecting-IP;/);
+  assert.match(nginx, /real_ip_recursive on;/);
+});
+
 test('Nginx proxies contribution submissions to the lead service with the API contract', () => {
   const contributionLocation = nginx.match(/location = \/api\/contributions\/submit\s*{([\s\S]*?)\n\s*}/)?.[1] ?? '';
   assert.match(contributionLocation, /client_max_body_size 128k;/);

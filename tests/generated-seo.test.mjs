@@ -168,7 +168,7 @@ test('contact links stay on owned routes and avoid Cloudflare email wrappers', a
   const violations = [];
   for (const file of files) {
     const $ = cheerio.load(await readFile(file, 'utf8'));
-    if ($('a[href^="mailto:"]').length > 0) violations.push(`${file.pathname}: mailto`);
+    if ($('a[href^="mailto:"]:not([data-contact-direct="true"])').length > 0) violations.push(`${file.pathname}: mailto`);
     if ($('a[href*="/cdn-cgi/"]').length > 0) violations.push(`${file.pathname}: Cloudflare email wrapper`);
   }
   assert.deepEqual(violations, []);

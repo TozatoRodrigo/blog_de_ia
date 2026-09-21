@@ -24,7 +24,7 @@ const contributionPrivacyVersion = '2026-09-21';
     <p>{english ? 'We will read the submission and contact you if it fits the section. Nothing is published automatically.' : 'Vamos ler o envio e entrar em contato se ele fizer sentido para a seção. Nada é publicado automaticamente.'}</p>
   </div>
 
-  <noscript><p class="contribution-form__noscript">{english ? 'JavaScript is required to complete Cloudflare Turnstile; without it, this endpoint cannot verify the submission.' : 'JavaScript é necessário para concluir o Cloudflare Turnstile; sem ele, este endpoint não pode verificar o envio.'}{' '}<a href={english ? '/en/about#contact' : '/sobre#contato'}>{english ? 'Contact the editor directly' : 'Fale diretamente com o editor'}</a>{' '}<span aria-hidden="true">·</span>{' '}<a href={privacyPath}>{english ? 'Read the privacy policy' : 'Leia a política de privacidade'}</a>.</p></noscript>
+  <noscript><p class="contribution-form__noscript">{english ? 'JavaScript is required to complete Cloudflare Turnstile; without it, this endpoint cannot verify the submission.' : 'JavaScript é necessário para concluir o Cloudflare Turnstile; sem ele, este endpoint não pode verificar o envio.'}{' '}<ContactEmail lang={lang} direct />{' '}<span aria-hidden="true">·</span>{' '}<a href={english ? '/en/about#contact' : '/sobre#contato'}>{english ? 'Contact page' : 'Página de contato'}</a>{' '}<span aria-hidden="true">·</span>{' '}<a href={privacyPath}>{english ? 'Read the privacy policy' : 'Leia a política de privacidade'}</a>.</p></noscript>
 
   <form class="contribution-form__form" method="post" action="/api/contributions/submit" enctype="application/x-www-form-urlencoded" data-contribution-form hidden={submitted}>
     <div class="contribution-form__fields">

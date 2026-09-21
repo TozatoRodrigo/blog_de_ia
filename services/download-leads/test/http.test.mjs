@@ -37,6 +37,7 @@ async function setup() {
     downloadsDir,
     turnstileSecretKey: 'turnstile-secret',
     turnstileSiteKey: '1x00000000000000000000AA',
+    notificationTo: 'rodrigo.tozato@icloud.com',
     privacyVersion: '2026-07-22',
     contributionPrivacyVersion: '2026-09-21',
     contributionMaxBodyBytes: 96 * 1024,
@@ -440,21 +441,27 @@ test('contribution endpoint rate limits repeated submissions', async () => {
   }
 });
 
-test('does not let direct CF-Connecting-IP headers choose rate-limit identities', async () => {
+test('does not let direct CF-Connecting-IP or X-Forwarded-For headers choose rate-limit identities', async () => {
   const app = await setup();
   try {
     for (let attempt = 0; attempt < 5; attempt += 1) {
       const response = await fetch(`${app.baseUrl}/api/contributions/submit`, jsonRequest({
         ...validContribution,
         title: `${validContribution.title} spoof ${attempt}`,
-      }, { 'cf-connecting-ip': `198.51.100.${attempt + 10}` }));
+      }, {
+        'cf-connecting-ip': `198.51.100.${attempt + 10}`,
+        'x-forwarded-for': `203.0.113.${attempt + 10}`,
+      }));
       assert.equal(response.status, 201);
     }
 
     const blocked = await fetch(`${app.baseUrl}/api/contributions/submit`, jsonRequest({
       ...validContribution,
       title: `${validContribution.title} spoof blocked`,
-    }, { 'cf-connecting-ip': '203.0.113.99' }));
+    }, {
+      'cf-connecting-ip': '203.0.113.99',
+      'x-forwarded-for': '198.51.100.99',
+    }));
     assert.equal(blocked.status, 429);
     assert.equal((await blocked.json()).error, 'rate_limited');
   } finally {
@@ -507,6 +514,7 @@ test('contribution form errors render escaped localized fallback HTML', async ()
     assert.doesNotMatch(html, /<script>alert/);
     assert.match(html, /\/en\/privacy\//);
     assert.match(html, /\/en\/about#contact/);
+    assert.match(html, /<a data-contact-direct="true" href="mailto:rodrigo\.tozato@icloud\.com">Contact the editor<\/a>/);
     assert.match(html, /<noscript>[\s\S]*JavaScript is required to complete Cloudflare Turnstile/);
     assert.match(html, /cannot verify the submission/);
   } finally {

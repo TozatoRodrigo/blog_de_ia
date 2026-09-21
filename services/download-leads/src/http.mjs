@@ -269,7 +269,7 @@ function contributionFallbackPage({ config, values = {}, lang = 'pt-BR', error =
   return `<!doctype html>
 <html lang="${english ? 'en' : 'pt-BR'}"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width"><title>${escapeHtml(copy.title)} — Produto com IA</title><meta name="robots" content="noindex, nofollow, noarchive"></head>
 <body><main><p><a href="${pagePath}">Produto com IA</a></p><h1>${escapeHtml(copy.title)}</h1><p>${escapeHtml(copy.intro)}</p>${errorHtml}
-<noscript><p>${escapeHtml(copy.noScript)} <a href="${contactHref}">${escapeHtml(copy.contactLink)}</a> · <a href="${privacyHref}">${escapeHtml(copy.privacyLink)}</a>.</p></noscript>
+<noscript><p>${escapeHtml(copy.noScript)} <a data-contact-direct="true" href="mailto:${escapeHtml(config.notificationTo)}">${escapeHtml(copy.contactLink)}</a> · <a href="${contactHref}">${escapeHtml(copy.contactLink)}</a> · <a href="${privacyHref}">${escapeHtml(copy.privacyLink)}</a>.</p></noscript>
 <form method="post" action="/api/contributions/submit">
 ${field('name', copy.name)}${field('email', copy.email, 'email')}${field('role', copy.role)}${field('siteUrl', copy.siteUrl)}${field('title', copy.titleField)}${textarea('excerpt', copy.excerpt)}${textarea('content', copy.content)}${textarea('links', copy.links)}${textarea('bio', copy.bio)}
 <label><input name="consent" type="checkbox" value="on" required> ${escapeHtml(english ? 'I confirm that I am the author or have permission to submit this material.' : 'Confirmo que sou autor ou tenho autorização para enviar este material.')}</label>
