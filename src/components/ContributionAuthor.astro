@@ -1,0 +1,75 @@
+---
+import { contributorFor } from '../data/contributors';
+import type { Lang } from '../i18n/lang';
+
+interface Props {
+  authorId: string;
+  lang: Lang;
+}
+
+const { authorId, lang } = Astro.props;
+const contributor = contributorFor(authorId);
+const role = lang === 'en' ? 'Product executive and author of Inteligência à Brasileira' : contributor.role;
+const bio = lang === 'en'
+  ? 'Ricardo Guia is a product executive and author of Inteligência à Brasileira, where he writes about AI from the perspective of someone who builds systems and products with it.'
+  : contributor.bio;
+const authorLabel = lang === 'en' ? 'ABOUT THE CONTRIBUTOR' : 'SOBRE O AUTOR';
+const siteLabel = lang === 'en' ? 'MAIN SITE' : 'SITE PRINCIPAL';
+const linksLabel = lang === 'en' ? 'CREDITS AND LINKS' : 'CRÉDITOS E LINKS';
+---
+
+<aside class="contribution-author" aria-label={authorLabel}>
+  <div class="contribution-author__avatar" aria-hidden="true">{contributor.name.split(' ').map((part) => part[0]).join('').slice(0, 2)}</div>
+  <div class="contribution-author__content">
+    <span class="mono-sm" style="color: var(--accent);">{authorLabel}</span>
+    <h2>{contributor.name}</h2>
+    <p class="contribution-author__role">{role}</p>
+    <p>{bio}</p>
+    {contributor.site && <a href={contributor.site} target="_blank" rel="noopener noreferrer">{siteLabel} →</a>}
+    <div class="contribution-author__links">
+      <span class="mono-sm">{linksLabel}</span>
+      <ul>
+        {contributor.links.map((link) => <li><a href={link.href} target="_blank" rel="noopener noreferrer">{link.label}</a></li>)}
+      </ul>
+    </div>
+  </div>
+</aside>
+
+<style>
+  .contribution-author {
+    max-width: 760px;
+    margin: 3rem auto 0;
+    display: flex;
+    gap: 1.5rem;
+    padding: 1.5rem;
+    border: 2px solid var(--line);
+    background: var(--fg);
+    color: var(--fg-invert);
+  }
+  .contribution-author__avatar {
+    width: 64px;
+    height: 64px;
+    flex: 0 0 auto;
+    display: grid;
+    place-items: center;
+    background: var(--accent);
+    color: var(--fg-invert);
+    font-family: var(--font-display);
+    font-size: 1.25rem;
+  }
+  .contribution-author__content { flex: 1; }
+  .contribution-author h2 {
+    margin: 0.5rem 0;
+    color: var(--fg-invert);
+    font-size: 1.5rem;
+    text-transform: none;
+  }
+  .contribution-author p { margin: 0 0 0.75rem; color: var(--bg-alt); }
+  .contribution-author__role { font-family: var(--font-mono); font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.06em; }
+  .contribution-author a { color: var(--accent-soft, #ff6b5f); border-bottom-color: currentColor; }
+  .contribution-author__links { margin-top: 1.25rem; }
+  .contribution-author__links ul { margin: 0.5rem 0 0; padding: 0; display: flex; flex-wrap: wrap; gap: 0.75rem 1.25rem; list-style: none; }
+  @media (max-width: 560px) {
+    .contribution-author { flex-direction: column; }
+  }
+</style>
