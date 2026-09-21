@@ -15,7 +15,7 @@ function valueOrDash(value) {
 
 function subjectValue(value) {
   return String(value)
-    .replace(/[\u0000-\u001F\u007F]/g, ' ')
+    .replace(/[\u0000-\u001F\u007F-\u009F]/g, ' ')
     .replace(/\s+/g, ' ')
     .trim();
 }

@@ -190,6 +190,76 @@ test('shutdown waits for an in-flight notification batch before closing SQLite',
   assert.equal(closed, true);
 });
 
+test('shutdown waits for a sibling notification after the other batch fails early', async () => {
+  let releaseDownloadResponse;
+  let releaseContributionResponse;
+  let markRequestStarted;
+  const requestStarted = new Promise((resolve) => {
+    let count = 0;
+    markRequestStarted = () => {
+      count += 1;
+      if (count === 2) resolve();
+    };
+  });
+  const app = await createTestApplication({
+    fetchImpl: async (_url, options) => {
+      markRequestStarted();
+      const release = options.headers['idempotency-key'].startsWith('download-event/')
+        ? (resolve) => { releaseDownloadResponse = resolve; }
+        : (resolve) => { releaseContributionResponse = resolve; };
+      return new Promise(release);
+    },
+  });
+  const storedLead = app.db.upsertLead({
+    email: 'pessoa@example.com',
+    marketingOptIn: false,
+    privacyVersion: '2026-09-21',
+  });
+  for (let index = 0; index < 2; index += 1) {
+    app.db.createDownloadEvent({
+      leadId: storedLead.id,
+      materialId: 'resource',
+      sourcePath: '/guias/recurso/',
+      lang: 'pt-BR',
+    });
+  }
+  app.db.createEditorialSubmission({
+    name: 'Pessoa autora',
+    email: 'autora@example.com',
+    title: 'Uma contribuição útil',
+    excerpt: 'Resumo editorial.',
+    content: 'Texto completo.',
+    bio: 'Bio curta.',
+    language: 'pt-BR',
+    sourcePath: '/contribua/',
+    privacyVersion: '2026-09-21',
+  });
+
+  const originalGet = app.catalog.byId.get;
+  let lookups = 0;
+  app.catalog.byId.get = (...args) => {
+    lookups += 1;
+    if (lookups === 2) throw new Error('download sibling failed');
+    return originalGet.apply(app.catalog.byId, args);
+  };
+
+  const notificationRun = app.runNotifications();
+  await requestStarted;
+  releaseDownloadResponse(new Response(JSON.stringify({ id: 'download-id' }), { status: 200 }));
+
+  let closed = false;
+  const closeRun = app.close().then(() => {
+    closed = true;
+  });
+  await new Promise((resolve) => setImmediate(resolve));
+  assert.equal(closed, false);
+
+  releaseContributionResponse(new Response(JSON.stringify({ id: 'contribution-id' }), { status: 200 }));
+  await assert.rejects(notificationRun, /download sibling failed/);
+  await closeRun;
+  assert.equal(closed, true);
+});
+
 test('logs notification batch failures during startup', async () => {
   const errors = [];
   const app = await createTestApplication({

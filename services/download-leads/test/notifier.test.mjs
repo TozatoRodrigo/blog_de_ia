@@ -218,11 +218,11 @@ test('keeps control characters out of editorial subjects without losing body con
   });
   const submission = {
     id: 'submission-safe-subject',
-    name: '<Pessoa\u007Fautora\n>',
+    name: '<Pessoa\u007Fautora\u009F\n>',
     email: 'autora@example.com',
     role: 'Product Manager',
     siteUrl: '',
-    title: 'Uma\u0000 contribuição\r\nútil\t',
+    title: 'Uma\u0000 contribuição\u0080\r\nútil\t',
     excerpt: 'Resumo editorial da contribuição.',
     content: 'Texto completo da contribuição.',
     links: '',
@@ -235,13 +235,13 @@ test('keeps control characters out of editorial subjects without losing body con
 
   await notifier.sendContributionNotification({ submission });
 
-  assert.doesNotMatch(payload.subject, /[\u0000-\u001F\u007F]/);
+  assert.doesNotMatch(payload.subject, /[\u0000-\u001F\u007F-\u009F]/);
   assert.match(payload.subject, /Uma contribuição útil/);
   assert.match(payload.subject, /Pessoa autora/);
   assert.ok(payload.text.includes(submission.title));
   assert.ok(payload.text.includes(submission.name));
-  assert.match(payload.html, /&lt;Pessoa\u007Fautora\n&gt;/);
-  assert.match(payload.html, /Uma\u0000 contribuição\r\nútil\t/);
+  assert.match(payload.html, /&lt;Pessoa\u007Fautora\u009F\n&gt;/);
+  assert.match(payload.html, /Uma\u0000 contribuição\u0080\r\nútil\t/);
 });
 
 test('processes editorial notification batches and preserves failed submissions for retry', async () => {

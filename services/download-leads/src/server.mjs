@@ -52,7 +52,9 @@ export async function createApplication({ env = process.env, fetchImpl = fetch, 
 
   function runNotifications() {
     const run = (async () => {
-      const [downloads, contributions] = await Promise.all([
+      let firstRejection;
+      let hasRejection = false;
+      const batches = [
         runNotificationBatch({ db, notifier, catalog, limit: 20 }),
         runContributionNotificationBatch({
           db,
@@ -60,7 +62,17 @@ export async function createApplication({ env = process.env, fetchImpl = fetch, 
           limit: 20,
           maxAttempts: config.contributionNotificationMaxAttempts,
         }),
-      ]);
+      ].map((batch) => batch.catch((error) => {
+        if (!hasRejection) {
+          hasRejection = true;
+          firstRejection = error;
+        }
+        throw error;
+      }));
+      const [downloadsResult, contributionsResult] = await Promise.allSettled(batches);
+      if (hasRejection) throw firstRejection;
+      const downloads = downloadsResult.value;
+      const contributions = contributionsResult.value;
       return {
         sent: downloads.sent + contributions.sent,
         failed: downloads.failed + contributions.failed,
