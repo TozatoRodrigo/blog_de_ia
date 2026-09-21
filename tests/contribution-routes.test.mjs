@@ -3,6 +3,7 @@ import test from 'node:test';
 
 import {
   assertUniqueContributionSlugs,
+  assertUniqueContributionTranslationKeys,
   contributionIndexPath,
   contributionPath,
   findContributionTranslation,
@@ -46,6 +47,16 @@ test('contribution SEO slugs must be unique within a localized collection', () =
       { data: { seoSlug: 'repeated' } },
     ]),
     /duplicate-contribution-seo-slug:en:repeated/,
+  );
+});
+
+test('contribution translation keys must be unique within a localized collection', () => {
+  assert.throws(
+    () => assertUniqueContributionTranslationKeys('en', [
+      { data: { translationKey: 'ricardo-evals' } },
+      { data: { translationKey: 'ricardo-evals' } },
+    ]),
+    /duplicate-contribution-translation-key:en:ricardo-evals/,
   );
 });
 

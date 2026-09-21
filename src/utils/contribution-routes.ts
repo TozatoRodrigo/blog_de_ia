@@ -28,6 +28,19 @@ export function assertUniqueContributionSlugs(
   }
 }
 
+export function assertUniqueContributionTranslationKeys(
+  lang: Lang,
+  entries: Array<{ data: { translationKey: string } }>,
+) {
+  const seen = new Set<string>();
+  for (const entry of entries) {
+    if (seen.has(entry.data.translationKey)) {
+      throw new Error(`duplicate-contribution-translation-key:${lang}:${entry.data.translationKey}`);
+    }
+    seen.add(entry.data.translationKey);
+  }
+}
+
 export function findContributionTranslation<T extends ContributionEntry>(
   entries: T[],
   translationKey: string,
