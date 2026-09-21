@@ -66,9 +66,9 @@ function bodySize(input) {
   }
 }
 
-const allowAllRateLimiter = Object.freeze({
+const failClosedRateLimiter = Object.freeze({
   check() {
-    return { allowed: true, retryAfter: 0 };
+    return { allowed: false, retryAfter: 60 };
   },
 });
 
@@ -82,7 +82,7 @@ export function createContributionWorkflow({
   config,
   db,
   verifyTurnstileFn = verifyTurnstile,
-  rateLimiter = allowAllRateLimiter,
+  rateLimiter = failClosedRateLimiter,
   clock = () => new Date(),
 }) {
   const expectedHostname = new URL(config.allowedOrigin).hostname;

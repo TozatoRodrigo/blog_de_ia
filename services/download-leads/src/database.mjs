@@ -204,6 +204,7 @@ export function createLeadDatabase({ path, clock = () => new Date(), randomUUID 
       WHERE notification_state = 'failed'
       ORDER BY updated_at ASC LIMIT ?
     `),
+    editorialSubmissionById: database.prepare('SELECT * FROM editorial_submissions WHERE id = ?'),
     contributionNotificationSent: database.prepare(`
       UPDATE editorial_submissions
       SET notification_state = 'sent', notification_sent_at = ?, notification_last_error = NULL,
@@ -214,7 +215,7 @@ export function createLeadDatabase({ path, clock = () => new Date(), randomUUID 
       UPDATE editorial_submissions
       SET notification_state = 'failed', notification_attempts = notification_attempts + 1,
           notification_last_error = ?, updated_at = ?
-      WHERE id = ? AND notification_attempts < ?
+      WHERE id = ? AND notification_state IN ('pending', 'failed') AND notification_attempts < ?
     `),
     deleteLead: database.prepare('DELETE FROM leads WHERE email = ?'),
     purgeSessions: database.prepare('DELETE FROM sessions WHERE expires_at <= ?'),
@@ -374,6 +375,10 @@ export function createLeadDatabase({ path, clock = () => new Date(), randomUUID 
 
     failedContributionNotifications(limit = 20) {
       return statements.failedContributionNotifications.all(limit).map(editorialSubmissionFromRow);
+    },
+
+    findEditorialSubmissionById(id) {
+      return editorialSubmissionFromRow(statements.editorialSubmissionById.get(id));
     },
 
     markContributionNotificationSent(submissionId) {

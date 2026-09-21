@@ -233,6 +233,58 @@ test('processes editorial notification batches and preserves failed submissions 
   db.close();
 });
 
+test('keeps an editorial notification sent when an overlapping failure finishes late', async () => {
+  const db = createLeadDatabase({
+    path: ':memory:',
+    randomUUID: (() => { let id = 0; return () => `overlap-${++id}`; })(),
+  });
+  const submission = db.createEditorialSubmission({
+    name: 'Pessoa autora',
+    email: 'autora@example.com',
+    title: 'Uma contribuição útil',
+    excerpt: 'Resumo editorial da contribuição.',
+    content: 'Texto completo da contribuição.',
+    bio: 'Bio curta da pessoa autora.',
+    language: 'pt-BR',
+    sourcePath: '/contribua/',
+    privacyVersion: '2026-09-21',
+  });
+  let releaseSuccess;
+  let releaseFailure;
+  const successReady = new Promise((resolve) => { releaseSuccess = resolve; });
+  const failureReady = new Promise((resolve) => { releaseFailure = resolve; });
+  const successBatch = runContributionNotificationBatch({
+    db,
+    notifier: {
+      sendContributionNotification: async () => {
+        await successReady;
+        return { id: 'editorial-email-id' };
+      },
+    },
+  });
+  const failureBatch = runContributionNotificationBatch({
+    db,
+    notifier: {
+      sendContributionNotification: async () => {
+        await failureReady;
+        throw Object.assign(new Error('failed'), { code: 'resend_http_503' });
+      },
+    },
+  });
+
+  releaseSuccess();
+  assert.deepEqual(await successBatch, { sent: 1, failed: 0 });
+  releaseFailure();
+  assert.deepEqual(await failureBatch, { sent: 0, failed: 1 });
+
+  const stored = db.findEditorialSubmissionById(submission.id);
+  assert.equal(stored.notificationState, 'sent');
+  assert.equal(stored.notificationAttempts, 0);
+  assert.deepEqual(db.failedContributionNotifications(20), []);
+  assert.deepEqual(db.pendingContributionNotifications(20), []);
+  db.close();
+});
+
 test('stops contribution retries at the configured limit and keeps failed state for recovery', async () => {
   const db = createLeadDatabase({
     path: ':memory:',

@@ -30,9 +30,13 @@ const validContribution = Object.freeze({
   sourcePath: '/contribua/',
 });
 
+const allowAllRateLimiter = Object.freeze({
+  check: () => ({ allowed: true, retryAfter: 0 }),
+});
+
 function setup({
   verifyTurnstileFn = async ({ token, action }) => token === 'valid-contribution-turnstile' && action === 'contribution_submit',
-  rateLimiter,
+  rateLimiter = allowAllRateLimiter,
 } = {}) {
   const now = new Date('2026-09-21T15:00:00.000Z');
   let id = 0;
@@ -154,6 +158,31 @@ test('rejects contribution submissions with the dedicated rate limit contract', 
       && error.code === 'rate_limited'
       && error.status === 429
       && error.retryAfter === 37,
+  );
+  assert.equal(verificationCalls, 0);
+  assert.deepEqual(db.pendingContributionNotifications(10), []);
+  db.close();
+});
+
+test('fails closed when a contribution workflow is created without a rate limiter', async () => {
+  let verificationCalls = 0;
+  const now = new Date('2026-09-21T15:00:00.000Z');
+  const db = createLeadDatabase({ path: ':memory:', clock: () => now });
+  const workflow = createContributionWorkflow({
+    config,
+    db,
+    verifyTurnstileFn: async () => {
+      verificationCalls += 1;
+      return true;
+    },
+    clock: () => now,
+  });
+
+  await assert.rejects(
+    () => workflow.submit(validContribution),
+    (error) => error instanceof LeadFlowError
+      && error.code === 'rate_limited'
+      && error.status === 429,
   );
   assert.equal(verificationCalls, 0);
   assert.deepEqual(db.pendingContributionNotifications(10), []);
