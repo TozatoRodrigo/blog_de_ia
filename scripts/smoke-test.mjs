@@ -25,6 +25,23 @@ for (const [path, expectedStatus, expectedText] of checks) {
   } else console.log(`PASS ${path}`);
 }
 
+const contactChecks = [
+  ['/contribua/', ['data-contact-direct="true"', 'href="mailto:', 'href="/sobre#contato"', 'href="/privacidade/"']],
+  ['/en/contribute/', ['data-contact-direct="true"', 'href="mailto:', 'href="/en/about#contact"', 'href="/en/privacy/"']],
+  ['/privacidade/', ['data-contact-email', 'href="/sobre#contato"']],
+  ['/en/privacy/', ['data-contact-email', 'href="/en/about#contact"']],
+];
+for (const [path, required] of contactChecks) {
+  const response = await fetch(`${origin}${path}`);
+  const text = await response.text();
+  const actionable = required.every((marker) => text.includes(marker));
+  const obfuscated = text.includes('/cdn-cgi/l/email-protection');
+  if (response.status !== 200 || !actionable || obfuscated) {
+    console.error(`FAIL ${path}: contact fallback is not actionable or was obfuscated`);
+    failures += 1;
+  } else console.log(`PASS ${path} contact fallback`);
+}
+
 const health = await fetch(`${origin}/api/download-leads/health`);
 if (health.status !== 200 || (await health.json()).status !== 'ok') {
   console.error('FAIL /api/download-leads/health'); failures += 1;

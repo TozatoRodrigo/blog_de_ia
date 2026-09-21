@@ -34,8 +34,20 @@ test('loadConfig returns normalized immutable values', () => {
   assert.equal(config.contributionMaxBodyBytes, 96 * 1024);
   assert.equal(config.contributionRateLimitAttempts, 5);
   assert.equal(config.contributionNotificationMaxAttempts, 8);
+  assert.equal(config.trustedProxyCidr, '172.30.0.0/24');
   assert.equal(config.turnstileTesting, true);
   assert.equal(Object.isFrozen(config), true);
+});
+
+test('loadConfig rejects an invalid trusted proxy boundary', () => {
+  assert.throws(
+    () => loadConfig({ ...valid, TRUSTED_PROXY_CIDR: '172.30.0.0' }),
+    /TRUSTED_PROXY_CIDR/,
+  );
+  assert.throws(
+    () => loadConfig({ ...valid, TRUSTED_PROXY_CIDR: '10.0.0.0/8,172.30.0.0/24' }),
+    /TRUSTED_PROXY_CIDR/,
+  );
 });
 
 test('loadConfig allows contribution-specific privacy and size overrides', () => {

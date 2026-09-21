@@ -93,19 +93,28 @@ function normalizedIp(value) {
   return isIP(candidate) ? candidate : '';
 }
 
-function isPrivateProxyAddress(value) {
+function ipv4Value(value) {
   const ip = normalizedIp(value);
-  if (!ip || ip.includes(':')) return false;
-  const octets = ip.split('.').map(Number);
-  return octets[0] === 10
-    || (octets[0] === 172 && octets[1] >= 16 && octets[1] <= 31)
-    || (octets[0] === 192 && octets[1] === 168);
+  if (!ip || ip.includes(':')) return null;
+  return ip.split('.').map(Number).reduce((result, octet) => (result * 256) + octet, 0) >>> 0;
 }
 
-function remoteIp(request) {
+function ipInCidr(value, cidr) {
+  const [network, prefixText] = String(cidr ?? '').split('/');
+  const addressValue = ipv4Value(value);
+  const networkValue = ipv4Value(network);
+  const prefix = Number(prefixText);
+  if (addressValue === null || networkValue === null || !Number.isInteger(prefix) || prefix < 1 || prefix > 32) {
+    return false;
+  }
+  const mask = (0xffffffff << (32 - prefix)) >>> 0;
+  return ((addressValue & mask) >>> 0) === ((networkValue & mask) >>> 0);
+}
+
+export function remoteIp(request, trustedProxyCidr) {
   const socketIp = normalizedIp(request.socket?.remoteAddress);
   const proxyIp = normalizedIp(request.headers['x-real-ip']);
-  if (isPrivateProxyAddress(socketIp) && proxyIp) return proxyIp;
+  if (ipInCidr(socketIp, trustedProxyCidr) && proxyIp) return proxyIp;
   return socketIp || 'unknown';
 }
 
@@ -209,7 +218,10 @@ function contributionMessage(error, lang) {
 
 function contributionErrorPayload(error, lang) {
   const code = error instanceof LeadFlowError ? error.code : 'internal_error';
-  return { error: code, message: contributionMessage(error, lang) };
+  const field = ['name', 'email', 'role', 'siteUrl', 'title', 'excerpt', 'content', 'links', 'bio'].includes(error?.field)
+    ? error.field
+    : null;
+  return { error: code, field, message: contributionMessage(error, lang) };
 }
 
 function contributionFieldValue(body, field) {
@@ -352,7 +364,7 @@ export function createLeadHandler({ config, catalog, workflow, rateLimiter, cont
         const result = await contributionWorkflow.submit({
           ...body,
           language: body.language ?? body.lang,
-          remoteIp: remoteIp(request),
+          remoteIp: remoteIp(request, config.trustedProxyCidr),
         });
         const contentType = request.headers['content-type']?.split(';')[0]?.trim();
         if (contentType === 'application/x-www-form-urlencoded') {
@@ -374,14 +386,14 @@ export function createLeadHandler({ config, catalog, workflow, rateLimiter, cont
           if (!isHoneypotClear(body.company)) {
             throw new LeadFlowError('invalid_submission', 400, 'Invalid submission');
           }
-          const limit = rateLimiter.check(remoteIp(request));
+          const limit = rateLimiter.check(remoteIp(request, config.trustedProxyCidr));
           if (!limit.allowed) {
             return sendJson(response, 429, errorPayload(
               new LeadFlowError('rate_limited', 429, 'Try again later'),
               requestId,
             ), { 'retry-after': String(limit.retryAfter) });
           }
-          const result = await workflow.register({ ...body, remoteIp: remoteIp(request) });
+          const result = await workflow.register({ ...body, remoteIp: remoteIp(request, config.trustedProxyCidr) });
           const cookie = sessionCookie(result.sessionToken, config.sessionDays * 86_400);
           if (url.pathname.endsWith('register-form')) {
             response.writeHead(303, {

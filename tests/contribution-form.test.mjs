@@ -34,6 +34,9 @@ test('Portuguese contribution page renders a complete accessible progressive for
     const input = form.find(`[name="${field}"]`);
     assert.equal(input.length, 1, `missing ${field}`);
     assert.equal(form.find(`label[for="${input.attr('id')}"]`).length, 1, `missing label for ${field}`);
+    const error = form.find(`[data-field-error="${field}"]`);
+    assert.equal(error.length, 1, `missing error target for ${field}`);
+    assert.equal(error.attr('id'), `${input.attr('id')}-error`);
   }
   assert.match($('main').text(), /não .*publicada automaticamente/i);
   assert.equal(form.find('a[href="/privacidade/"]').length, 1);
@@ -50,6 +53,10 @@ test('enhanced contribution form uses its dedicated public privacy version', asy
   assert.match(source, /config\.contributionPrivacyVersion/);
   assert.doesNotMatch(source, /privacyInput\.value = config\.privacyVersion/);
   assert.ok(source.indexOf('await prepare();') < source.indexOf('new FormData(form)'));
+  assert.match(source, /aria-invalid/);
+  assert.match(source, /aria-describedby/);
+  assert.match(source, /status\.focus\(\)/);
+  assert.match(source, /data-field-error/);
 });
 
 test('English contribution page preserves its localized submission contract', async () => {
@@ -67,4 +74,19 @@ test('English contribution page preserves its localized submission contract', as
   assert.match($('noscript').html(), /href="\/en\/about#contact"/);
   assert.match($('noscript').html(), /href="\/en\/privacy\/"/);
   assert.doesNotMatch(await readFile(new URL('../src/components/ContributionForm.astro', import.meta.url), 'utf8'), /umami|track\s*\(/i);
+});
+
+test('generated contribution and privacy contact paths remain actionable after email-obfuscation checks', async () => {
+  const pages = [
+    ['contribua/index.html', 'mailto:', '/sobre#contato'],
+    ['en/contribute/index.html', 'mailto:', '/en/about#contact'],
+    ['privacidade/index.html', 'data-contact-email', '/sobre#contato'],
+    ['en/privacy/index.html', 'data-contact-email', '/en/about#contact'],
+  ];
+  for (const [pathname, contactMarker, route] of pages) {
+    const html = await readFile(join(dist.pathname, pathname), 'utf8');
+    assert.match(html, new RegExp(contactMarker.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')));
+    assert.match(html, new RegExp(`href="${route.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}"`));
+    assert.doesNotMatch(html, /\/cdn-cgi\/l\/email-protection/);
+  }
 });

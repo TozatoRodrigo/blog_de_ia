@@ -28,15 +28,15 @@ const contributionPrivacyVersion = '2026-09-21';
 
   <form class="contribution-form__form" method="post" action="/api/contributions/submit" enctype="application/x-www-form-urlencoded" data-contribution-form hidden={submitted}>
     <div class="contribution-form__fields">
-      <div class="contribution-form__field"><label for="contribution-name">{english ? 'Name' : 'Nome'} <span aria-hidden="true">*</span></label><input id="contribution-name" name="name" type="text" autocomplete="name" required /></div>
-      <div class="contribution-form__field"><label for="contribution-email">{english ? 'Email' : 'E-mail'} <span aria-hidden="true">*</span></label><input id="contribution-email" name="email" type="email" autocomplete="email" required /></div>
-      <div class="contribution-form__field"><label for="contribution-role">{english ? 'Role or professional context' : 'Cargo ou contexto profissional'}</label><input id="contribution-role" name="role" type="text" autocomplete="organization-title" /></div>
-      <div class="contribution-form__field"><label for="contribution-site">{english ? 'Website' : 'Site'}</label><input id="contribution-site" name="siteUrl" type="url" autocomplete="url" placeholder="https://" /></div>
-      <div class="contribution-form__field contribution-form__field--wide"><label for="contribution-title">{english ? 'Contribution title' : 'Título da contribuição'} <span aria-hidden="true">*</span></label><input id="contribution-title" name="title" type="text" required /></div>
-      <div class="contribution-form__field contribution-form__field--wide"><label for="contribution-excerpt">{english ? 'Short summary' : 'Resumo curto'} <span aria-hidden="true">*</span></label><textarea id="contribution-excerpt" name="excerpt" rows="3" required aria-describedby="contribution-excerpt-help"></textarea><small id="contribution-excerpt-help">{english ? 'What should a reader understand before opening the full piece?' : 'O que a pessoa leitora precisa entender antes de abrir o texto completo?'}</small></div>
-      <div class="contribution-form__field contribution-form__field--wide"><label for="contribution-content">{english ? 'Full contribution' : 'Texto completo da contribuição'} <span aria-hidden="true">*</span></label><textarea id="contribution-content" name="content" rows="12" required aria-describedby="contribution-content-help"></textarea><small id="contribution-content-help">{english ? 'Paste the draft or the complete text. Plain text and Markdown are welcome.' : 'Cole o rascunho ou o texto completo. Texto simples e Markdown são bem-vindos.'}</small></div>
-      <div class="contribution-form__field"><label for="contribution-links">{english ? 'Links to credit' : 'Links para creditar'}</label><textarea id="contribution-links" name="links" rows="4" aria-describedby="contribution-links-help"></textarea><small id="contribution-links-help">{english ? 'One URL per line.' : 'Uma URL por linha.'}</small></div>
-      <div class="contribution-form__field"><label for="contribution-bio">{english ? 'Short bio' : 'Bio curta'} <span aria-hidden="true">*</span></label><textarea id="contribution-bio" name="bio" rows="4" required></textarea></div>
+      <div class="contribution-form__field"><label for="contribution-name">{english ? 'Name' : 'Nome'} <span aria-hidden="true">*</span></label><input id="contribution-name" name="name" type="text" autocomplete="name" required /><p id="contribution-name-error" class="contribution-form__field-error" data-field-error="name" role="alert" hidden></p></div>
+      <div class="contribution-form__field"><label for="contribution-email">{english ? 'Email' : 'E-mail'} <span aria-hidden="true">*</span></label><input id="contribution-email" name="email" type="email" autocomplete="email" required /><p id="contribution-email-error" class="contribution-form__field-error" data-field-error="email" role="alert" hidden></p></div>
+      <div class="contribution-form__field"><label for="contribution-role">{english ? 'Role or professional context' : 'Cargo ou contexto profissional'}</label><input id="contribution-role" name="role" type="text" autocomplete="organization-title" /><p id="contribution-role-error" class="contribution-form__field-error" data-field-error="role" role="alert" hidden></p></div>
+      <div class="contribution-form__field"><label for="contribution-site">{english ? 'Website' : 'Site'}</label><input id="contribution-site" name="siteUrl" type="url" autocomplete="url" placeholder="https://" /><p id="contribution-site-error" class="contribution-form__field-error" data-field-error="siteUrl" role="alert" hidden></p></div>
+      <div class="contribution-form__field contribution-form__field--wide"><label for="contribution-title">{english ? 'Contribution title' : 'Título da contribuição'} <span aria-hidden="true">*</span></label><input id="contribution-title" name="title" type="text" required /><p id="contribution-title-error" class="contribution-form__field-error" data-field-error="title" role="alert" hidden></p></div>
+      <div class="contribution-form__field contribution-form__field--wide"><label for="contribution-excerpt">{english ? 'Short summary' : 'Resumo curto'} <span aria-hidden="true">*</span></label><textarea id="contribution-excerpt" name="excerpt" rows="3" required aria-describedby="contribution-excerpt-help"></textarea><small id="contribution-excerpt-help">{english ? 'What should a reader understand before opening the full piece?' : 'O que a pessoa leitora precisa entender antes de abrir o texto completo?'}</small><p id="contribution-excerpt-error" class="contribution-form__field-error" data-field-error="excerpt" role="alert" hidden></p></div>
+      <div class="contribution-form__field contribution-form__field--wide"><label for="contribution-content">{english ? 'Full contribution' : 'Texto completo da contribuição'} <span aria-hidden="true">*</span></label><textarea id="contribution-content" name="content" rows="12" required aria-describedby="contribution-content-help"></textarea><small id="contribution-content-help">{english ? 'Paste the draft or the complete text. Plain text and Markdown are welcome.' : 'Cole o rascunho ou o texto completo. Texto simples e Markdown são bem-vindos.'}</small><p id="contribution-content-error" class="contribution-form__field-error" data-field-error="content" role="alert" hidden></p></div>
+      <div class="contribution-form__field"><label for="contribution-links">{english ? 'Links to credit' : 'Links para creditar'}</label><textarea id="contribution-links" name="links" rows="4" aria-describedby="contribution-links-help"></textarea><small id="contribution-links-help">{english ? 'One URL per line.' : 'Uma URL por linha.'}</small><p id="contribution-links-error" class="contribution-form__field-error" data-field-error="links" role="alert" hidden></p></div>
+      <div class="contribution-form__field"><label for="contribution-bio">{english ? 'Short bio' : 'Bio curta'} <span aria-hidden="true">*</span></label><textarea id="contribution-bio" name="bio" rows="4" required></textarea><p id="contribution-bio-error" class="contribution-form__field-error" data-field-error="bio" role="alert" hidden></p></div>
     </div>
 
     <label class="contribution-form__consent" for="contribution-consent"><input id="contribution-consent" name="consent" type="checkbox" value="on" required /><span>{english ? 'I confirm that I am the author or have permission to submit this material, and authorize editorial review.' : 'Confirmo que sou autor ou tenho autorização para enviar este material e autorizo a avaliação editorial.'}</span></label>
@@ -67,12 +67,37 @@ const contributionPrivacyVersion = '2026-09-21';
   let turnstilePromise: Promise<TurnstileApi> | null = null;
 
   function copy(pt: string, en: string) { return lang === 'en' ? en : pt; }
-  function errorMessage(code: string) {
+  function errorMessage(code: string, field = '') {
+    if (code === 'invalid_submission' && field === 'content') return copy('Informe o texto completo da contribuição.', 'Add the full contribution text.');
+    if (code === 'invalid_submission' && field) return copy('Confira este campo e tente novamente.', 'Check this field and try again.');
     const messages: Record<string, [string, string]> = {
       invalid_submission: ['Confira os campos obrigatórios e tente novamente.', 'Check the required fields and try again.'], invalid_email: ['Digite um e-mail válido.', 'Enter a valid email.'], invalid_url: ['Use apenas links válidos começando com http ou https.', 'Use valid links beginning with http or https.'], body_too_large: ['O texto enviado é grande demais. Reduza o conteúdo e tente novamente.', 'The submitted text is too large. Shorten it and try again.'], privacy_version_mismatch: ['Atualize a página para aceitar a versão atual da política de privacidade.', 'Reload the page to accept the current privacy policy version.'], turnstile_failed: ['Não foi possível validar a verificação. Tente novamente.', 'The verification could not be completed. Please try again.'], rate_limited: ['Aguarde alguns minutos ou fale diretamente com o editor.', 'Please wait a few minutes or contact the editor directly.'],
     };
     const message = messages[code];
     return message ? copy(message[0], message[1]) : copy('Não foi possível enviar agora. Fale diretamente com o editor.', 'The submission could not be sent. Contact the editor directly.');
+  }
+  function clearFieldErrors() {
+    form?.querySelectorAll<HTMLElement>('[data-field-error]').forEach((error) => {
+      error.hidden = true;
+      error.textContent = '';
+    });
+    form?.querySelectorAll<HTMLInputElement | HTMLTextAreaElement>('[name]').forEach((field) => {
+      field.removeAttribute('aria-invalid');
+      const describedBy = (field.getAttribute('aria-describedby') || '').split(/\s+/).filter((id) => id && id !== `${field.id}-error`);
+      if (describedBy.length) field.setAttribute('aria-describedby', describedBy.join(' '));
+      else field.removeAttribute('aria-describedby');
+    });
+  }
+  function setFieldError(fieldName: string, message: string) {
+    const field = form?.elements.namedItem(fieldName);
+    const input = field instanceof HTMLInputElement || field instanceof HTMLTextAreaElement ? field : null;
+    const error = form?.querySelector<HTMLElement>(`[data-field-error="${CSS.escape(fieldName)}"]`);
+    if (!input || !error) return;
+    error.textContent = message;
+    error.hidden = false;
+    input.setAttribute('aria-invalid', 'true');
+    const describedBy = (input.getAttribute('aria-describedby') || '').split(/\s+/).filter(Boolean);
+    if (!describedBy.includes(error.id)) input.setAttribute('aria-describedby', [...describedBy, error.id].join(' '));
   }
   function loadTurnstile() {
     if (browser.turnstile) return Promise.resolve(browser.turnstile);
@@ -99,6 +124,7 @@ const contributionPrivacyVersion = '2026-09-21';
   prepare().catch(() => { if (status) status.textContent = copy('Não foi possível carregar a verificação. Tente novamente.', 'Could not load verification. Please try again.'); });
   form?.addEventListener('submit', async (event) => {
     event.preventDefault(); if (!form) return;
+    clearFieldErrors();
     const submit = form.querySelector<HTMLButtonElement>('button[type="submit"]');
     if (submit) submit.disabled = true; if (status) status.textContent = copy('Enviando para avaliação…', 'Sending for review…');
     try {
@@ -108,7 +134,13 @@ const contributionPrivacyVersion = '2026-09-21';
       const body = Object.fromEntries(fields.entries()); body.turnstileToken = turnstileToken;
       const response = await fetch('/api/contributions/submit', { method: 'POST', credentials: 'same-origin', headers: { 'content-type': 'application/json', accept: 'application/json' }, body: JSON.stringify(body) });
       const payload = await response.json().catch(() => ({}));
-      if (!response.ok) throw new Error(errorMessage(typeof payload.error === 'string' ? payload.error : 'internal_error'));
+      if (!response.ok) {
+        const code = typeof payload.error === 'string' ? payload.error : 'internal_error';
+        const field = typeof payload.field === 'string' ? payload.field : '';
+        const message = errorMessage(code, field);
+        if (field) setFieldError(field, message);
+        throw new Error(message);
+      }
       if (success) { success.hidden = false; success.focus(); } form.hidden = true; if (status) status.textContent = '';
     } catch (error) {
       if (status) { status.textContent = error instanceof Error ? error.message : copy('Não foi possível enviar agora.', 'The submission could not be sent.'); status.focus(); }
@@ -132,6 +164,7 @@ const contributionPrivacyVersion = '2026-09-21';
   .contribution-form textarea { resize: vertical; min-height: 7rem; }
   .contribution-form input:not([type='checkbox']):focus-visible, .contribution-form textarea:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
   .contribution-form small { color: var(--fg-muted); font-size: var(--step--1); line-height: 1.4; }
+  .contribution-form__field-error { margin: 0; color: var(--accent-dark); font-size: var(--step--1); font-weight: 700; }
   .contribution-form__consent { display: flex; align-items: flex-start; gap: 0.75rem; margin-top: 1.75rem; text-transform: none !important; font-family: var(--font-body) !important; font-size: var(--step--1) !important; letter-spacing: normal !important; }
   .contribution-form__consent input { flex: 0 0 auto; width: 1.25rem; height: 1.25rem; margin-top: 0.1rem; accent-color: var(--accent); }
   .contribution-form__honeypot { position: absolute; left: -10000px; width: 1px; height: 1px; overflow: hidden; }

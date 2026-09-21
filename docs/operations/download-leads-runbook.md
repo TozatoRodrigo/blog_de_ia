@@ -23,14 +23,16 @@ Revogue uma chave antiga depois de confirmar que a nova envia corretamente. Chav
 
 ## Cloudflare e links de contato
 
-O site não publica mais `mailto:` no HTML inicial. O endereço é montado no navegador para evitar que o recurso **Email Address Obfuscation** do Cloudflare transforme os links em `/cdn-cgi/l/email-protection`, que é um endpoint operacional e não uma página de contato.
+As páginas de contribuição mantêm deliberadamente um fallback estático `mailto:` dentro do bloco `<noscript>` e no fallback HTML do serviço. Ele é um caminho de contato acionável para quem não executa JavaScript; não o remova. As páginas de privacidade mantêm a rota interna de contato e montam o endereço no navegador.
 
-Depois de publicar uma versão com essa correção:
+O **Email Address Obfuscation** do Cloudflare deve estar desativado para `/contribua/`, `/en/contribute/`, `/privacidade/` e `/en/privacy/`, ou deve ser verificado explicitamente após cada publicação. A transformação de um fallback válido em `/cdn-cgi/l/email-protection` quebra o contato e não é uma alternativa aceitável.
 
-1. No Cloudflare, abra **Scrape Shield → Email Address Obfuscation** e confirme que a configuração não está reescrevendo o HTML público. Se a proteção estiver ativa por política da zona, mantenha os contatos somente no formato dinâmico usado pelo site.
+Depois de publicar uma versão:
+
+1. No Cloudflare, abra **Scrape Shield → Email Address Obfuscation** e desative a reescrita para essas páginas, ou registre uma exceção equivalente no produto de cache usado pela zona.
 2. Faça purge dos caminhos de contato e políticas: `/sobre/`, `/en/about/`, `/privacidade/`, `/en/privacy/`, `/politica-editorial/`, `/en/editorial-policy/`, `/correcoes/` e `/en/corrections/`.
-3. Valide a origem e o cache com `curl` ou um crawler: não deve existir `href` para `/cdn-cgi/l/email-protection`, e os links de contato devem apontar para as seções internas localizadas ou ser montados após o carregamento.
-4. Não crie um redirect artificial para `/cdn-cgi/l/email-protection`. O caminho é um artefato do Cloudflare; a correção correta é remover os anchors estáticos e invalidar o HTML antigo.
+3. Execute `node scripts/smoke-test.mjs https://produtocomia.com.br` ou faça uma requisição GET equivalente: as páginas de contribuição devem conter `data-contact-direct="true"` com `href="mailto:` e os links localizados de contato e privacidade; as páginas de privacidade devem conter o contato acionável. Nenhuma deve conter `/cdn-cgi/l/email-protection`.
+4. Não crie um redirect artificial para `/cdn-cgi/l/email-protection`. O caminho é um artefato do Cloudflare; corrija a configuração e invalide o HTML antigo.
 
 ## Variáveis do servidor
 

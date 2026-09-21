@@ -30,6 +30,10 @@ test('compose isolates data, files, secrets and container privileges', async () 
   assert.match(compose, /cap_drop:\s*\n\s*- ALL/);
   assert.match(compose, /condition: service_healthy/);
   assert.match(compose, /restart: unless-stopped/);
+  assert.match(compose, /produtocomia:\n[\s\S]*networks:\n\s+- proxy\n\s+- leads-internal/);
+  assert.match(compose, /^  download-leads:\n[\s\S]*?^    networks:\n\s+- leads-internal/m);
+  assert.doesNotMatch(compose, /^  download-leads:[\s\S]*?^    networks:[\s\S]*?- proxy/m);
+  assert.match(compose, /leads-internal:\n\s+internal: true\n\s+ipam:[\s\S]*?subnet: 172\.30\.0\.0\/24/);
 });
 
 test('nginx proxies protected paths with bounded requests and Turnstile CSP', async () => {
@@ -54,7 +58,7 @@ test('environment example documents production variables without working secrets
     'COOKIE_SECRET', 'TURNSTILE_SITE_KEY', 'TURNSTILE_SECRET_KEY', 'RESEND_API_KEY',
     'RESEND_FROM', 'LEAD_NOTIFICATION_TO', 'NOTIFICATION_MODE', 'PRIVACY_VERSION',
     'CONTRIBUTION_PRIVACY_VERSION',
-    'RETENTION_DAYS', 'SESSION_DAYS', 'AUTHORIZATION_SECONDS', 'MAX_BODY_BYTES',
+    'RETENTION_DAYS', 'SESSION_DAYS', 'AUTHORIZATION_SECONDS', 'MAX_BODY_BYTES', 'TRUSTED_PROXY_CIDR',
   ]) {
     assert.match(env, new RegExp(`^${name}=.+$`, 'm'));
   }
@@ -78,4 +82,8 @@ test('operations runbook covers activation, privacy requests and recovery', asyn
   assert.match(runbook, /openssl rand -hex 32/);
   assert.match(runbook, /chmod 600/);
   assert.match(runbook, /nunca[^\n]*html/i);
+  assert.match(runbook, /fallback estático `mailto:`/);
+  assert.match(runbook, /Email Address Obfuscation/);
+  assert.match(runbook, /cdn-cgi\/l\/email-protection/);
+  assert.match(runbook, /node scripts\/smoke-test\.mjs/);
 });

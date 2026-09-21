@@ -6,7 +6,7 @@ import { join } from 'node:path';
 import test from 'node:test';
 import { createLeadDatabase } from '../src/database.mjs';
 import { createContributionWorkflow } from '../src/contribution-workflow.mjs';
-import { createLeadHandler } from '../src/http.mjs';
+import { createLeadHandler, remoteIp } from '../src/http.mjs';
 import { createRateLimiter } from '../src/security.mjs';
 import { createLeadWorkflow } from '../src/workflow.mjs';
 
@@ -41,6 +41,7 @@ async function setup() {
     privacyVersion: '2026-07-22',
     contributionPrivacyVersion: '2026-09-21',
     contributionMaxBodyBytes: 96 * 1024,
+    trustedProxyCidr: '172.30.0.0/24',
   });
   const catalog = Object.freeze({
     items: Object.freeze([material]),
@@ -374,7 +375,31 @@ test('contribution endpoint rejects unsafe JSON requests without echoing submitt
 
     const invalidEmail = await fetch(`${app.baseUrl}/api/contributions/submit`, jsonRequest({ ...validContribution, email: 'invalid' }));
     assert.equal(invalidEmail.status, 400);
-    assert.deepEqual((await invalidEmail.json()).error, 'invalid_email');
+    const invalidEmailPayload = await invalidEmail.json();
+    assert.deepEqual(invalidEmailPayload.error, 'invalid_email');
+    assert.deepEqual(invalidEmailPayload.field, 'email');
+    assert.equal(invalidEmailPayload.message, 'Digite um e-mail válido.');
+    assert.doesNotMatch(JSON.stringify(invalidEmailPayload), /example\.com|Uma contribuição/);
+
+    const invalidUrl = await fetch(`${app.baseUrl}/api/contributions/submit`, jsonRequest({
+      ...validContribution,
+      siteUrl: 'javascript:alert("site")',
+    }));
+    assert.equal(invalidUrl.status, 400);
+    const invalidUrlPayload = await invalidUrl.json();
+    assert.deepEqual(invalidUrlPayload.error, 'invalid_url');
+    assert.deepEqual(invalidUrlPayload.field, 'siteUrl');
+    assert.doesNotMatch(JSON.stringify(invalidUrlPayload), /javascript|alert|example\.com/);
+
+    const invalidContent = await fetch(`${app.baseUrl}/api/contributions/submit`, jsonRequest({
+      ...validContribution,
+      content: '',
+    }));
+    assert.equal(invalidContent.status, 400);
+    const invalidContentPayload = await invalidContent.json();
+    assert.deepEqual(invalidContentPayload.error, 'invalid_submission');
+    assert.deepEqual(invalidContentPayload.field, 'content');
+    assert.doesNotMatch(JSON.stringify(invalidContentPayload), /valid-contribution|example\.com|Uma contribuição/);
 
     const invalidTurnstile = await fetch(`${app.baseUrl}/api/contributions/submit`, jsonRequest({ ...validContribution, turnstileToken: 'invalid' }));
     assert.equal(invalidTurnstile.status, 400);
@@ -451,6 +476,7 @@ test('does not let direct CF-Connecting-IP or X-Forwarded-For headers choose rat
       }, {
         'cf-connecting-ip': `198.51.100.${attempt + 10}`,
         'x-forwarded-for': `203.0.113.${attempt + 10}`,
+        'x-real-ip': `192.0.2.${attempt + 10}`,
       }));
       assert.equal(response.status, 201);
     }
@@ -458,15 +484,34 @@ test('does not let direct CF-Connecting-IP or X-Forwarded-For headers choose rat
     const blocked = await fetch(`${app.baseUrl}/api/contributions/submit`, jsonRequest({
       ...validContribution,
       title: `${validContribution.title} spoof blocked`,
-    }, {
-      'cf-connecting-ip': '203.0.113.99',
-      'x-forwarded-for': '198.51.100.99',
-    }));
+      }, {
+        'cf-connecting-ip': '203.0.113.99',
+        'x-forwarded-for': '198.51.100.99',
+        'x-real-ip': '192.0.2.99',
+      }));
     assert.equal(blocked.status, 429);
     assert.equal((await blocked.json()).error, 'rate_limited');
   } finally {
     await app.close();
   }
+});
+
+test('accepts sanitized X-Real-IP only from the exact internal proxy boundary', () => {
+  const trustedRequest = {
+    socket: { remoteAddress: '172.30.0.2' },
+    headers: {
+      'x-real-ip': '198.51.100.10',
+      'cf-connecting-ip': '203.0.113.10',
+      'x-forwarded-for': '192.0.2.10',
+    },
+  };
+  const untrustedRequest = {
+    ...trustedRequest,
+    socket: { remoteAddress: '172.18.0.4' },
+  };
+
+  assert.equal(remoteIp(trustedRequest, '172.30.0.0/24'), '198.51.100.10');
+  assert.equal(remoteIp(untrustedRequest, '172.30.0.0/24'), '172.18.0.4');
 });
 
 test('contribution form submission redirects to the localized success state', async () => {

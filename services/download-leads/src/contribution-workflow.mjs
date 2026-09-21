@@ -23,8 +23,10 @@ const FIELD_LIMITS = Object.freeze({
   company: 160,
 });
 
-function invalidSubmission(message = 'Invalid submission') {
-  return new LeadFlowError('invalid_submission', 400, message);
+function invalidSubmission(message = 'Invalid submission', field) {
+  const error = new LeadFlowError('invalid_submission', 400, message);
+  if (field) error.field = field;
+  return error;
 }
 
 function consentAccepted(value) {
@@ -35,33 +37,35 @@ function consentAccepted(value) {
 
 function stringValue(value, field, { required = false } = {}) {
   if (typeof value !== 'string') {
-    if (required) throw invalidSubmission('Required fields are missing');
+    if (required) throw invalidSubmission('Required fields are missing', field);
     return '';
   }
   const normalized = value.trim();
-  if (required && normalized.length === 0) throw invalidSubmission('Required fields are missing');
-  if (normalized.length > FIELD_LIMITS[field]) throw invalidSubmission('One or more fields are too long');
+  if (required && normalized.length === 0) throw invalidSubmission('Required fields are missing', field);
+  if (normalized.length > FIELD_LIMITS[field]) throw invalidSubmission('One or more fields are too long', field);
   return normalized;
 }
 
-function httpUrl(value) {
+function httpUrl(value, field = 'siteUrl') {
   try {
     const url = new URL(value);
     if (!['http:', 'https:'].includes(url.protocol)) throw new Error('unsupported protocol');
     return url.toString();
   } catch {
-    throw new LeadFlowError('invalid_url', 400, 'Enter valid http or https links');
+    const error = new LeadFlowError('invalid_url', 400, 'Enter valid http or https links');
+    error.field = field;
+    throw error;
   }
 }
 
 function optionalUrl(value) {
   if (!value) return '';
-  return httpUrl(value);
+  return httpUrl(value, 'siteUrl');
 }
 
 function normalizeLinks(value) {
   if (!value) return '';
-  const links = value.split(/\r?\n/).map((link) => link.trim()).filter(Boolean).map(httpUrl);
+  const links = value.split(/\r?\n/).map((link) => link.trim()).filter(Boolean).map((link) => httpUrl(link, 'links'));
   return links.join('\n');
 }
 
@@ -129,7 +133,9 @@ export function createContributionWorkflow({
       try {
         email = normalizeEmail(input.email);
       } catch {
-        throw new LeadFlowError('invalid_email', 400, 'Enter a valid email');
+        const error = new LeadFlowError('invalid_email', 400, 'Enter a valid email');
+        error.field = 'email';
+        throw error;
       }
 
       const normalizedSiteUrl = optionalUrl(siteUrl);
