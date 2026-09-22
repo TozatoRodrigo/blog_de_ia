@@ -1,0 +1,78 @@
+---
+import { getCollection, render } from 'astro:content';
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+import ContributionAuthor from '../../../components/ContributionAuthor.astro';
+import { contributorFor } from '../../../data/contributors';
+import { formatDate, formatDateISO } from '../../../utils/format';
+import { assertUniqueContributionSlugs, assertUniqueContributionTranslationKeys, contributionIndexPath, contributionPath, findContributionTranslation } from '../../../utils/contribution-routes';
+import { contributionPostingSchema, breadcrumbSchema } from '../../../utils/schema';
+import { guideForTag } from '../../../data/guideLinks';
+
+const lang = 'en' as const;
+
+export async function getStaticPaths() {
+  const entries = await getCollection('contributions-en', ({ data }) => !data.draft);
+  assertUniqueContributionSlugs('en', entries);
+  assertUniqueContributionTranslationKeys('en', entries);
+  return entries.map((entry) => ({ params: { slug: entry.data.seoSlug }, props: { entry } }));
+}
+
+const { entry } = Astro.props;
+const { Content } = await render(entry);
+const allPortuguese = await getCollection('contributions', ({ data }) => !data.draft);
+const alternateEntry = findContributionTranslation(allPortuguese, entry.data.translationKey, 'pt-BR');
+const articleUrl = contributionPath(lang, entry.data.seoSlug);
+const alternateUrl = contributionPath('pt-BR', alternateEntry.data.seoSlug);
+const contributor = contributorFor(entry.data.authorId);
+const related = guideForTag(entry.data.tags[0] || 'produto', lang);
+const jsonLd = [
+  contributionPostingSchema({ url: articleUrl, title: entry.data.title, description: entry.data.excerpt, datePublished: formatDateISO(entry.data.date), dateModified: formatDateISO(entry.data.date), image: '/og/default.png', lang, tags: entry.data.tags, contributor }),
+  breadcrumbSchema([['Home', '/en/'], ['Editorial contributions', contributionIndexPath(lang)], [entry.data.title, articleUrl]]),
+];
+---
+
+<BaseLayout title={entry.data.title} description={entry.data.excerpt} image="/og/default.png" type="article" publishedTime={formatDateISO(entry.data.date)} modifiedTime={formatDateISO(entry.data.date)} tags={entry.data.tags} author={contributor.name} jsonLd={jsonLd} lang={lang} alternateUrl={alternateUrl}>
+  <article class="container contribution-article" style="padding-top: 2rem; padding-bottom: 4rem;">
+    <nav class="mono-sm contribution-article__breadcrumb" aria-label="Breadcrumb">
+      <a href="/en/" style="border: none; color: inherit;">HOME</a><span>/</span>
+      <a href={contributionIndexPath(lang)} style="border: none; color: inherit;">CONTRIBUTIONS</a><span>/</span>
+      <span style="color: var(--fg);">{formatDateISO(entry.data.date).replace(/[-:]/g, '').slice(0, 8)}</span>
+    </nav>
+    <header class="article-header">
+      <div class="article-header__eyebrow"><span class="accent">●</span><span>EDITORIAL CONTRIBUTION — {formatDate(entry.data.date, lang)}</span></div>
+      <h1>{entry.data.title}</h1>
+      <p class="contribution-article__excerpt">{entry.data.excerpt}</p>
+      <div class="article-header__meta"><span>BY — {contributor.name.toUpperCase()}</span><span>{contributor.roleEn.toUpperCase()}</span></div>
+    </header>
+
+    {entry.data.translationNote && <p class="contribution-translation-note"><span class="mono-sm">TRANSLATION NOTE</span> {entry.data.translationNote}</p>}
+    <div class="article-body"><Content /></div>
+
+    <aside class="contribution-related" aria-label="Related reading">
+      <span class="mono-sm">RELATED READING</span>
+      <h2>{related.title}</h2>
+      <p>Keep exploring the editorial materials connected to this topic.</p>
+      <div class="contribution-related__links"><a href={related.href}>READ THE GUIDE →</a><a href={contributionIndexPath(lang)}>SEE ALL CONTRIBUTIONS →</a></div>
+    </aside>
+
+    <div class="contribution-tags"><span class="mono">[ TOPICS ]</span><div>{entry.data.tags.map((tag) => <span class="tag">#{tag}</span>)}</div></div>
+    <ContributionAuthor authorId={entry.data.authorId} lang={lang} />
+    <p class="contribution-back"><a href={contributionIndexPath(lang)}>← BACK TO CONTRIBUTIONS</a></p>
+  </article>
+</BaseLayout>
+
+<style>
+  .contribution-article__breadcrumb { display: flex; gap: 0.5rem; margin-bottom: 2rem; color: var(--fg-muted); }
+  .contribution-article__excerpt { max-width: 70ch; color: var(--fg-soft); font-size: var(--step-1); line-height: 1.55; }
+  .contribution-translation-note { max-width: 760px; margin: 0 auto 2rem; padding: 0.9rem 1rem; border-left: 3px solid var(--accent); background: var(--bg-alt); color: var(--fg-soft); }
+  .contribution-translation-note .mono-sm { color: var(--accent); margin-right: 0.5rem; }
+  .contribution-related { max-width: 760px; margin: 3rem auto 0; padding: 1.25rem; border-left: 3px solid var(--accent); background: var(--bg-alt); }
+  .contribution-related h2 { margin: 0.5rem 0; font-size: 1.35rem; }
+  .contribution-related p { color: var(--fg-soft); }
+  .contribution-related__links { display: flex; flex-wrap: wrap; gap: 1rem 1.5rem; font-family: var(--font-mono); font-size: 0.7rem; }
+  .contribution-related__links a { color: var(--accent); }
+  .contribution-tags { max-width: 760px; margin: 3rem auto 0; padding-top: 2rem; border-top: 2px solid var(--line); }
+  .contribution-tags > div { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 1rem; }
+  .contribution-back { max-width: 760px; margin: 3rem auto 0; font-family: var(--font-mono); font-size: 0.75rem; }
+  .contribution-back a { color: var(--accent); }
+</style>

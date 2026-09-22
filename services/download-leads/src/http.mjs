@@ -1,4 +1,5 @@
 import { createReadStream } from 'node:fs';
+import { isIP } from 'node:net';
 import { stat } from 'node:fs/promises';
 import { randomUUID } from 'node:crypto';
 import { isHoneypotClear, parseSessionCookie, sessionCookie, verifyOrigin } from './security.mjs';
@@ -42,6 +43,14 @@ function sendRedirect(response, location) {
   response.end();
 }
 
+function sendContributionRedirect(response, location) {
+  response.writeHead(303, {
+    location,
+    'cache-control': 'no-store',
+  });
+  response.end();
+}
+
 async function readBody(request, limit) {
   const chunks = [];
   let total = 0;
@@ -79,13 +88,34 @@ async function parseBody(request, limit) {
   throw new LeadFlowError('unsupported_media_type', 415, 'Unsupported request');
 }
 
-function remoteIp(request) {
-  const forwarded = request.headers['cf-connecting-ip']
-    || request.headers['x-real-ip']
-    || request.headers['x-forwarded-for']
-    || request.socket.remoteAddress
-    || 'unknown';
-  return String(forwarded).split(',')[0].trim();
+function normalizedIp(value) {
+  const candidate = String(value ?? '').trim();
+  return isIP(candidate) ? candidate : '';
+}
+
+function ipv4Value(value) {
+  const ip = normalizedIp(value);
+  if (!ip || ip.includes(':')) return null;
+  return ip.split('.').map(Number).reduce((result, octet) => (result * 256) + octet, 0) >>> 0;
+}
+
+function ipInCidr(value, cidr) {
+  const [network, prefixText] = String(cidr ?? '').split('/');
+  const addressValue = ipv4Value(value);
+  const networkValue = ipv4Value(network);
+  const prefix = Number(prefixText);
+  if (addressValue === null || networkValue === null || !Number.isInteger(prefix) || prefix < 1 || prefix > 32) {
+    return false;
+  }
+  const mask = (0xffffffff << (32 - prefix)) >>> 0;
+  return ((addressValue & mask) >>> 0) === ((networkValue & mask) >>> 0);
+}
+
+export function remoteIp(request, trustedProxyCidr) {
+  const socketIp = normalizedIp(request.socket?.remoteAddress);
+  const proxyIp = normalizedIp(request.headers['x-real-ip']);
+  if (ipInCidr(socketIp, trustedProxyCidr) && proxyIp) return proxyIp;
+  return socketIp || 'unknown';
 }
 
 function fallbackPage({ config, material, lang = 'pt-BR', error = '' }) {
@@ -129,7 +159,182 @@ function errorPayload(error, requestId) {
   };
 }
 
-export function createLeadHandler({ config, catalog, workflow, rateLimiter }) {
+const CONTRIBUTION_ERROR_MESSAGES = Object.freeze({
+  invalid_submission: {
+    'pt-BR': 'Confira os campos obrigatórios e tente novamente.',
+    en: 'Check the required fields and try again.',
+  },
+  invalid_email: {
+    'pt-BR': 'Digite um e-mail válido.',
+    en: 'Enter a valid email.',
+  },
+  invalid_url: {
+    'pt-BR': 'Use apenas links válidos começando com http ou https.',
+    en: 'Use valid links beginning with http or https.',
+  },
+  body_too_large: {
+    'pt-BR': 'O texto enviado é grande demais. Reduza o conteúdo e tente novamente.',
+    en: 'The submitted text is too large. Shorten it and try again.',
+  },
+  privacy_version_mismatch: {
+    'pt-BR': 'Atualize a página para aceitar a versão atual da política de privacidade.',
+    en: 'Reload the page to accept the current privacy policy version.',
+  },
+  turnstile_failed: {
+    'pt-BR': 'Não foi possível validar a verificação. Tente novamente.',
+    en: 'The verification could not be completed. Please try again.',
+  },
+  rate_limited: {
+    'pt-BR': 'Aguarde alguns minutos antes de enviar outra contribuição ou fale diretamente com o editor.',
+    en: 'Please wait a few minutes before trying again, or contact the editor directly.',
+  },
+  forbidden_origin: {
+    'pt-BR': 'Não foi possível validar a origem deste envio.',
+    en: 'The origin of this submission could not be validated.',
+  },
+  invalid_json: {
+    'pt-BR': 'O envio não está em um formato válido.',
+    en: 'The submission format is invalid.',
+  },
+  unsupported_media_type: {
+    'pt-BR': 'Este formato de envio não é aceito.',
+    en: 'This submission format is not supported.',
+  },
+  internal_error: {
+    'pt-BR': 'Não foi possível receber a contribuição agora. Fale diretamente com o editor.',
+    en: 'The contribution could not be received right now. Contact the editor directly.',
+  },
+});
+
+const CONTRIBUTION_FIELDS = new Set([
+  'name', 'email', 'role', 'siteUrl', 'title', 'excerpt', 'content', 'links', 'bio', 'consent',
+]);
+
+const CONTRIBUTION_FIELD_MESSAGES = Object.freeze({
+  invalid_submission: Object.freeze({
+    name: { 'pt-BR': 'Informe seu nome.', en: 'Enter your name.' },
+    email: { 'pt-BR': 'Digite um e-mail válido.', en: 'Enter a valid email.' },
+    siteUrl: { 'pt-BR': 'Confira o site informado e tente novamente.', en: 'Check the website and try again.' },
+    title: { 'pt-BR': 'Informe o título da contribuição.', en: 'Enter the contribution title.' },
+    excerpt: { 'pt-BR': 'Informe um resumo curto.', en: 'Add a short summary.' },
+    content: { 'pt-BR': 'Informe o texto completo da contribuição.', en: 'Add the full contribution text.' },
+    links: { 'pt-BR': 'Confira os links e tente novamente.', en: 'Check the credited links and try again.' },
+    bio: { 'pt-BR': 'Informe uma bio curta.', en: 'Add a short bio.' },
+    consent: { 'pt-BR': 'Confira a autorização de autoria e tente novamente.', en: 'Confirm authorship authorization and try again.' },
+  }),
+  invalid_email: Object.freeze({
+    email: { 'pt-BR': 'Digite um e-mail válido.', en: 'Enter a valid email.' },
+  }),
+  invalid_url: Object.freeze({
+    siteUrl: { 'pt-BR': 'Use um site válido começando com http ou https.', en: 'Use valid links beginning with http or https.' },
+    links: { 'pt-BR': 'Use links válidos começando com http ou https.', en: 'Use valid links beginning with http or https.' },
+  }),
+});
+
+function contributionLanguage(body) {
+  return body?.lang === 'en' || body?.language === 'en' ? 'en' : 'pt-BR';
+}
+
+function contributionMessage(error, lang) {
+  const code = error instanceof LeadFlowError ? error.code : 'internal_error';
+  const field = CONTRIBUTION_FIELDS.has(error?.field) ? error.field : '';
+  const fieldMessage = CONTRIBUTION_FIELD_MESSAGES[code]?.[field]?.[lang];
+  if (fieldMessage) return fieldMessage;
+  return CONTRIBUTION_ERROR_MESSAGES[code]?.[lang]
+    ?? CONTRIBUTION_ERROR_MESSAGES.internal_error[lang];
+}
+
+function contributionErrorPayload(error, lang) {
+  const code = error instanceof LeadFlowError ? error.code : 'internal_error';
+  const field = CONTRIBUTION_FIELDS.has(error?.field)
+    ? error.field
+    : null;
+  return { error: code, field, message: contributionMessage(error, lang) };
+}
+
+function contributionFieldValue(body, field) {
+  return typeof body?.[field] === 'string' ? body[field] : '';
+}
+
+function contributionFallbackPage({ config, values = {}, lang = 'pt-BR', error = null }) {
+  const english = lang === 'en';
+  const pagePath = english ? '/en/contribute/' : '/contribua/';
+  const privacyHref = english ? '/en/privacy/' : '/privacidade/';
+  const contactHref = english ? '/en/about#contact' : '/sobre#contato';
+  const copy = english
+    ? {
+      title: 'Contribute an idea',
+      intro: 'Send an editorial contribution for review. Submissions are reviewed by the editorial team and are not automatically published.',
+      name: 'Name',
+      email: 'Email',
+      role: 'Role or professional context',
+      siteUrl: 'Website',
+      titleField: 'Contribution title',
+      excerpt: 'Short summary',
+      content: 'Full contribution',
+      links: 'Links to credit',
+      bio: 'Short bio',
+      submit: 'Send for review',
+      privacy: 'We use these details to evaluate the contribution and contact you about it.',
+      privacyLink: 'Privacy policy',
+      contact: 'Prefer to start with a question? Contact the editor directly.',
+      contactLink: 'Contact the editor',
+      turnstile: 'This form uses Cloudflare Turnstile for abuse prevention.',
+      noScript: 'JavaScript is required to complete Cloudflare Turnstile; without it, this endpoint cannot verify the submission.',
+    }
+    : {
+      title: 'Contribua com uma ideia',
+      intro: 'Envie uma contribuição editorial para avaliação. Cada envio é lido pela equipe editorial e não é publicado automaticamente.',
+      name: 'Nome',
+      email: 'E-mail',
+      role: 'Cargo ou contexto profissional',
+      siteUrl: 'Site',
+      titleField: 'Título da contribuição',
+      excerpt: 'Resumo curto',
+      content: 'Texto completo da contribuição',
+      links: 'Links para creditar',
+      bio: 'Bio curta',
+      submit: 'Enviar para avaliação',
+      privacy: 'Usamos esses dados para avaliar a contribuição e falar com você sobre ela.',
+      privacyLink: 'Política de privacidade',
+      contact: 'Prefere começar com uma pergunta? Fale diretamente com o editor.',
+      contactLink: 'Falar com o editor',
+      turnstile: 'Este formulário usa Cloudflare Turnstile para evitar abusos.',
+      noScript: 'JavaScript é necessário para concluir o Cloudflare Turnstile; sem ele, este endpoint não pode verificar o envio.',
+    };
+  const errorField = CONTRIBUTION_FIELDS.has(error?.field) ? error.field : '';
+  const errorMessage = error ? contributionMessage(error, lang) : '';
+  const errorHtml = error ? `<div role="alert"><strong>${escapeHtml(errorMessage)}</strong></div>` : '';
+  const fieldId = (name) => name === 'siteUrl' ? 'contribution-site' : `contribution-${name}`;
+  const fieldError = (name) => {
+    const id = `${fieldId(name)}-error`;
+    const active = errorField === name;
+    return `<p id="${id}" data-field-error="${name}" role="alert"${active ? '' : ' hidden'}>${active ? escapeHtml(errorMessage) : ''}</p>`;
+  };
+  const fieldAttributes = (name) => errorField === name
+    ? ` aria-invalid="true" aria-describedby="${fieldId(name)}-error"`
+    : '';
+  const field = (name, label, type = 'text') => `<label for="${fieldId(name)}">${label}</label><input id="${fieldId(name)}" name="${name}" type="${type}" value="${escapeHtml(contributionFieldValue(values, name))}"${type === 'email' ? ' autocomplete="email"' : ''}${fieldAttributes(name)}>${fieldError(name)}`;
+  const textarea = (name, label) => `<label for="${fieldId(name)}">${label}</label><textarea id="${fieldId(name)}" name="${name}"${fieldAttributes(name)}>${escapeHtml(contributionFieldValue(values, name))}</textarea>${fieldError(name)}`;
+  const hidden = (name, value) => `<input type="hidden" name="${name}" value="${escapeHtml(value)}">`;
+  return `<!doctype html>
+<html lang="${english ? 'en' : 'pt-BR'}"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width"><title>${escapeHtml(copy.title)} — Produto com IA</title><meta name="robots" content="noindex, nofollow, noarchive"></head>
+<body><main><p><a href="${pagePath}">Produto com IA</a></p><h1>${escapeHtml(copy.title)}</h1><p>${escapeHtml(copy.intro)}</p>${errorHtml}
+<noscript><p>${escapeHtml(copy.noScript)} <a data-contact-direct="true" href="mailto:${escapeHtml(config.notificationTo)}">${escapeHtml(copy.contactLink)}</a> · <a href="${contactHref}">${escapeHtml(copy.contactLink)}</a> · <a href="${privacyHref}">${escapeHtml(copy.privacyLink)}</a>.</p></noscript>
+<form method="post" action="/api/contributions/submit">
+${field('name', copy.name)}${field('email', copy.email, 'email')}${field('role', copy.role)}${field('siteUrl', copy.siteUrl)}${field('title', copy.titleField)}${textarea('excerpt', copy.excerpt)}${textarea('content', copy.content)}${textarea('links', copy.links)}${textarea('bio', copy.bio)}
+<label for="contribution-consent"><input id="contribution-consent" name="consent" type="checkbox" value="on" required${fieldAttributes('consent')}> ${escapeHtml(english ? 'I confirm that I am the author or have permission to submit this material.' : 'Confirmo que sou autor ou tenho autorização para enviar este material.')}</label>${fieldError('consent')}
+<div aria-hidden="true" style="position:absolute;left:-10000px"><label for="contribution-company">Company</label><input id="contribution-company" name="company" tabindex="-1" autocomplete="off"></div>
+${hidden('lang', english ? 'en' : 'pt-BR')}${hidden('sourcePath', pagePath)}${hidden('privacyVersion', config.contributionPrivacyVersion || config.privacyVersion)}
+<div class="cf-turnstile" data-sitekey="${escapeHtml(config.turnstileSiteKey)}" data-action="contribution_submit" data-appearance="interaction-only"></div>
+<p>${escapeHtml(copy.privacy)} <a href="${privacyHref}">${escapeHtml(copy.privacyLink)}</a>. ${escapeHtml(copy.turnstile)}</p><p>${escapeHtml(copy.contact)} <a href="${contactHref}">${escapeHtml(copy.contactLink)}</a>.</p>
+<button type="submit">${escapeHtml(copy.submit)}</button></form></main><script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script></body></html>`;
+}
+
+export function createLeadHandler({ config, catalog, workflow, rateLimiter, contributionWorkflow, contributionRateLimiter }) {
+  // The dedicated workflow owns the canonical limiter check; keeping this dependency
+  // in the handler composition makes the security boundary explicit without double-counting requests.
+  void contributionRateLimiter;
   return async function leadHandler(request, response) {
     const requestId = randomUUID();
     response.setHeader('x-request-id', requestId);
@@ -141,6 +346,7 @@ export function createLeadHandler({ config, catalog, workflow, rateLimiter }) {
         return sendJson(response, 200, {
           turnstileSiteKey: config.turnstileSiteKey,
           privacyVersion: config.privacyVersion,
+          contributionPrivacyVersion: config.contributionPrivacyVersion,
         });
       }
 
@@ -183,6 +389,31 @@ export function createLeadHandler({ config, catalog, workflow, rateLimiter }) {
       const isRegister = request.method === 'POST'
         && ['/api/download-leads/register', '/api/download-leads/register-form'].includes(url.pathname);
       const isAuthorize = request.method === 'POST' && url.pathname === '/api/download-leads/authorize';
+      const isContribution = request.method === 'POST' && url.pathname === '/api/contributions/submit';
+
+      if (isContribution) {
+        if (!verifyOrigin(request.headers.origin, config.allowedOrigin)) {
+          throw new LeadFlowError('forbidden_origin', 403, 'Forbidden origin');
+        }
+        if (!contributionWorkflow) {
+          throw new LeadFlowError('internal_error', 503, 'Contribution service unavailable');
+        }
+        const body = await parseBody(request, config.contributionMaxBodyBytes);
+        parsedBody = body;
+        const result = await contributionWorkflow.submit({
+          ...body,
+          language: body.language ?? body.lang,
+          remoteIp: remoteIp(request, config.trustedProxyCidr),
+        });
+        const contentType = request.headers['content-type']?.split(';')[0]?.trim();
+        if (contentType === 'application/x-www-form-urlencoded') {
+          return sendContributionRedirect(
+            response,
+            contributionLanguage(body) === 'en' ? '/en/contribute/?submitted=1' : '/contribua/?submitted=1',
+          );
+        }
+        return sendJson(response, 201, { status: result.status });
+      }
 
       if (isRegister || isAuthorize) {
         if (!verifyOrigin(request.headers.origin, config.allowedOrigin)) {
@@ -194,14 +425,14 @@ export function createLeadHandler({ config, catalog, workflow, rateLimiter }) {
           if (!isHoneypotClear(body.company)) {
             throw new LeadFlowError('invalid_submission', 400, 'Invalid submission');
           }
-          const limit = rateLimiter.check(remoteIp(request));
+          const limit = rateLimiter.check(remoteIp(request, config.trustedProxyCidr));
           if (!limit.allowed) {
             return sendJson(response, 429, errorPayload(
               new LeadFlowError('rate_limited', 429, 'Try again later'),
               requestId,
             ), { 'retry-after': String(limit.retryAfter) });
           }
-          const result = await workflow.register({ ...body, remoteIp: remoteIp(request) });
+          const result = await workflow.register({ ...body, remoteIp: remoteIp(request, config.trustedProxyCidr) });
           const cookie = sessionCookie(result.sessionToken, config.sessionDays * 86_400);
           if (url.pathname.endsWith('register-form')) {
             response.writeHead(303, {
@@ -232,6 +463,20 @@ export function createLeadHandler({ config, catalog, workflow, rateLimiter }) {
           lang: parsedBody?.lang === 'en' ? 'en' : 'pt-BR',
           error: error instanceof LeadFlowError ? error.message : 'Serviço temporariamente indisponível',
         }), { 'x-robots-tag': 'noindex, nofollow, noarchive' });
+      }
+      if (request.method === 'POST' && url.pathname === '/api/contributions/submit') {
+        const lang = contributionLanguage(parsedBody);
+        const contentType = request.headers['content-type']?.split(';')[0]?.trim();
+        const retryHeaders = error?.retryAfter ? { 'retry-after': String(error.retryAfter) } : {};
+        if (contentType === 'application/x-www-form-urlencoded') {
+          return sendHtml(response, status, contributionFallbackPage({
+            config,
+            values: parsedBody,
+            lang,
+            error,
+          }), { 'x-robots-tag': 'noindex, nofollow, noarchive', ...retryHeaders });
+        }
+        return sendJson(response, status, contributionErrorPayload(error, lang), retryHeaders);
       }
       return sendJson(response, status, errorPayload(error, requestId));
     }

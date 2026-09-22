@@ -1,0 +1,58 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import ContributionCard from '../../components/ContributionCard.astro';
+import { contributionIndexPath, contributionPath } from '../../utils/contribution-routes';
+import { itemListSchema } from '../../utils/schema';
+
+const lang = 'pt-BR' as const;
+const contributions = await getCollection('contributions', ({ data }) => !data.draft);
+contributions.sort((a, b) => Number(b.data.featured) - Number(a.data.featured) || b.data.date.localeCompare(a.data.date));
+const title = 'Contribuições editoriais';
+const description = 'Ideias, experiências e aprendizados de quem constrói produtos com inteligência artificial. Uma seção para publicar vozes convidadas com autoria, contexto e crédito claros.';
+const jsonLd = itemListSchema({
+  name: title,
+  url: contributionIndexPath(lang),
+  lang,
+  items: contributions.map((entry) => ({ name: entry.data.title, description: entry.data.excerpt, url: contributionPath(lang, entry.data.seoSlug) })),
+});
+---
+
+<BaseLayout title={title} description={description} jsonLd={jsonLd} lang={lang} alternateUrl="/en/contributions/">
+  <section class="container contribution-index__intro">
+    <span class="mono" style="color: var(--accent);">[ VOZES CONVIDADAS ]</span>
+    <h1>{title}</h1>
+    <p>{description}</p>
+    <p>Esta é uma frente editorial independente da newsletter e dos guias. Cada texto publicado preserva a perspectiva de quem o escreveu, com uma ficha de autor que deixa claro o contexto, os links e a responsabilidade pela contribuição. O objetivo é aproximar diferentes experiências de produto, agentes e governança de IA.</p>
+  </section>
+
+  <section class="container contribution-index__list" aria-labelledby="published-contributions">
+    <div class="section-header">
+      <h2 id="published-contributions">Publicações</h2>
+      <span class="mono" style="color: var(--fg-muted);">{contributions.length} {contributions.length === 1 ? 'contribuição' : 'contribuições'}</span>
+    </div>
+    {contributions.length > 0 ? (
+      <div class="grid grid-2">{contributions.map((entry) => <ContributionCard entry={entry} lang={lang} />)}</div>
+    ) : (
+      <div class="contribution-empty"><h3>A primeira contribuição está a caminho</h3><p>A seção ainda está crescendo. Se você tem uma experiência ou uma ideia para compartilhar, envie seu texto para avaliação editorial.</p></div>
+    )}
+  </section>
+
+  <section class="container contribution-index__cta" aria-labelledby="contribute-heading">
+    <span class="mono" style="color: var(--accent);">[ NOVA VOZ ]</span>
+    <h2 id="contribute-heading">Tem uma contribuição para publicar?</h2>
+    <p>Recebemos textos completos sobre produto, agentes, avaliação e governança de IA. Todo material passa por triagem editorial antes de qualquer publicação.</p>
+    <a class="btn btn--primary" href="/contribua/">CONTRIBUA →</a>
+  </section>
+</BaseLayout>
+
+<style>
+  .contribution-index__intro { padding-top: 4rem; padding-bottom: 2rem; }
+  .contribution-index__intro h1 { max-width: 13ch; }
+  .contribution-index__intro p { max-width: 70ch; color: var(--fg-soft); font-size: var(--step-1); line-height: 1.65; }
+  .contribution-index__list { padding-bottom: 4rem; }
+  .contribution-index__cta { padding: 3rem 0 5rem; border-top: 2px solid var(--line); }
+  .contribution-index__cta p { max-width: 60ch; color: var(--fg-soft); font-size: var(--step-1); }
+  .contribution-empty { border: 2px dashed var(--line); padding: 2rem; max-width: 760px; }
+  .contribution-empty p { color: var(--fg-soft); }
+</style>

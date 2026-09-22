@@ -21,16 +21,31 @@ Revogue uma chave antiga depois de confirmar que a nova envia corretamente. Chav
 4. Copie separadamente a chave pública e a secreta. A pública vai em `TURNSTILE_SITE_KEY`; a secreta vai em `TURNSTILE_SECRET_KEY`, somente no servidor.
 5. Antes dos valores de produção, rode os testes com as chaves de teste oficiais “always pass” do Cloudflare. Não misture chaves de teste e produção.
 
+## Publicação de contribuições editoriais
+
+Antes de publicar uma versão que contenha `/contribua/`, `/en/contribute/` ou as páginas em `/contribuicoes/`, confirme este contrato:
+
+- O formulário público envia para `POST /api/contributions/submit`. A rota exata é publicada pelo Nginx para `download-leads:8787`; não crie uma página estática em `dist/api/` nem exponha a porta 8787 ao proxy externo.
+- `CONTRIBUTION_PRIVACY_VERSION` deve ser exatamente a versão exibida nas páginas `/privacidade/` e `/en/privacy/`, no formulário PT/EN e no fallback do serviço. Ao atualizar a política, altere as fontes e a variável do servidor juntas, gere o build e confirme o valor no endpoint público de configuração sem publicar a chave secreta.
+- `TURNSTILE_SITE_KEY` e `TURNSTILE_SECRET_KEY` devem ser o par do mesmo widget de produção autorizado para `produtocomia.com.br`. A chave pública pode aparecer no HTML/configuração pública; a secreta fica somente no `.env.download-leads`. Nunca use o par de testes no host de produção.
+- O Resend envia a notificação para `LEAD_NOTIFICATION_TO=rodrigo.tozato@icloud.com`, usando o remetente verificado em `RESEND_FROM`. A chamada usa a chave de idempotência `editorial-submission/<submission-id>`; uma falha mantém a submissão privada e o worker tenta novamente até `CONTRIBUTION_NOTIFICATION_MAX_ATTEMPTS` (padrão: 8). Depois do limite, revise a causa e use o requeue por identificador descrito em [Recuperar notificações editoriais](#recuperar-notificações-editoriais); não há endpoint público de reenvio.
+- O envio fica `pending` para triagem. Não existe autopublicação: a equipe revisa autoria, links, escopo e edição antes de criar qualquer arquivo em `src/content/contributions*.md`.
+- O container `download-leads` fica somente na rede interna `leads-internal` (`172.30.0.0/24`). O Nginx é o único caminho até ele e sobrescreve os cabeçalhos de identidade recebidos do proxy. Mantenha `TRUSTED_PROXY_CIDR=172.30.0.0/24` alinhado com essa fronteira; não confie em `CF-Connecting-IP` ou `X-Forwarded-For` enviados diretamente por clientes.
+
+Após a publicação, valide `/api/contributions/submit` por uma submissão controlada e confirme a notificação no mailbox do editor. Em caso de pedido de exclusão, use [Excluir um lead](#excluir-um-lead), que também remove as submissões editoriais pelo mesmo e-mail. Antes de uma migração ou manutenção, crie uma cópia consistente com [Backup](#backup); não copie o banco enquanto o serviço estiver escrevendo.
+
 ## Cloudflare e links de contato
 
-O site não publica mais `mailto:` no HTML inicial. O endereço é montado no navegador para evitar que o recurso **Email Address Obfuscation** do Cloudflare transforme os links em `/cdn-cgi/l/email-protection`, que é um endpoint operacional e não uma página de contato.
+As páginas de contribuição e de privacidade mantêm deliberadamente links estáticos `mailto:`. O fallback estático `mailto:` da contribuição também aparece dentro do bloco `<noscript>` e no HTML de erro do serviço. Eles são caminhos de contato acionáveis para quem não executa JavaScript; não os remova.
 
-Depois de publicar uma versão com essa correção:
+O **Email Address Obfuscation** do Cloudflare deve estar desativado para `/contribua/`, `/en/contribute/`, `/privacidade/` e `/en/privacy/`, ou deve ser verificado explicitamente após cada publicação. A transformação de um fallback válido em `/cdn-cgi/l/email-protection` quebra o contato e não é uma alternativa aceitável.
 
-1. No Cloudflare, abra **Scrape Shield → Email Address Obfuscation** e confirme que a configuração não está reescrevendo o HTML público. Se a proteção estiver ativa por política da zona, mantenha os contatos somente no formato dinâmico usado pelo site.
+Depois de publicar uma versão:
+
+1. No Cloudflare, abra **Scrape Shield → Email Address Obfuscation** e desative a reescrita para essas páginas, ou registre uma exceção equivalente no produto de cache usado pela zona.
 2. Faça purge dos caminhos de contato e políticas: `/sobre/`, `/en/about/`, `/privacidade/`, `/en/privacy/`, `/politica-editorial/`, `/en/editorial-policy/`, `/correcoes/` e `/en/corrections/`.
-3. Valide a origem e o cache com `curl` ou um crawler: não deve existir `href` para `/cdn-cgi/l/email-protection`, e os links de contato devem apontar para as seções internas localizadas ou ser montados após o carregamento.
-4. Não crie um redirect artificial para `/cdn-cgi/l/email-protection`. O caminho é um artefato do Cloudflare; a correção correta é remover os anchors estáticos e invalidar o HTML antigo.
+3. Execute `node scripts/smoke-test.mjs https://produtocomia.com.br` ou faça uma requisição GET equivalente: as páginas de contribuição devem conter `data-contact-direct="true"` com `href="mailto:` e os links localizados de contato e privacidade; as páginas de privacidade devem conter o contato acionável. Nenhuma deve conter `/cdn-cgi/l/email-protection`.
+4. Não crie um redirect artificial para `/cdn-cgi/l/email-protection`. O caminho é um artefato do Cloudflare; corrija a configuração e invalide o HTML antigo.
 
 ## Variáveis do servidor
 
@@ -78,14 +93,25 @@ Transfira uma cópia apenas por canal protegido, cifre cópias fora do servidor 
 
 ## Excluir um lead
 
-Confirme o pedido usando o mesmo e-mail do cadastro. Revise o endereço normalizado antes de executar. A remoção abaixo usa o método de manutenção do serviço; as relações do banco apagam em cascata as sessões, os eventos e as autorizações vinculadas:
+Confirme o pedido usando o mesmo e-mail do cadastro. Revise o endereço normalizado antes de executar. A remoção abaixo usa os métodos de manutenção do serviço: `deleteLeadByEmail` apaga o lead e, em cascata, sessões, eventos e autorizações; `deleteEditorialSubmissionsByEmail` apaga todas as submissões editoriais privadas do mesmo e-mail. O purge de retenção é separado desta solicitação individual:
 
 ```sh
 cd /home/rodrigo/apps/radar-ia
-docker compose exec -T download-leads node --input-type=module -e 'import { createLeadDatabase } from "./src/database.mjs"; import { normalizeEmail } from "./src/security.mjs"; const email = normalizeEmail(process.argv[1]); const db = createLeadDatabase({ path: "/data/leads.sqlite" }); const deleted = db.deleteLeadByEmail(email); db.close(); process.stdout.write(deleted ? "deleted\n" : "not-found\n");' -- pessoa@example.com
+docker compose exec -T download-leads node --input-type=module -e 'import { createLeadDatabase } from "./src/database.mjs"; import { normalizeEmail } from "./src/security.mjs"; const email = normalizeEmail(process.argv[1]); const db = createLeadDatabase({ path: "/data/leads.sqlite" }); const leadDeleted = db.deleteLeadByEmail(email); const editorialDeleted = db.deleteEditorialSubmissionsByEmail(email); db.close(); process.stdout.write(JSON.stringify({ leads: leadDeleted ? 1 : 0, editorial: editorialDeleted }) + "\n");' -- pessoa@example.com
 ```
 
 Registre fora do banco de leads a data do atendimento e o resultado, sem manter dados além do necessário.
+
+## Recuperar notificações editoriais
+
+Quando uma notificação editorial atingir o limite de tentativas, o serviço mantém a submissão privada com `notification_state=failed` e grava um alerta operacional com o identificador, título limitado e status editorial. Depois de corrigir a causa, revise o registro e reencaminhe somente pelo método de manutenção abaixo; não existe endpoint público de recuperação:
+
+```sh
+cd /home/rodrigo/apps/radar-ia
+docker compose exec -T download-leads node --input-type=module -e 'import { createLeadDatabase } from "./src/database.mjs"; const db = createLeadDatabase({ path: "/data/leads.sqlite" }); const requeued = db.requeueContributionNotification(process.argv[1]); db.close(); process.stdout.write(requeued ? "requeued\n" : "not-found-or-not-failed\n");' -- submission-id
+```
+
+O requeue zera as tentativas da notificação, move apenas o registro editorial indicado para `pending` e deixa o texto, o contato e os demais dados privados no banco.
 
 ## Backup
 
@@ -95,7 +121,7 @@ O banco SQLite aceita backup consistente com o serviço no ar. Crie o destino de
 cd /home/rodrigo/apps/radar-ia
 mkdir -p lead-data/backups
 chmod 700 lead-data/backups
-docker compose exec -T download-leads node --input-type=module -e 'import { createLeadDatabase } from "./src/database.mjs"; const db = createLeadDatabase({ path: "/data/leads.sqlite" }); await db.backup("/data/backups/leads-manual.sqlite"); db.close();'
+docker compose exec -T download-leads node --input-type=module -e 'import { createLeadDatabase } from "./src/database.mjs"; const db = createLeadDatabase({ path: "/data/leads.sqlite" }); db.backupTo("/data/backups/leads-manual.sqlite"); db.close();'
 ```
 
 Verifique se o arquivo existe e tem tamanho maior que zero. Cópias fora do servidor devem ser cifradas e ter acesso restrito. O publicador preserva `lead-data` entre versões e nunca o remove no rollback.

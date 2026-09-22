@@ -22,6 +22,29 @@ function email(env, name) {
   return value;
 }
 
+function ipv4(value, name) {
+  const octets = value.split('.');
+  if (octets.length !== 4 || octets.some((octet) => !/^\d{1,3}$/.test(octet) || Number(octet) > 255)) {
+    throw new Error(`${name} must be an IPv4 CIDR`);
+  }
+  return octets.map(Number).join('.');
+}
+
+function ipv4Cidr(env, name, fallback) {
+  const raw = env[name]?.trim() || fallback;
+  const parts = raw.split('/');
+  if (parts.length !== 2 || !/^\d{1,2}$/.test(parts[1])) {
+    throw new Error(`${name} must be an IPv4 CIDR`);
+  }
+  const prefix = Number(parts[1]);
+  if (prefix < 1 || prefix > 32) throw new Error(`${name} must be an IPv4 CIDR`);
+  const address = ipv4(parts[0], name);
+  const addressValue = address.split('.').map(Number).reduce((value, octet) => (value * 256) + octet, 0);
+  const mask = (0xffffffff << (32 - prefix)) >>> 0;
+  if (((addressValue & mask) >>> 0) !== addressValue) throw new Error(`${name} must be a network address`);
+  return `${address}/${prefix}`;
+}
+
 const TURNSTILE_TEST_SITE_KEYS = new Set([
   '1x00000000000000000000AA',
   '2x00000000000000000000AB',
@@ -89,11 +112,24 @@ export function loadConfig(env = process.env) {
     notificationTo: email(env, 'LEAD_NOTIFICATION_TO'),
     notificationMode,
     privacyVersion,
+    contributionPrivacyVersion: env.CONTRIBUTION_PRIVACY_VERSION?.trim() || privacyVersion,
     retentionDays: positiveInteger(env, 'RETENTION_DAYS', 730),
     sessionDays: positiveInteger(env, 'SESSION_DAYS', 180),
     authorizationSeconds: positiveInteger(env, 'AUTHORIZATION_SECONDS', 300),
     maxBodyBytes: positiveInteger(env, 'MAX_BODY_BYTES', 16 * 1024),
+    contributionMaxBodyBytes: positiveInteger(env, 'CONTRIBUTION_MAX_BODY_BYTES', 96 * 1024),
+    contributionRateLimitAttempts: positiveInteger(env, 'CONTRIBUTION_RATE_LIMIT_ATTEMPTS', 5),
+    contributionNotificationMaxAttempts: positiveInteger(
+      env,
+      'CONTRIBUTION_NOTIFICATION_MAX_ATTEMPTS',
+      8,
+    ),
+    trustedProxyCidr: ipv4Cidr(env, 'TRUSTED_PROXY_CIDR', '172.30.0.0/24'),
   };
+
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(config.contributionPrivacyVersion)) {
+    throw new Error('CONTRIBUTION_PRIVACY_VERSION must use YYYY-MM-DD');
+  }
 
   return Object.freeze(config);
 }

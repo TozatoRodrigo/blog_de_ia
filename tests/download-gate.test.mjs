@@ -23,6 +23,9 @@ test('download pages expose one accessible, localized lead gate', async () => {
     assert.equal(dialog.length, 1);
     assert.equal(dialog.attr('aria-labelledby'), 'download-lead-title');
     assert.match($('#download-lead-title').text(), new RegExp(heading));
+    assert.equal(dialog.find('form#download-lead-form').length, 1);
+    assert.equal(dialog.find('form#download-lead-form').attr('method'), undefined);
+    assert.equal(dialog.find('input[name="email"][type="email"][required]').length, 1);
     assert.equal(dialog.find('input[name="email"][type="email"]').length, 1);
     assert.equal(dialog.find('input[name="marketingOptIn"]').is(':checked'), false);
 
@@ -69,11 +72,20 @@ test('privacy pages disclose the complete lead lifecycle in both languages', asy
     assert.match($('main h1').text(), new RegExp(heading));
     assert.equal($('link[rel="canonical"]').attr('href'), `https://produtocomia.com.br${canonicalPath}`);
     assert.ok($('link[rel="alternate"][hreflang]').filter((_, element) => $(element).attr('href') === `https://produtocomia.com.br${alternatePath}`).length > 0);
-    assert.equal($('[data-contact-email]').length, 2);
+    assert.equal($('a[href="mailto:rodrigo.tozato@icloud.com"]').length, 2);
+    assert.equal($('[data-contact-email]').length, 0);
     assert.match(text, /Resend/);
     assert.match(text, /Cloudflare Turnstile/);
     assert.match(text, /730/);
-    assert.match(text, /2026-07-22/);
+    assert.match(text, /2026-09-21/);
+    assert.match(text, /(contribui(ção|ções)|submission)/i);
+    assert.match(text, /(identidade|identity)/i);
+    assert.match(text, /(bio|links)/i);
+    assert.match(text, /(trecho|excerpt)/i);
+    assert.match(text, /(texto completo|article text|full contribution)/i);
+    assert.match(text, /(avaliação editorial|editorial review)/i);
+    assert.match(text, /(não é publicad[oa] automaticamente|not auto-published|not automatically published)/i);
+    assert.match(text, /(730 dias|730 days)/i);
     assert.match(text, /(acesso|access)/i);
     assert.match(text, /(correção|correction)/i);
     assert.match(text, /(exclusão|deletion)/i);

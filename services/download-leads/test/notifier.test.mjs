@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 import { createLeadDatabase } from '../src/database.mjs';
-import { createNotifier, runNotificationBatch } from '../src/notifier.mjs';
+import { createNotifier, runContributionNotificationBatch, runNotificationBatch } from '../src/notifier.mjs';
 
 const material = Object.freeze({
   id: 'ai-risk-matrix',
@@ -162,5 +162,300 @@ test('notification worker preserves failed events for retry', async () => {
   }), { sent: 0, failed: 1 });
   assert.equal(db.pendingNotifications(20)[0].id, storedEvent.id);
   assert.equal(db.pendingNotifications(20)[0].notificationAttempts, 1);
+  db.close();
+});
+
+test('keeps a download notification sent when an overlapping failure finishes late', async () => {
+  const db = createLeadDatabase({
+    path: ':memory:',
+    randomUUID: (() => { let id = 0; return () => `download-overlap-${++id}`; })(),
+  });
+  const storedLead = db.upsertLead({
+    email: lead.email,
+    marketingOptIn: false,
+    privacyVersion: '2026-07-22',
+  });
+  db.createDownloadEvent({
+    leadId: storedLead.id,
+    materialId: material.id,
+    sourcePath: event.sourcePath,
+    lang: event.lang,
+    campaign: event.campaign,
+  });
+  let releaseSuccess;
+  let releaseFailure;
+  const successReady = new Promise((resolve) => { releaseSuccess = resolve; });
+  const failureReady = new Promise((resolve) => { releaseFailure = resolve; });
+  const catalog = { byId: new Map([[material.id, material]]) };
+  const successBatch = runNotificationBatch({
+    db,
+    catalog,
+    notifier: {
+      sendDownloadNotification: async () => {
+        await successReady;
+        return { id: 'download-email-id' };
+      },
+    },
+  });
+  const failureBatch = runNotificationBatch({
+    db,
+    catalog,
+    notifier: {
+      sendDownloadNotification: async () => {
+        await failureReady;
+        throw Object.assign(new Error('failed'), { code: 'resend_http_503' });
+      },
+    },
+  });
+
+  releaseSuccess();
+  assert.deepEqual(await successBatch, { sent: 1, failed: 0 });
+  releaseFailure();
+  assert.deepEqual(await failureBatch, { sent: 0, failed: 1 });
+
+  assert.deepEqual(db.pendingNotifications(20), []);
+  db.close();
+});
+
+test('sends a complete idempotent editorial contribution notification', async () => {
+  let request;
+  const notifier = createNotifier({
+    apiKey: 're_test',
+    from: 'Produto com IA <leads@leads.produtocomia.com.br>',
+    to: 'rodrigo.tozato@icloud.com',
+    mode: 'resend',
+    fetchImpl: async (url, options) => {
+      request = { url, options, payload: JSON.parse(options.body) };
+      return new Response(JSON.stringify({ id: 'editorial-email-id' }), { status: 200 });
+    },
+  });
+  const submission = {
+    id: 'submission-1',
+    name: '<Pessoa autora>',
+    email: 'autora@example.com',
+    role: 'Product Manager',
+    siteUrl: 'https://example.com/',
+    title: 'Uma contribuição útil',
+    excerpt: 'Resumo editorial da contribuição.',
+    content: '<Texto completo da contribuição.>',
+    links: 'https://example.com/referencia',
+    bio: 'Bio curta da pessoa autora.',
+    language: 'pt-BR',
+    sourcePath: '/contribua/',
+    privacyVersion: '2026-09-21',
+    createdAt: '2026-09-21T15:00:00.000Z',
+  };
+
+  const result = await notifier.sendContributionNotification({ submission });
+  assert.deepEqual(result, { id: 'editorial-email-id' });
+  assert.equal(request.options.headers['idempotency-key'], 'editorial-submission/submission-1');
+  assert.match(request.payload.subject, /Uma contribuição útil/);
+  assert.match(request.payload.subject, /Pessoa autora/);
+  for (const value of Object.values(submission)) assert.ok(request.payload.text.includes(String(value)));
+  assert.match(request.payload.html, /&lt;Pessoa autora&gt;/);
+  assert.match(request.payload.html, /&lt;Texto completo da contribuição\.&gt;/);
+});
+
+test('keeps control characters out of editorial subjects without losing body content', async () => {
+  let payload;
+  const notifier = createNotifier({
+    apiKey: 're_test',
+    from: 'Produto com IA <leads@leads.produtocomia.com.br>',
+    to: 'rodrigo.tozato@icloud.com',
+    mode: 'resend',
+    fetchImpl: async (_url, options) => {
+      payload = JSON.parse(options.body);
+      return new Response(JSON.stringify({ id: 'editorial-safe-subject-id' }), { status: 200 });
+    },
+  });
+  const submission = {
+    id: 'submission-safe-subject',
+    name: '<Pessoa\u007Fautora\u009F\n>',
+    email: 'autora@example.com',
+    role: 'Product Manager',
+    siteUrl: '',
+    title: 'Uma\u0000 contribuição\u0080\r\nútil\t',
+    excerpt: 'Resumo editorial da contribuição.',
+    content: 'Texto completo da contribuição.',
+    links: '',
+    bio: 'Bio curta da pessoa autora.',
+    language: 'pt-BR',
+    sourcePath: '/contribua/',
+    privacyVersion: '2026-09-21',
+    createdAt: '2026-09-21T15:00:00.000Z',
+  };
+
+  await notifier.sendContributionNotification({ submission });
+
+  assert.doesNotMatch(payload.subject, /[\u0000-\u001F\u007F-\u009F]/);
+  assert.match(payload.subject, /Uma contribuição útil/);
+  assert.match(payload.subject, /Pessoa autora/);
+  assert.ok(payload.text.includes(submission.title));
+  assert.ok(payload.text.includes(submission.name));
+  assert.match(payload.html, /&lt;Pessoa\u007Fautora\u009F\n&gt;/);
+  assert.match(payload.html, /Uma\u0000 contribuição\u0080\r\nútil\t/);
+});
+
+test('processes editorial notification batches and preserves failed submissions for retry', async () => {
+  const db = createLeadDatabase({
+    path: ':memory:',
+    randomUUID: (() => { let id = 0; return () => `editorial-${++id}`; })(),
+  });
+  const submission = db.createEditorialSubmission({
+    name: 'Pessoa autora',
+    email: 'autora@example.com',
+    role: 'Product Manager',
+    siteUrl: '',
+    title: 'Uma contribuição útil',
+    excerpt: 'Resumo editorial da contribuição.',
+    content: 'Texto completo da contribuição.',
+    links: '',
+    bio: 'Bio curta da pessoa autora.',
+    language: 'pt-BR',
+    sourcePath: '/contribua/',
+    privacyVersion: '2026-09-21',
+  });
+  const notifier = {
+    sendContributionNotification: async () => { throw Object.assign(new Error('failed'), { code: 'resend_http_503' }); },
+  };
+
+  assert.deepEqual(await runContributionNotificationBatch({ db, notifier, limit: 20 }), { sent: 0, failed: 1 });
+  assert.equal(db.pendingContributionNotifications(20)[0].id, submission.id);
+  assert.equal(db.pendingContributionNotifications(20)[0].notificationAttempts, 1);
+  db.close();
+});
+
+test('keeps an editorial notification sent when an overlapping failure finishes late', async () => {
+  const db = createLeadDatabase({
+    path: ':memory:',
+    randomUUID: (() => { let id = 0; return () => `overlap-${++id}`; })(),
+  });
+  const submission = db.createEditorialSubmission({
+    name: 'Pessoa autora',
+    email: 'autora@example.com',
+    title: 'Uma contribuição útil',
+    excerpt: 'Resumo editorial da contribuição.',
+    content: 'Texto completo da contribuição.',
+    bio: 'Bio curta da pessoa autora.',
+    language: 'pt-BR',
+    sourcePath: '/contribua/',
+    privacyVersion: '2026-09-21',
+  });
+  let releaseSuccess;
+  let releaseFailure;
+  const successReady = new Promise((resolve) => { releaseSuccess = resolve; });
+  const failureReady = new Promise((resolve) => { releaseFailure = resolve; });
+  const successBatch = runContributionNotificationBatch({
+    db,
+    notifier: {
+      sendContributionNotification: async () => {
+        await successReady;
+        return { id: 'editorial-email-id' };
+      },
+    },
+  });
+  const failureBatch = runContributionNotificationBatch({
+    db,
+    notifier: {
+      sendContributionNotification: async () => {
+        await failureReady;
+        throw Object.assign(new Error('failed'), { code: 'resend_http_503' });
+      },
+    },
+  });
+
+  releaseSuccess();
+  assert.deepEqual(await successBatch, { sent: 1, failed: 0 });
+  releaseFailure();
+  assert.deepEqual(await failureBatch, { sent: 0, failed: 1 });
+
+  const stored = db.findEditorialSubmissionById(submission.id);
+  assert.equal(stored.notificationState, 'sent');
+  assert.equal(stored.notificationAttempts, 0);
+  assert.deepEqual(db.failedContributionNotifications(20), []);
+  assert.deepEqual(db.pendingContributionNotifications(20), []);
+  db.close();
+});
+
+test('stops contribution retries at the configured limit and keeps failed state for recovery', async () => {
+  const db = createLeadDatabase({
+    path: ':memory:',
+    randomUUID: (() => { let id = 0; return () => `exhausted-${++id}`; })(),
+  });
+  const submission = db.createEditorialSubmission({
+    name: 'Pessoa autora',
+    email: 'autora@example.com',
+    title: 'Uma contribuição útil',
+    excerpt: 'Resumo editorial da contribuição.',
+    content: 'Texto completo da contribuição.',
+    bio: 'Bio curta da pessoa autora.',
+    language: 'pt-BR',
+    sourcePath: '/contribua/',
+    privacyVersion: '2026-09-21',
+  });
+  let attempts = 0;
+  const logs = [];
+  const notifier = {
+    sendContributionNotification: async () => {
+      attempts += 1;
+      throw Object.assign(new Error('failed'), { code: 'resend_http_503' });
+    },
+  };
+
+  for (let run = 0; run < 3; run += 1) {
+    await runContributionNotificationBatch({
+      db,
+      notifier,
+      limit: 20,
+      maxAttempts: 2,
+      logger: { error: (...args) => logs.push(args) },
+    });
+  }
+
+  assert.equal(attempts, 2);
+  assert.deepEqual(db.pendingContributionNotifications(20, 2), []);
+  const failed = db.failedContributionNotifications(20);
+  assert.equal(failed.length, 1);
+  assert.equal(failed[0].id, submission.id);
+  assert.equal(failed[0].notificationState, 'failed');
+  assert.equal(failed[0].notificationAttempts, 2);
+  assert.equal(logs.length, 1);
+  assert.match(logs[0][0], /exhausted retries/i);
+  assert.deepEqual(logs[0][1], {
+    submissionId: submission.id,
+    title: 'Uma contribuição útil',
+    status: 'pending',
+    notificationState: 'failed',
+    notificationAttempts: 2,
+  });
+  db.close();
+});
+
+test('marks a contribution sent after a retry succeeds', async () => {
+  const db = createLeadDatabase({ path: ':memory:' });
+  db.createEditorialSubmission({
+    name: 'Pessoa autora',
+    email: 'autora@example.com',
+    title: 'Uma contribuição útil',
+    excerpt: 'Resumo editorial da contribuição.',
+    content: 'Texto completo da contribuição.',
+    bio: 'Bio curta da pessoa autora.',
+    language: 'pt-BR',
+    sourcePath: '/contribua/',
+    privacyVersion: '2026-09-21',
+  });
+  let attempts = 0;
+  const notifier = {
+    sendContributionNotification: async () => {
+      attempts += 1;
+      if (attempts === 1) throw Object.assign(new Error('failed'), { code: 'resend_http_503' });
+      return { id: 'sent-after-retry' };
+    },
+  };
+
+  assert.deepEqual(await runContributionNotificationBatch({ db, notifier, maxAttempts: 2 }), { sent: 0, failed: 1 });
+  assert.deepEqual(await runContributionNotificationBatch({ db, notifier, maxAttempts: 2 }), { sent: 1, failed: 0 });
+  assert.deepEqual(db.pendingContributionNotifications(20, 2), []);
+  assert.deepEqual(db.failedContributionNotifications(20), []);
   db.close();
 });

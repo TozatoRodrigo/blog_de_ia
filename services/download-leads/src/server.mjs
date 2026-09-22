@@ -4,12 +4,17 @@ import { resolve } from 'node:path';
 import { loadCatalog } from './catalog.mjs';
 import { loadConfig } from './config.mjs';
 import { createLeadDatabase } from './database.mjs';
+import { createContributionWorkflow } from './contribution-workflow.mjs';
 import { createLeadHandler } from './http.mjs';
-import { createNotifier, runNotificationBatch } from './notifier.mjs';
+import {
+  createNotifier,
+  runContributionNotificationBatch,
+  runNotificationBatch,
+} from './notifier.mjs';
 import { createRateLimiter } from './security.mjs';
 import { createLeadWorkflow } from './workflow.mjs';
 
-export async function createApplication({ env = process.env, fetchImpl = fetch } = {}) {
+export async function createApplication({ env = process.env, fetchImpl = fetch, logger = console } = {}) {
   const config = loadConfig(env);
   const catalog = await loadCatalog(config.downloadCatalogPath);
   const db = createLeadDatabase({ path: config.databasePath });
@@ -22,17 +27,82 @@ export async function createApplication({ env = process.env, fetchImpl = fetch }
   });
   const workflow = createLeadWorkflow({ config, catalog, db });
   const rateLimiter = createRateLimiter({ secret: config.cookieSecret });
-  const server = createServer(createLeadHandler({ config, catalog, workflow, rateLimiter }));
+  const contributionRateLimiter = createRateLimiter({
+    secret: config.cookieSecret,
+    maxAttempts: config.contributionRateLimitAttempts,
+  });
+  // The workflow owns the canonical guard so future HTTP adapters cannot bypass it.
+  const contributionWorkflow = createContributionWorkflow({
+    config,
+    db,
+    rateLimiter: contributionRateLimiter,
+  });
+  const server = createServer(createLeadHandler({
+    config,
+    catalog,
+    workflow,
+    rateLimiter,
+    contributionWorkflow,
+    contributionRateLimiter,
+  }));
   const timers = new Set();
+  const activeNotificationRuns = new Set();
   let closed = false;
 
-  async function runNotifications() {
-    return runNotificationBatch({ db, notifier, catalog, limit: 20 });
+  function reportNotificationError(phase, error) {
+    try {
+      logger?.error?.(`Notification batch failed during ${phase}`, error);
+    } catch {
+      // Logging must not turn a handled batch failure into an unhandled rejection.
+    }
+  }
+
+  function runNotifications() {
+    const run = (async () => {
+      let firstRejection;
+      let hasRejection = false;
+      const batches = [
+        runNotificationBatch({ db, notifier, catalog, limit: 20 }),
+        runContributionNotificationBatch({
+          db,
+          notifier,
+          limit: 20,
+          maxAttempts: config.contributionNotificationMaxAttempts,
+          logger,
+        }),
+      ].map((batch) => batch.catch((error) => {
+        if (!hasRejection) {
+          hasRejection = true;
+          firstRejection = error;
+        }
+        throw error;
+      }));
+      const [downloadsResult, contributionsResult] = await Promise.allSettled(batches);
+      if (hasRejection) throw firstRejection;
+      const downloads = downloadsResult.value;
+      const contributions = contributionsResult.value;
+      return {
+        sent: downloads.sent + contributions.sent,
+        failed: downloads.failed + contributions.failed,
+      };
+    })();
+    activeNotificationRuns.add(run);
+    run.then(
+      () => activeNotificationRuns.delete(run),
+      () => activeNotificationRuns.delete(run),
+    );
+    return run;
   }
 
   async function start() {
     await workflow.health();
-    await runNotifications();
+    try {
+      await runNotifications();
+    } catch (error) {
+      reportNotificationError('startup', error);
+      throw error;
+    }
+    if (closed) throw new Error('Application is closed');
     await new Promise((resolveStart, reject) => {
       server.once('error', reject);
       server.listen(config.port, '0.0.0.0', () => {
@@ -42,7 +112,9 @@ export async function createApplication({ env = process.env, fetchImpl = fetch }
     });
 
     const notificationTimer = setInterval(() => {
-      runNotifications().catch(() => {});
+      void runNotifications().catch((error) => {
+        reportNotificationError('timer', error);
+      });
     }, 60_000);
     notificationTimer.unref();
     timers.add(notificationTimer);
@@ -51,6 +123,7 @@ export async function createApplication({ env = process.env, fetchImpl = fetch }
       db.purgeExpired();
       const cutoff = new Date(Date.now() - config.retentionDays * 86_400_000).toISOString();
       db.purgeOlderThan(cutoff);
+      db.purgeEditorialSubmissions(cutoff);
     }, 86_400_000);
     cleanupTimer.unref();
     timers.add(cleanupTimer);
@@ -68,10 +141,25 @@ export async function createApplication({ env = process.env, fetchImpl = fetch }
         server.close((error) => error ? reject(error) : resolveClose());
       });
     }
+    while (activeNotificationRuns.size > 0) {
+      await Promise.allSettled([...activeNotificationRuns]);
+    }
     db.close();
   }
 
-  return Object.freeze({ config, catalog, db, notifier, workflow, server, runNotifications, start, close });
+  return Object.freeze({
+    config,
+    catalog,
+    db,
+    notifier,
+    workflow,
+    contributionWorkflow,
+    contributionRateLimiter,
+    server,
+    runNotifications,
+    start,
+    close,
+  });
 }
 
 async function runMain() {

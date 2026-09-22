@@ -11,6 +11,7 @@ services:
       - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro
     networks:
       - proxy
+      - leads-internal
     labels:
       - "traefik.enable=true"
       - "traefik.docker.network=proxy"
@@ -45,7 +46,7 @@ services:
       - ./lead-data:/data
       - ./private-downloads:/app/downloads:ro
     networks:
-      - proxy
+      - leads-internal
     read_only: true
     tmpfs:
       - /tmp
@@ -63,3 +64,8 @@ services:
 networks:
   proxy:
     external: true
+  leads-internal:
+    internal: true
+    ipam:
+      config:
+        - subnet: 172.30.0.0/24

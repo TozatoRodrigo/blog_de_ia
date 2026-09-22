@@ -1,0 +1,91 @@
+---
+import type { Lang } from '../i18n/lang';
+import { ui } from '../i18n/ui';
+import { contributionIndexPath } from '../utils/contribution-routes';
+
+interface Props {
+  lang: Lang;
+}
+
+const { lang } = Astro.props;
+const intakePath = lang === 'pt-BR' ? '/contribua/' : '/en/contribute/';
+---
+
+<section class="contribution-cta">
+  <div class="contribution-strip" data-contribution-strip>
+    <div class="contribution-strip__copy">
+      <span class="mono-sm">{ui('contribution.stripLabel', lang)}</span>
+      <h2>{ui('contribution.stripTitle', lang)}</h2>
+      <p>{ui('contribution.stripBody', lang)}</p>
+    </div>
+    <div class="contribution-strip__actions">
+      <a class="contribution-cta__text-link" href={contributionIndexPath(lang)}>{ui('contribution.browse', lang)} <span aria-hidden="true">→</span></a>
+      <a class="btn btn--accent" href={intakePath}>{ui('contribution.submit', lang)} <span aria-hidden="true">→</span></a>
+    </div>
+  </div>
+</section>
+
+<style>
+  .contribution-cta {
+    width: 100%;
+    max-width: var(--grid-max);
+    margin: 0 auto;
+    padding: 0 var(--gutter);
+  }
+
+  .contribution-strip {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: clamp(1.25rem, 4vw, 4rem);
+    padding: clamp(1.25rem, 3vw, 2rem);
+    border: 2px solid var(--line);
+    background: var(--fg);
+    color: var(--fg-invert);
+  }
+
+  .contribution-strip__copy { min-width: 0; }
+  .contribution-strip__copy .mono-sm { color: var(--accent); }
+  .contribution-strip h2 {
+    margin: 0.5rem 0 0.4rem;
+    color: var(--fg-invert);
+    font-size: var(--step-2);
+    line-height: 1;
+    overflow-wrap: anywhere;
+  }
+  .contribution-strip p {
+    max-width: 52ch;
+    margin: 0;
+    color: var(--bg-alt);
+    font-size: var(--step--1);
+  }
+  .contribution-strip__actions {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 1rem;
+    flex: 0 0 auto;
+    flex-wrap: wrap;
+  }
+  .contribution-cta__text-link {
+    color: var(--fg-invert);
+    border-bottom-color: var(--accent);
+    font-family: var(--font-mono);
+    font-size: 0.6875rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+  .contribution-cta__text-link:hover { color: var(--fg-invert); }
+  .contribution-strip .btn { white-space: nowrap; }
+
+  @media (max-width: 720px) {
+    .contribution-strip { align-items: stretch; flex-direction: column; }
+    .contribution-strip__actions { justify-content: flex-start; }
+  }
+  @media (max-width: 480px) {
+    .contribution-strip__actions { align-items: stretch; flex-direction: column; }
+    .contribution-cta__text-link { width: fit-content; }
+    .contribution-strip .btn { width: 100%; justify-content: center; }
+  }
+</style>

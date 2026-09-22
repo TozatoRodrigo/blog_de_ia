@@ -8,9 +8,9 @@ const guides = {
 } as const;
 
 export function guideForTag(tag: string, lang: Lang) {
-  const key = ['agentes-de-ia', 'coding-agents'].includes(tag) ? 'agents'
-    : ['governanca-de-ia', 'seguranca-de-ia'].includes(tag) ? 'governance'
-    : ['produto', 'automacao', 'adocao-de-ia'].includes(tag) ? 'product' : 'pm';
+  const key = ['agentes-de-ia', 'ai-agents', 'coding-agents'].includes(tag) ? 'agents'
+    : ['governanca-de-ia', 'ai-governance', 'seguranca-de-ia'].includes(tag) ? 'governance'
+    : ['produto', 'product', 'automacao', 'adocao-de-ia'].includes(tag) ? 'product' : 'pm';
   const guide = guides[key];
   return { href: lang === 'pt-BR' ? `/guias/${guide.pt}/` : `/en/guides/${guide.en}/`, title: lang === 'pt-BR' ? guide.ptTitle : guide.enTitle };
 }

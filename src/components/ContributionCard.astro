@@ -1,0 +1,65 @@
+---
+import type { CollectionEntry } from 'astro:content';
+import type { Lang } from '../i18n/lang';
+import { formatDate } from '../utils/format';
+import { contributionPath } from '../utils/contribution-routes';
+import { contributorFor } from '../data/contributors';
+
+interface Props {
+  entry: CollectionEntry<'contributions'> | CollectionEntry<'contributions-en'>;
+  lang: Lang;
+}
+
+const { entry, lang } = Astro.props;
+const contributor = contributorFor(entry.data.authorId);
+const label = lang === 'en' ? 'EDITORIAL CONTRIBUTION' : 'CONTRIBUIÇÃO EDITORIAL';
+const readLabel = lang === 'en' ? 'READ CONTRIBUTION' : 'LER CONTRIBUIÇÃO';
+---
+
+<article class="contribution-card">
+  <div class="contribution-card__header">
+    <span class="mono-sm">{label}</span>
+    <time datetime={entry.data.date}>{formatDate(entry.data.date, lang)}</time>
+  </div>
+  <div class="contribution-card__body">
+    <h2><a href={contributionPath(lang, entry.data.seoSlug)}>{entry.data.title}</a></h2>
+    <p>{entry.data.excerpt}</p>
+    <div class="contribution-card__footer">
+      <span>{contributor.name}</span>
+      <a href={contributionPath(lang, entry.data.seoSlug)} aria-label={`${readLabel}: ${entry.data.title}`}>{readLabel} →</a>
+    </div>
+  </div>
+</article>
+
+<style>
+  .contribution-card {
+    display: flex;
+    flex-direction: column;
+    min-height: 100%;
+    border: 2px solid var(--line);
+    background: var(--bg);
+    transition: all var(--dur) var(--ease);
+  }
+  .contribution-card:hover { background: var(--fg); color: var(--fg-invert); }
+  .contribution-card:hover h2 a,
+  .contribution-card:hover p,
+  .contribution-card:hover .contribution-card__footer,
+  .contribution-card:hover .contribution-card__header { color: var(--fg-invert); }
+  .contribution-card:hover .contribution-card__header { background: var(--fg); border-bottom-color: var(--fg-muted); }
+  .contribution-card__header {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 0.75rem 1.25rem;
+    border-bottom: 1px solid var(--line);
+    background: var(--bg-alt);
+    color: var(--fg-muted);
+  }
+  .contribution-card__body { flex: 1; display: flex; flex-direction: column; gap: 1rem; padding: 1.25rem; }
+  .contribution-card h2 { margin: 0; font-size: var(--step-2); line-height: 1; text-transform: none; }
+  .contribution-card h2 a { color: inherit; border: 0; }
+  .contribution-card p { flex: 1; margin: 0; color: var(--fg-soft); line-height: 1.55; }
+  .contribution-card__footer { display: flex; justify-content: space-between; gap: 1rem; flex-wrap: wrap; padding-top: 0.75rem; border-top: 1px solid var(--line-soft); color: var(--fg-muted); font-family: var(--font-mono); font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.06em; }
+  .contribution-card__footer a { color: var(--accent); border: 0; }
+  .contribution-card:hover .contribution-card__footer a { color: var(--fg-invert); }
+</style>

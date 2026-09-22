@@ -6,6 +6,11 @@ const checks = [
   ['/guias/inteligencia-artificial-para-product-managers/', 200, '<h1'],
   ['/guias/gestao-de-produtos-com-ia/', 200, '<h1'], ['/guias/governanca-de-ia/', 200, '<h1'],
   ['/guias/', 200, '<h1'], ['/privacidade/', 200, '<h1'], ['/en/privacy/', 200, '<h1'],
+  ['/contribua/', 200, '<h1'], ['/en/contribute/', 200, '<h1'],
+  ['/contribuicoes/', 200, 'Seu produto de IA precisa lembrar'],
+  ['/contribuicoes/evals-infraestrutura-produto/', 200, 'Seu produto de IA precisa lembrar'],
+  ['/en/contributions/', 200, 'Your AI product needs to remember'],
+  ['/en/contributions/evals-as-product-infrastructure/', 200, 'Your AI product needs to remember'],
   ['/newsletter/', 200, '<h1'], ['/sitemap-index.xml', 200, '<sitemapindex'],
   ['/rss.xml', 200, '<rss'], ['/robots.txt', 200, 'GPTBot'], ['/llms.txt', 200, '# Produto com IA'],
   ['/llms-full.txt', 200, 'corpus editorial'],
@@ -26,6 +31,23 @@ for (const [path, expectedStatus, expectedText] of checks) {
   } else console.log(`PASS ${path}`);
 }
 
+const contactChecks = [
+  ['/contribua/', ['data-contact-direct="true"', 'href="mailto:', 'href="/sobre#contato"', 'href="/privacidade/"']],
+  ['/en/contribute/', ['data-contact-direct="true"', 'href="mailto:', 'href="/en/about#contact"', 'href="/en/privacy/"']],
+  ['/privacidade/', ['data-contact-direct="true"', 'href="mailto:', 'href="/sobre#contato"']],
+  ['/en/privacy/', ['data-contact-direct="true"', 'href="mailto:', 'href="/en/about#contact"']],
+];
+for (const [path, required] of contactChecks) {
+  const response = await fetch(`${origin}${path}?smoke=${Date.now()}`, { redirect: 'follow' });
+  const text = await response.text();
+  const actionable = required.every((marker) => text.includes(marker));
+  const obfuscated = text.includes('/cdn-cgi/l/email-protection');
+  if (response.status !== 200 || !actionable || obfuscated) {
+    console.error(`FAIL ${path}: contact fallback is not actionable or was obfuscated`);
+    failures += 1;
+  } else console.log(`PASS ${path} contact fallback`);
+}
+
 const health = await fetch(`${origin}/api/download-leads/health`);
 if (health.status !== 200 || (await health.json()).status !== 'ok') {
   console.error('FAIL /api/download-leads/health'); failures += 1;
@@ -35,7 +57,7 @@ const configResponse = await fetch(`${origin}/api/download-leads/config`);
 const config = await configResponse.json().catch(() => ({}));
 const configKeys = Object.keys(config).sort();
 if (configResponse.status !== 200
-  || JSON.stringify(configKeys) !== JSON.stringify(['privacyVersion', 'turnstileSiteKey'])
+  || JSON.stringify(configKeys) !== JSON.stringify(['contributionPrivacyVersion', 'privacyVersion', 'turnstileSiteKey'])
   || 'turnstileSecretKey' in config
   || 'TURNSTILE_SECRET_KEY' in config) {
   console.error('FAIL /api/download-leads/config exposed an invalid contract'); failures += 1;

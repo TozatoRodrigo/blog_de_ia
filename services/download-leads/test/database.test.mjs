@@ -111,6 +111,52 @@ test('tracks notification retries without losing the download event', () => {
   db.close();
 });
 
+test('stores editorial submissions separately and tracks notification state', () => {
+  const { db } = setup();
+  const submission = db.createEditorialSubmission({
+    name: 'Pessoa autora',
+    email: 'autora@example.com',
+    role: 'Product Manager',
+    siteUrl: 'https://example.com/',
+    title: 'Uma contribuição útil',
+    excerpt: 'Resumo editorial da contribuição.',
+    content: 'Texto completo da contribuição.',
+    links: 'https://example.com/referencia',
+    bio: 'Bio curta da pessoa autora.',
+    language: 'pt-BR',
+    sourcePath: '/contribua/',
+    privacyVersion: '2026-09-21',
+  });
+
+  assert.equal(submission.status, 'pending');
+  assert.equal(submission.notificationState, 'pending');
+  assert.equal(submission.notificationAttempts, 0);
+  assert.equal(db.pendingContributionNotifications(10)[0].id, submission.id);
+  assert.equal(db.pendingNotifications(10).length, 0);
+
+  db.markContributionNotificationFailed(submission.id, 'resend_http_503');
+  assert.equal(db.pendingContributionNotifications(10)[0].notificationAttempts, 1);
+  assert.equal(db.pendingContributionNotifications(10)[0].notificationLastError, 'resend_http_503');
+  db.markContributionNotificationSent(submission.id);
+  assert.deepEqual(db.pendingContributionNotifications(10), []);
+  assert.equal(db.purgeEditorialSubmissions('2026-07-22T11:59:00.000Z'), 0);
+  const oldSubmission = db.createEditorialSubmission({
+    name: 'Pessoa antiga',
+    email: 'antiga@example.com',
+    title: 'Contribuição antiga',
+    excerpt: 'Resumo antigo.',
+    content: 'Texto antigo.',
+    bio: 'Bio antiga.',
+    language: 'pt-BR',
+    sourcePath: '/contribua/',
+    privacyVersion: '2026-09-21',
+    createdAt: '2026-07-01T12:00:00.000Z',
+  });
+  assert.equal(db.purgeEditorialSubmissions('2026-07-22T11:59:00.000Z'), 1);
+  assert.equal(db.findEditorialSubmissionById(oldSubmission.id), undefined);
+  db.close();
+});
+
 test('updates lead activity when a returning visitor downloads again', () => {
   const { db, advance } = setup();
   const lead = db.upsertLead({
@@ -139,6 +185,76 @@ test('deletes a lead and cascades sessions and events', () => {
   assert.equal(db.findLeadById(lead.id), undefined);
   assert.equal(db.findLeadBySessionHash('hash'), undefined);
   assert.deepEqual(db.pendingNotifications(10), []);
+  db.close();
+});
+
+test('deletes all editorial submissions for a normalized email without purging other records', () => {
+  const { db } = setup();
+  const first = db.createEditorialSubmission({
+    name: 'Pessoa autora',
+    email: 'autora@example.com',
+    title: 'Primeira contribuição',
+    excerpt: 'Resumo.',
+    content: 'Texto.',
+    bio: 'Bio.',
+    language: 'pt-BR',
+    sourcePath: '/contribua/',
+    privacyVersion: '2026-09-21',
+  });
+  const second = db.createEditorialSubmission({
+    name: 'Pessoa autora',
+    email: 'autora@example.com',
+    title: 'Segunda contribuição',
+    excerpt: 'Resumo.',
+    content: 'Texto.',
+    bio: 'Bio.',
+    language: 'en',
+    sourcePath: '/en/contribute/',
+    privacyVersion: '2026-09-21',
+  });
+  const other = db.createEditorialSubmission({
+    name: 'Outra pessoa',
+    email: 'outra@example.com',
+    title: 'Outra contribuição',
+    excerpt: 'Resumo.',
+    content: 'Texto.',
+    bio: 'Bio.',
+    language: 'pt-BR',
+    sourcePath: '/contribua/',
+    privacyVersion: '2026-09-21',
+  });
+
+  assert.equal(db.deleteEditorialSubmissionsByEmail(' AUTORA@EXAMPLE.COM '), 2);
+  assert.equal(db.findEditorialSubmissionById(first.id), undefined);
+  assert.equal(db.findEditorialSubmissionById(second.id), undefined);
+  assert.equal(db.findEditorialSubmissionById(other.id).email, 'outra@example.com');
+  assert.equal(db.deleteEditorialSubmissionsByEmail('missing@example.com'), 0);
+  db.close();
+});
+
+test('requeues a failed editorial notification for manual recovery', () => {
+  const { db } = setup();
+  const submission = db.createEditorialSubmission({
+    name: 'Pessoa autora',
+    email: 'autora@example.com',
+    title: 'Contribuição para recuperar',
+    excerpt: 'Resumo.',
+    content: 'Texto.',
+    bio: 'Bio.',
+    language: 'pt-BR',
+    sourcePath: '/contribua/',
+    privacyVersion: '2026-09-21',
+  });
+  db.markContributionNotificationFailed(submission.id, 'resend_http_503', 1);
+  assert.equal(db.failedContributionNotifications(10)[0].notificationAttempts, 1);
+
+  assert.equal(db.requeueContributionNotification(submission.id), true);
+  const queued = db.pendingContributionNotifications(10, 1)[0];
+  assert.equal(queued.id, submission.id);
+  assert.equal(queued.notificationState, 'pending');
+  assert.equal(queued.notificationAttempts, 0);
+  assert.equal(queued.notificationLastError, null);
+  assert.equal(db.requeueContributionNotification('missing'), false);
   db.close();
 });
 

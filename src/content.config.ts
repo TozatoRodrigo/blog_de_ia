@@ -44,4 +44,27 @@ const guideSchema = z.object({
 const guides = defineCollection({ loader: glob({ pattern: '**/*.md', base: './src/content/guides' }), schema: guideSchema });
 const guidesEn = defineCollection({ loader: glob({ pattern: '**/*.md', base: './src/content/guides-en' }), schema: guideSchema });
 
-export const collections = { newsletters, 'newsletters-en': newslettersEn, guides, 'guides-en': guidesEn };
+const contributionSchema = z.object({
+  title: z.string(),
+  date: z.string(),
+  seoSlug: z.string().regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/),
+  excerpt: z.string(),
+  tags: z.array(z.string()).default([]),
+  authorId: z.string(),
+  translationKey: z.string(),
+  featured: z.boolean().default(false),
+  draft: z.boolean().default(false),
+  translationNote: z.string().optional(),
+});
+
+const contributions = defineCollection({ loader: glob({ pattern: '**/*.md', base: './src/content/contributions' }), schema: contributionSchema });
+const contributionsEn = defineCollection({ loader: glob({ pattern: '**/*.md', base: './src/content/contributions-en' }), schema: contributionSchema });
+
+export const collections = {
+  newsletters,
+  'newsletters-en': newslettersEn,
+  guides,
+  'guides-en': guidesEn,
+  contributions,
+  'contributions-en': contributionsEn,
+};

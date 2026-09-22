@@ -1,5 +1,6 @@
 import { SITE, SITE_LOCALE } from '../config.ts';
 import type { Lang } from '../i18n/lang.ts';
+import type { Contributor } from '../data/contributors.ts';
 import { absoluteUrl } from './seo.ts';
 
 export const IDS = {
@@ -47,6 +48,31 @@ export function blogPostingSchema(input: ArticleInput) {
     inLanguage: input.lang === 'en' ? 'en' : 'pt-BR', keywords: (input.tags || []).join(', '),
     image: { '@type': 'ImageObject', url: absoluteUrl(input.image), width: 1200, height: 630 },
     author: { '@id': IDS.person }, publisher: { '@id': IDS.organization },
+    mainEntityOfPage: { '@type': 'WebPage', '@id': url }, isPartOf: { '@id': IDS.website },
+  };
+}
+
+export function contributionPostingSchema(input: ArticleInput & { contributor: Contributor }) {
+  const url = absoluteUrl(input.url);
+  const contributorUrl = input.contributor.site;
+  const contributorRole = input.lang === 'en' ? input.contributor.roleEn : input.contributor.role;
+  const contributorBio = input.lang === 'en' ? input.contributor.bioEn : input.contributor.bio;
+  return {
+    '@context': 'https://schema.org', '@type': 'BlogPosting', '@id': `${url}#article`,
+    headline: input.title, description: input.description,
+    datePublished: input.datePublished, dateModified: input.dateModified,
+    inLanguage: input.lang === 'en' ? 'en' : 'pt-BR', keywords: (input.tags || []).join(', '),
+    image: { '@type': 'ImageObject', url: absoluteUrl(input.image), width: 1200, height: 630 },
+    author: {
+      '@type': 'Person',
+      '@id': `${url}#author-${input.contributor.id}`,
+      name: input.contributor.name,
+      jobTitle: contributorRole,
+      description: contributorBio,
+      ...(contributorUrl ? { url: contributorUrl } : {}),
+      sameAs: input.contributor.links.map((link) => link.href),
+    },
+    publisher: { '@id': IDS.organization },
     mainEntityOfPage: { '@type': 'WebPage', '@id': url }, isPartOf: { '@id': IDS.website },
   };
 }

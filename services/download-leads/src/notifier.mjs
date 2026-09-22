@@ -13,6 +13,18 @@ function valueOrDash(value) {
   return value === undefined || value === null || value === '' ? '—' : String(value);
 }
 
+function subjectValue(value) {
+  return String(value)
+    .replace(/[\u0000-\u001F\u007F-\u009F]/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+function safeLogValue(value, maxLength) {
+  const normalized = subjectValue(value).slice(0, maxLength);
+  return normalized || 'unknown';
+}
+
 function formatSãoPaulo(isoDate) {
   return new Intl.DateTimeFormat('pt-BR', {
     timeZone: 'America/Sao_Paulo',
@@ -36,6 +48,31 @@ function message({ event, lead, material }) {
     label,
     text: fields.map(([name, value]) => `${name}: ${valueOrDash(value)}`).join('\n'),
     html: `<h1>Novo download</h1><dl>${fields
+      .map(([name, value]) => `<dt><strong>${escapeHtml(name)}</strong></dt><dd>${escapeHtml(valueOrDash(value))}</dd>`)
+      .join('')}</dl>`,
+  };
+}
+
+function contributionMessage({ submission }) {
+  const fields = [
+    ['ID', submission.id],
+    ['Nome', submission.name],
+    ['E-mail', submission.email],
+    ['Função', submission.role],
+    ['Site', submission.siteUrl],
+    ['Título', submission.title],
+    ['Resumo', submission.excerpt],
+    ['Conteúdo completo', submission.content],
+    ['Links', submission.links],
+    ['Bio', submission.bio],
+    ['Idioma', submission.language],
+    ['Página de origem', submission.sourcePath],
+    ['Versão de privacidade', submission.privacyVersion],
+    ['Data e hora', submission.createdAt],
+  ];
+  return {
+    text: fields.map(([name, value]) => `${name}: ${valueOrDash(value)}`).join('\n'),
+    html: `<h1>Nova contribuição editorial</h1><dl>${fields
       .map(([name, value]) => `<dt><strong>${escapeHtml(name)}</strong></dt><dd>${escapeHtml(valueOrDash(value))}</dd>`)
       .join('')}</dl>`,
   };
@@ -83,6 +120,41 @@ export function createNotifier({ apiKey, from, to, mode = 'resend', fetchImpl = 
         clearTimeout(timeout);
       }
     },
+
+    async sendContributionNotification({ submission }) {
+      if (mode === 'log') return { id: 'logged' };
+
+      const content = contributionMessage({ submission });
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), 10_000);
+      try {
+        const response = await fetchImpl(RESEND_EMAIL_URL, {
+          method: 'POST',
+          headers: {
+            authorization: `Bearer ${apiKey}`,
+            'content-type': 'application/json',
+            'idempotency-key': `editorial-submission/${submission.id}`,
+          },
+          body: JSON.stringify({
+            from,
+            to: [to],
+            subject: `Nova contribuição editorial: ${subjectValue(submission.title)} — ${subjectValue(submission.name)}`,
+            text: content.text,
+            html: content.html,
+          }),
+          signal: controller.signal,
+        });
+        if (!response.ok) throw operationalError(`resend_http_${response.status}`);
+        const result = await response.json();
+        if (!result?.id || typeof result.id !== 'string') throw operationalError('resend_invalid_response');
+        return { id: result.id };
+      } catch (error) {
+        if (error?.code?.startsWith('resend_')) throw error;
+        throw operationalError(error?.name === 'AbortError' ? 'resend_timeout' : 'resend_network');
+      } finally {
+        clearTimeout(timeout);
+      }
+    },
   });
 }
 
@@ -105,6 +177,47 @@ export async function runNotificationBatch({ db, notifier, catalog, limit = 20 }
       sent += 1;
     } catch (error) {
       db.markNotificationFailed(event.id, error?.code ?? 'notification_unknown');
+      failed += 1;
+    }
+  }
+
+  return { sent, failed };
+}
+
+export async function runContributionNotificationBatch({
+  db,
+  notifier,
+  limit = 20,
+  maxAttempts = 8,
+  logger = console,
+}) {
+  let sent = 0;
+  let failed = 0;
+
+  for (const submission of db.pendingContributionNotifications(limit, maxAttempts)) {
+    try {
+      await notifier.sendContributionNotification({ submission });
+      db.markContributionNotificationSent(submission.id);
+      sent += 1;
+    } catch (error) {
+      const updated = db.markContributionNotificationFailed(
+        submission.id,
+        error?.code ?? 'notification_unknown',
+        maxAttempts,
+      );
+      if (updated?.notificationAttempts >= maxAttempts) {
+        try {
+          logger?.error?.('Editorial contribution notification exhausted retries', {
+            submissionId: safeLogValue(submission.id, 120),
+            title: safeLogValue(submission.title, 200),
+            status: safeLogValue(updated.status ?? submission.status, 40),
+            notificationState: updated.notificationState,
+            notificationAttempts: updated.notificationAttempts,
+          });
+        } catch {
+          // Logging must not turn a handled notification failure into an unhandled rejection.
+        }
+      }
       failed += 1;
     }
   }
