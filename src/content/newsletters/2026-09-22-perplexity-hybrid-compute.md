@@ -2,7 +2,7 @@
 title: "Perplexity Hybrid Compute: privacidade por design"
 date: "2026-09-22"
 seoSlug: "perplexity-hybrid-compute"
-excerpt: "O Hybrid Compute da Perplexity move dados pessoais para o computador do usuário quando necessário. Para fintechs, é uma lição de privacidade por design e arquitetura híbrida."
+excerpt: "O Hybrid Compute da Perplexity processa dados pessoais no dispositivo quando necessário. Para fintechs, mostra como combinar nuvem, IA e privacidade por design."
 tags: ["inteligencia-artificial", "governanca-de-ia", "seguranca-de-ia", "fintech", "produto"]
 featured: true
 draft: false
