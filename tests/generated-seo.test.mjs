@@ -62,6 +62,15 @@ test('both home pages surface the localized editorial contribution routes', asyn
   }
 });
 
+test('both home pages retain the published Arena entry points', async () => {
+  for (const pathname of ['index.html', 'en/index.html']) {
+    const $ = await loadPage(pathname);
+    assert.equal($('.hero-buttons a[href="/arena/"]').length, 1, `${pathname}: missing hero Arena link`);
+    assert.equal($('.arena-cta').length, 1, `${pathname}: missing Arena presentation section`);
+    assert.ok($('.arena-cta a[href="/arena/"]').length > 0, `${pathname}: Arena section has no route to the simulator`);
+  }
+});
+
 test('privacy pages directly disclose editorial submissions in generated SEO output', async () => {
   const cases = [
     ['privacidade/index.html', /contribuição editorial/i],
