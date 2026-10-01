@@ -22,16 +22,16 @@ assert_remote_head() {
   test "$(git rev-parse HEAD)" = "$HEAD_SHA"
 }
 remote_action() {
-  ssh "$REMOTE_HOST" sh -s -- "$1" "$STAMP" "${SITE_SHA:-}" < scripts/lib/editorial-deploy-remote.sh
+  ssh "$REMOTE_HOST" sh -s -- "$1" "$STAMP" "${SITE_SHA:-not-prepared}" < scripts/lib/editorial-deploy-remote.sh
 }
 cleanup() {
   RESULT=$?
   trap - 0 1 2 15
   if test "$PREPARED" -eq 1 && test "$FINALIZED" -eq 0; then
     if remote_action rollback > "$EVIDENCE/rollback.log" 2>&1; then
-      cat "$EVIDENCE/rollback.log"
+      cat "$EVIDENCE/rollback.log" >&2
       if node scripts/newsletter-continuity.mjs verify "$EVIDENCE/baseline.json" "$ORIGIN" > "$EVIDENCE/rollback-verification.json" 2>&1; then
-        echo 'Automatic rollback verified against the complete production baseline.'
+        echo 'Automatic rollback verified against the complete production baseline.' >&2
       else
         echo "Rollback public verification failed; inspect $EVIDENCE/rollback-verification.json." >&2
       fi
@@ -43,7 +43,7 @@ cleanup() {
   if test "$OWN_LOCAL_LOCK" -eq 1; then
     node scripts/newsletter-preflight.mjs unlock "$PUBLICATION_TOKEN" || RESULT=1
   fi
-  echo "Deployment evidence preserved at $EVIDENCE"
+  echo "Deployment evidence preserved at $EVIDENCE" >&2
   exit "$RESULT"
 }
 trap cleanup 0 1 2 15

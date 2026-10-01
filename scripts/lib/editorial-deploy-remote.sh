@@ -3,7 +3,7 @@
 set -eu
 ACTION="$1"
 STAMP="$2"
-EXPECTED_SITE_SHA="$3"
+EXPECTED_SITE_SHA="${3:-}"
 BASE="/home/rodrigo/apps/radar-ia"
 SITE_CONTAINER="produtocomia"
 LEADS_CONTAINER="produtocomia-download-leads"
