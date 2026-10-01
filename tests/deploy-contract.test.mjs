@@ -3,51 +3,43 @@ import { readFile } from 'node:fs/promises';
 import test from 'node:test';
 
 const deploy = await readFile(new URL('../scripts/deploy.sh', import.meta.url), 'utf8');
+const remote = await readFile(new URL('../scripts/lib/editorial-deploy-remote.sh', import.meta.url), 'utf8');
 const smoke = await readFile(new URL('../scripts/smoke-test.mjs', import.meta.url), 'utf8');
 const audit = await readFile(new URL('../scripts/audit-dist.mjs', import.meta.url), 'utf8');
 const nginx = await readFile(new URL('../deploy/nginx.conf', import.meta.url), 'utf8');
 const compose = await readFile(new URL('../deploy/docker-compose.yml', import.meta.url), 'utf8');
 
-test('deployment validates and verifies separate site and service packages', () => {
+test('editorial deployment validates a site package and infrastructure fingerprints', () => {
   assert.ok(deploy.indexOf('npm run validate') < deploy.indexOf('tar -C dist'));
-  assert.match(deploy, /SITE_ARCHIVE="\/tmp\/produtocomia-\$\{STAMP\}-site\.tar\.gz"/);
-  assert.match(deploy, /SERVICE_ARCHIVE="\/tmp\/produtocomia-\$\{STAMP\}-service\.tar\.gz"/);
   assert.match(deploy, /shasum -a 256 "\$SITE_ARCHIVE"/);
-  assert.match(deploy, /shasum -a 256 "\$SERVICE_ARCHIVE"/);
-  assert.match(deploy, /sha256sum "\$SITE_ARCHIVE"/);
-  assert.match(deploy, /sha256sum "\$SERVICE_ARCHIVE"/);
-  assert.match(deploy, /tar -czf "\$SERVICE_ARCHIVE" services\/download-leads config\/downloads\.json private-downloads deploy\/docker-compose\.yml deploy\/nginx\.conf/);
+  assert.match(deploy, /newsletter-infrastructure\.mjs manifest/);
+  assert.match(remote, /compare_infrastructure/);
+  assert.match(remote, /test "\$\(sha "\$INPUT\/site\.tar\.gz"\)" = "\$EXPECTED_SITE_SHA"/);
+  assert.doesNotMatch(deploy, /SERVICE_ARCHIVE|tar[^\n]*private-downloads/);
   assert.doesNotMatch(deploy, /scp[^\n]*\.env\.download-leads/);
 });
 
-test('remote activation protects secrets, persistent data and private downloads', () => {
-  assert.match(deploy, /test -f "\$BASE\/\.env\.download-leads"/);
-  assert.match(deploy, /stat -c %a "\$BASE\/\.env\.download-leads"/);
-  assert.match(deploy, /chmod 700 "\$BASE\/lead-data"/);
-  assert.match(deploy, /DOWNLOAD_LEADS_UID="\$\(id -u\)"/);
-  assert.match(deploy, /DOWNLOAD_LEADS_GID="\$\(id -g\)"/);
-  assert.match(deploy, /export DOWNLOAD_LEADS_UID DOWNLOAD_LEADS_GID/);
-  assert.match(deploy, /test -d "\$NEW_SERVICE_ROOT\/private-downloads"/);
-  assert.match(deploy, /mv "\$NEW_SERVICE_ROOT\/private-downloads" "\$NEW_PRIVATE"/);
-  assert.doesNotMatch(deploy, /test -d "\$NEW_SITE\/downloads"/);
-  assert.doesNotMatch(deploy, /mv "\$NEW_SITE\/downloads"/);
-  assert.match(deploy, /BACKUP_HTML/);
-  assert.match(deploy, /BACKUP_PRIVATE/);
-  assert.match(deploy, /BACKUP_NGINX/);
-  assert.match(deploy, /BACKUP_COMPOSE/);
-  assert.match(deploy, /BACKUP_SERVICE/);
-  assert.doesNotMatch(deploy, /(rm|find)[^\n]*lead-data/);
+test('editorial activation preserves secrets, data and private downloads', () => {
+  assert.match(remote, /test -f "\$BASE\/\.env\.download-leads"/);
+  assert.match(remote, /statSync[\s\S]*= 600/);
+  for (const path of ['lead-data', 'private-downloads', 'services/download-leads']) {
+    assert.match(remote, new RegExp(`test -d "\\$BASE/${path}"`));
+  }
+  assert.doesNotMatch(remote, /(?:mv|cp|chmod|unlink|rm)[^\n]*\$BASE\/(?:lead-data|private-downloads|services)/);
+  assert.doesNotMatch(remote, /(?:docker compose|docker stop|docker restart|docker rm)/);
+  assert.match(remote, /nginx.before/);
+  assert.match(remote, /previous-target/);
 });
 
-test('activation waits for both containers and restores every swapped path', () => {
-  assert.match(deploy, /docker compose[^\n]*up -d --build/);
-  assert.match(deploy, /produtocomia-download-leads/);
-  assert.match(deploy, /produtocomia/);
-  assert.match(deploy, /FAILED="\$BASE\/releases\/\$STAMP-failed"/);
-  for (const name of ['html', 'private-downloads', 'nginx.conf', 'docker-compose.yml', 'services/download-leads']) {
-    assert.match(deploy, new RegExp(name.replace(/[./-]/g, '\\$&')));
-  }
-  assert.match(deploy, /lead-data/);
+test('activation keeps container identities and restores the active static version', () => {
+  assert.match(remote, /containers.before/);
+  assert.match(remote, /containers.after/);
+  assert.match(remote, /unchanged_containers/);
+  assert.match(remote, /nginx -t/);
+  assert.match(remote, /nginx -s reload/);
+  assert.match(remote, /rolled-back/);
+  assert.match(deploy, /rollback-verification.json/);
+  assert.ok(deploy.indexOf('newsletter-continuity.mjs verify') < deploy.indexOf('remote_action finalize'));
 });
 
 test('smoke tests cover protected downloads, public discovery and secret-free config', () => {
@@ -87,7 +79,7 @@ test('build audit keeps protected downloads out of static output', () => {
 test('Nginx permanently redirects legacy newsletters before static routing', () => {
   assert.match(nginx, /map_hash_bucket_size 128;/);
   assert.match(nginx, /absolute_redirect off;/);
-  assert.match(nginx, /include \/usr\/share\/nginx\/html\/_newsletter-redirects\.map;/);
+  assert.match(nginx, /include \/usr\/share\/nginx\/html\/current\/_newsletter-redirects\.map;/);
   assert.match(nginx, /return 301 \$newsletter_redirect/);
   assert.doesNotMatch(nginx, /\$uri\/index\.html/);
 });
